@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  redis:
+    image: 'bitnami/redis:6.2.10'
+    container_name: redis_memebuilder
+    restart: always
+    volumes:
+      - ./db/redis:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6388:6379'
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo_db_memebuilder
+    ports:
+      - "27026:27017"  # Expose le port 27026 de l'hôte vers le port 27017 du conteneur
+    volumes:
+      - mongo_data:/data/db  # Persistance des données
+
+volumes:
+  mongo_data:
+    driver: local
