@@ -82,3 +82,18 @@ Our mission: **replace fragmented token launch processes** with a scalable syste
 
 ### 2.3 System Architecture Diagram
 
+┌─────────────────────────────────────────────────┐
+│                MemeBuilder(ai) MVP              │
+├───────────────────┬─────────────────────────────┤
+│                   │                             │
+│    Anchor-based   │     React/Next.js UI        │
+│  Solana Programs  │  with @coral-xyz/anchor     │
+│                   │                             │
+└───────────────────┴─────────────────────────────┘
+          ↑                       ↑
+          │                       │
+          │                       │
+┌─────────┴───────────┐  ┌────────┴────────────┐
+│    Solana Chain     │  │   Simple Backend    │
+│    (On-chain Data)  │  │  (Off-chain Data)   │
+└─────────────────────┘  └─────────────────────┘
