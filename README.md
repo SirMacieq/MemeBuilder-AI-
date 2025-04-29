@@ -96,4 +96,5 @@ Our mission: **replace fragmented token launch processes** with a scalable syste
 ┌─────────┴───────────┐  ┌────────┴────────────┐
 │    Solana Chain     │  │   Simple Backend    │
 │    (On-chain Data)  │  │  (Off-chain Data)   │
-└─────────────────────┘  └─────────────────────┘```
+└─────────────────────┘  └─────────────────────┘
+```
