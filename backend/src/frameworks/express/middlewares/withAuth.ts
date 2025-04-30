@@ -4,7 +4,6 @@ import ResponseError from '../../common/ResponseError';
 import ResponseRequest from '../../common/ResponseRequest';
 import { verifyAccesToken } from '../../../services/utils/token';
 
-
 export const withAuth = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers['authorization'];
   if (!token) {

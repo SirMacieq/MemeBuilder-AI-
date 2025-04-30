@@ -1,29 +1,18 @@
-import jwt from "jsonwebtoken";
-import { Types } from "mongoose";s
+import jwt from "jsonwebtoken"
 
 export async function createToken(
     id: string,
-    duration?: string,
   ): Promise<string> {
     const payload = {
       id,
-    };
-  
-    let durationTime = "30d";
-  
-    if (duration) {
-      durationTime = duration;
     }
   
-    let SECRET_TOKEN = "";
+    let SECRET_TOKEN_USER = "";
   
     if (process.env.SECRET_TOKEN) {
-      SECRET_TOKEN = process.env.SECRET_TOKEN;
+      SECRET_TOKEN_USER = process.env.SECRET_TOKEN;
     }
-  
-    return await jwt.sign(payload, SECRET_TOKEN, {
-      expiresIn: durationTime, // expires in 30 days
-    });
+    return await jwt.sign(payload, SECRET_TOKEN_USER)
   }
 
   export function verifyAccesToken(accessToken: string) {

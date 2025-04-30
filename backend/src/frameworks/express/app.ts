@@ -36,8 +36,8 @@ export default {
       // app.use(ErrorHandler);
   
       server.listen(port, () => {
-        console.log(`Connecté au port ${port}`);
-        console.log(`Vous êtes en mode ${process.env.ENV_REPOSITORIES}`);
+        console.log(`Connected to the port ${port}`);
+        console.log(`You are in ${process.env.ENV_REPOSITORIES} mode`);
   
         if (process.env.ENV_REPOSITORIES === "mongo") {
           MongoConnect.connect();
