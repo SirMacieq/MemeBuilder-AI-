@@ -60,7 +60,7 @@ export default (dependencies: any) => {
               status: 201,
               error: null,
               content: {
-                builder: userResponseDB,
+                user: userResponseDB,
                 title: "First connexion",
                 msg: "You need to add some user account information",
                 validationToken,
