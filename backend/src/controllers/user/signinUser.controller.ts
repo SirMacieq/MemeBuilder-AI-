@@ -9,14 +9,14 @@ export default function (dependencies: any) {
   const signinUserController = async (
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) => {
     try {
       const { wallet } = req.body;
 
       const signinUser = await signinUserUseCase(dependencies).execute;
       const response = await signinUser({
-        wallet
+        wallet,
       });
       res.json(response);
     } catch (err) {
@@ -28,7 +28,7 @@ export default function (dependencies: any) {
             error: err,
             msg: "Request error",
           }),
-        }),
+        })
       );
     }
   };

@@ -7,5 +7,5 @@ export default {
     repositoryName: "userRepository",
     useCaseName: "user",
   }),
-  signinUserUseCase
+  signinUserUseCase,
 };
