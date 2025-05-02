@@ -2,18 +2,16 @@ import { Types } from "mongoose";
 import { UserQuery } from "../../../../types/user/user-types";
 
 export type mongoUserResponse = {
-    wallet: string;
-    nickname: string | null;
-    bio: string | null;
-    created_at?: number; //timestamp,
-    last_login?: number; //timestamp,
-    _id: Types.ObjectId;
-    __v: number;
-  };
+  wallet: string;
+  nickname: string | null;
+  bio: string | null;
+  created_at?: number; //timestamp,
+  last_login?: number; //timestamp,
+  _id: Types.ObjectId;
+  __v: number;
+};
 
-export const userTypeFormatter = (
-  userMongoResponse: any
-): UserQuery => {
+export const userTypeFormatter = (userMongoResponse: any): UserQuery => {
   const userMongo: mongoUserResponse = userMongoResponse._doc
     ? userMongoResponse._doc
     : userMongoResponse;

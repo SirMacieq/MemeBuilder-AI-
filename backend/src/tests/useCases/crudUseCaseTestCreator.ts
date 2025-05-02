@@ -20,7 +20,7 @@ export function crudUseCaseTests<Dto extends { [key: string]: any }>({
   type T = Dto & {
     _id: string;
   };
-
+  console.log("useCaseName",useCaseName)
   it(`Should add ${useCaseName}`, async () => {
     const addEntity =
       useCases[`add${capitalizeFirstLetter(useCaseName)}UseCase`](

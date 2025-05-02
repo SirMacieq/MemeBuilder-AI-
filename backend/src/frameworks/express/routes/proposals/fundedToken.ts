@@ -2,23 +2,22 @@ import express from "express";
 import dependencies from "../../../../config/dependencies";
 import { withAuth } from "../../middlewares/withAuth";
 import { crudRouteCreator } from "../crudRouteCreator";
-import signinUserController from "../../../../controllers/user/signinUser.controller";
 
-export const userRouter = express.Router();
+export const fundedTokenRouter = express.Router();
 
 crudRouteCreator({
-  entityRouter: userRouter,
+  entityRouter: fundedTokenRouter,
   dependencies,
-  useCaseName: "User",
+  useCaseName: "FundedToken",
   withAuthRoute: {
-    add: false,
+    add: true,
     delete: true,
-    getAll: false,
-    getById: false,
+    getAll: true,
+    getById: true,
     update: true,
   },
   neededRoute: {
-    add: false,
+    add: true,
     delete: true,
     getAll: true,
     getById: true,
@@ -26,8 +25,3 @@ crudRouteCreator({
   },
   withAuth: withAuth,
 });
-
-userRouter.post(
-  "/signin",
-  signinUserController(dependencies).signinUserController
-);
