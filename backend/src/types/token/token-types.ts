@@ -31,8 +31,8 @@ export interface TokenDtoQuery {
         daoLp: number;
         daoVoters: number;
         contributorAirdrop: number;
-        teamReserve?: number;
-        [key: string]: number; // extensible for custom allocations
+        teamReserve?: number | undefined;
+        [key: string]: number | undefined; // extensible for custom allocations
       };
     };
     airdropModules?: {

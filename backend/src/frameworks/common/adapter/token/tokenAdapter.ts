@@ -34,8 +34,8 @@ export type mongoTokenResponse = {
       daoLp: number;
       daoVoters: number;
       contributorAirdrop: number;
-      teamReserve?: number;
-      [key: string]: number;
+      teamReserve?: number | undefined;
+      [key: string]: number | undefined;
     };
   };
   airdropModules?: {

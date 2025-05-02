@@ -84,10 +84,10 @@ describe("Token CRUD Test", () => {
     },
     tokenomics: {
       allocations: {
-        daoLp: 500000,
-        daoVoters: 250000,
-        contributorAirdrop: 250000,
-        builderFund: 1000000,
+        daoLp: 300000,
+        daoVoters: 200000,
+        contributorAirdrop: 100000,
+        teamReserve: 400000
       },
     },
     voting: {

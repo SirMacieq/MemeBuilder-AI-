@@ -1,6 +1,7 @@
 import ResponseError from "../../frameworks/common/ResponseError";
 import ResponseRequest from "../../frameworks/common/ResponseRequest";
 import { Request, Response, NextFunction } from "express";
+import verifySignedMessage from "../../services/utils/verifySignedMessage";
 
 export default function (dependencies: any) {
   const { useCases } = dependencies;
@@ -12,13 +13,27 @@ export default function (dependencies: any) {
     next: NextFunction
   ) => {
     try {
-      const { wallet } = req.body;
-
-      const signinUser = await signinUserUseCase(dependencies).execute;
-      const response = await signinUser({
-        wallet,
-      });
-      res.json(response);
+      const { wallet, signedMessage, message } = req.body;
+      const verifSignature = verifySignedMessage(message, signedMessage, wallet)
+      if(verifSignature){
+        const signinUser = await signinUserUseCase(dependencies).execute;
+        const response = await signinUser({
+          wallet,
+        });
+        res.json(response);
+      } else {
+        res.json(
+          new ResponseRequest({
+            status: 401,
+            error: new ResponseError({
+            error: 'Unauthorized',
+            msg: 'Acces forbidden',
+            }),
+            content: null,
+          }),
+        );
+      }
+      
     } catch (err) {
       res.json(
         new ResponseRequest({
