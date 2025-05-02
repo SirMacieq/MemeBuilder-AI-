@@ -15,6 +15,9 @@ const AppNav = async () => {
           <Button>
             <Link href="profile/">Profile</Link>
           </Button>
+          <Button>
+            <Link href="dashboard/">Dashboard</Link>
+          </Button>
           <LogoutButton />
         </>
       )}
