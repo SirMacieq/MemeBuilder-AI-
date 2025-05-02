@@ -1,8 +1,8 @@
 "use client";
-import { useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import signinAction from "../lib/actions/auth/signinAction";
 import logoutAction from "@/lib/actions/auth/logoutAction";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useEffect } from "react";
+import signinAction from "../lib/actions/auth/signinAction";
 
 /**
  * Component used to keep our app session in sync with
@@ -12,15 +12,15 @@ const Hoc = () => {
   const wallet = useWallet();
 
   useEffect(() => {
-    if (!wallet.publicKey) return;
-    const walletId = wallet.publicKey.toString();
-    signinAction(walletId);
-  }, [wallet.publicKey]);
+    if (wallet.connecting || wallet.disconnecting) return;
+    if (!wallet.publicKey) {
+      logoutAction();
+    } else {
+      const walletId = wallet.publicKey.toString();
+      signinAction(walletId);
+    }
+  }, [wallet, wallet.publicKey]);
 
-  useEffect(() => {
-    if (wallet.connected) return;
-    logoutAction();
-  }, [wallet.connected]);
   return "";
 };
 

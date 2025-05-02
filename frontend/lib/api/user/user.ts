@@ -42,7 +42,6 @@ export async function userSignin(data: UserSigninRequest) {
     body: JSON.stringify(data),
     headers: { "Content-Type": "application/json" },
   });
-  console.log("data", data);
   const json = (await res.json()) as UserSigninResponse;
   if (json.status !== 200 && json.status !== 201) {
     throw new Error(json.error?.error ?? "Unknown error");
@@ -76,7 +75,6 @@ export async function userGetById(id: string): Promise<UserGetByIdResponse> {
 interface UserUpdateByIdRequest {
   nickname: string;
   bio: string;
-  last_login: number; //timestamp
 }
 type UserUpdateByIdResponse = ResponseRequest<{ user: User }>;
 export async function userUpdateById(
@@ -86,7 +84,7 @@ export async function userUpdateById(
   const res = await fetch(getApiUrl() + "/user/updateById/" + id, {
     method: "PUT",
     headers: {
-      authorization: "Bearer " + (await getToken()),
+      authorization: await getToken(),
       "content-type": "application/json",
     },
     body: JSON.stringify(data),

@@ -10,6 +10,7 @@ import { CustomJWTClaims } from "@/types/auth";
 import { encode } from "../../utils/authUtils/jwtUtils";
 import { userSignin } from "@/lib/api/user/user";
 import setTokenCookie from "@/lib/api/setTokenCookie";
+import { revalidatePath } from "next/cache";
 
 /**
  *
@@ -18,8 +19,16 @@ import setTokenCookie from "@/lib/api/setTokenCookie";
  *
  */
 const signinAction = async (walletId: string): Promise<Response> => {
-  console.log("signinAction");
   try {
+    const cookieStore = await cookies();
+    const isDev = process.env.NODE_ENV === "development";
+
+    // is alerady signed in return
+    if (cookieStore.has("next-token"))
+      return {
+        status: ResponseStatus.Ok,
+      };
+
     const res = await userSignin({ wallet: walletId });
 
     //
@@ -46,8 +55,6 @@ const signinAction = async (walletId: string): Promise<Response> => {
     //
     // set cookie containing the token for next backend
     //
-    const cookieStore = await cookies();
-    const isDev = process.env.NODE_ENV === "development";
 
     // condition on env to allow test on phone since server is hosted on
     // localhost and accessed with ip on local network
@@ -69,6 +76,7 @@ const signinAction = async (walletId: string): Promise<Response> => {
       status: ResponseStatus.Error,
     };
   }
+  revalidatePath("/");
   redirect("/profile");
 };
 export default signinAction;
