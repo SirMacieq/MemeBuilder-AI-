@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import LogoutButton from "./ui/LogoutButton";
+import LogoutButton from "./atoms/LogoutButton";
 import getCurrentUserData from "@/lib/actions/user/getCurrentUserData";
 
 const AppNav = async () => {

@@ -1,3 +1,4 @@
+"use server";
 import getApiUrl from "@/lib/getApiUrl";
 import getToken from "../getToken";
 import { ResponseRequest } from "../genericResponse";
@@ -101,7 +102,7 @@ export async function userDelete(id: string): Promise<UserDeleteResponse> {
   const res = await fetch(getApiUrl() + "/user/delete/" + id, {
     method: "DELETE",
     headers: {
-      authorization: "Bearer " + (await getToken()),
+      authorization: await getToken(),
     },
   });
   const json = await res.json();

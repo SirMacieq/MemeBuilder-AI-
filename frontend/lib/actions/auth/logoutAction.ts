@@ -9,6 +9,8 @@ import { revalidatePath } from "next/cache";
  * server action to handle logout action.
  * it deletes the cookie with jwt token
  *
+ * redirects to home
+ *
  */
 const logoutAction = async () => {
   const cookieStore = await cookies();

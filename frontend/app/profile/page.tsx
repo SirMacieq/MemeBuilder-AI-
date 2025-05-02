@@ -3,11 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import updateProfile from "@/lib/actions/user/updateProfile";
 import { Button } from "@/components/ui/button";
+import DeleteAccountButton from "@/components/atoms/DeleteAccountButton";
 
 const Page = async () => {
   const user = await getCurrentUserData();
   return (
-    <div className="grow flex justify-center items-center">
+    <div className="grow flex flex-col justify-center items-center">
       <form className="bg-neutral-300 p-2 flex flex-col" action={updateProfile}>
         <h2>Type your on-chain alter ego</h2>
         <label className="flex flex-col">
@@ -30,6 +31,7 @@ const Page = async () => {
         </label>
         <input type="hidden" value={user._id} name="user_id" />
         <Button type="submit">Save</Button>
+        <DeleteAccountButton />
       </form>
     </div>
   );
