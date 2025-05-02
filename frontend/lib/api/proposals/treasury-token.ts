@@ -1,7 +1,7 @@
 "use server";
 import getApiUrl from "@/lib/getApiUrl";
-import getToken from "./getToken";
-import { ResponseRequest } from "./genericResponse";
+import getToken from "@/lib/api/getToken";
+import { ResponseRequest } from "@/lib/api/genericResponse";
 
 export interface TreasuryToken {
   _id: string;
