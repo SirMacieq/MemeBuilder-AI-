@@ -14,6 +14,8 @@ export interface User {
 interface UserSigninRequest {
   /** wallet public key in string format */
   wallet: string;
+  signedMessage: string;
+  message: string;
 }
 interface UserSigninResponseNew {
   status: number;

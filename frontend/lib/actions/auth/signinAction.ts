@@ -16,9 +16,15 @@ import { revalidatePath } from "next/cache";
  *
  * server action to handle signin action.
  * If auth succeded, it sets a cookie with jwt token
- *
+ * @param walletId wallet pubKey in string format
+ * @param signedMessage signed message in base64
+ * @param message message
  */
-const signinAction = async (walletId: string): Promise<Response> => {
+const signinAction = async (
+  walletId: string,
+  signedMessage: string,
+  message: string,
+): Promise<Response> => {
   try {
     const cookieStore = await cookies();
     const isDev = process.env.NODE_ENV === "development";
@@ -29,7 +35,7 @@ const signinAction = async (walletId: string): Promise<Response> => {
         status: ResponseStatus.Ok,
       };
 
-    const res = await userSignin({ wallet: walletId });
+    const res = await userSignin({ wallet: walletId, signedMessage, message });
 
     //
     // Setting api cookie

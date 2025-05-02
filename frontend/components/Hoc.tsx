@@ -21,7 +21,17 @@ const Hoc = () => {
       logoutAction();
     } else {
       const walletId = wallet.publicKey.toString();
-      signinAction(walletId);
+      (async () => {
+        const message = "connect to USM";
+        const signedMessageUint8Array = await wallet.signMessage!(
+          new TextEncoder().encode(message),
+        );
+        const signedMessageString = Buffer.from(
+          signedMessageUint8Array,
+        ).toString("base64");
+
+        await signinAction(walletId, signedMessageString, message);
+      })();
     }
   }, [wallet, isInitialized]);
 
