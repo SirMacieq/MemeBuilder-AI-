@@ -1,7 +1,7 @@
 "use server";
 import getApiUrl from "@/lib/getApiUrl";
-import getToken from "./getToken";
-import { ResponseRequest } from "./genericResponse";
+import getToken from "../getToken";
+import { ResponseRequest } from "../genericResponse";
 
 export interface DaoGovToken {
   _id: string;

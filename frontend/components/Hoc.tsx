@@ -19,7 +19,7 @@ const Hoc = () => {
       const walletId = wallet.publicKey.toString();
       signinAction(walletId);
     }
-  }, [wallet, wallet.publicKey]);
+  }, [wallet, wallet.publicKey, wallet.connecting, wallet.disconnecting]);
 
   return "";
 };
