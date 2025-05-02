@@ -53,7 +53,7 @@ export default function (dependencies: any) {
           new ResponseRequest({
           status: 400,
           error: new ResponseError({
-            error: "InvalidSignatureFormat",
+            error: "Invalid signature fÒormat",
             msg: "signedMessage must be a valid base64 string of a 64-byte signature",
           }),
           content: null,
