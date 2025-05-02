@@ -18,10 +18,10 @@ crudRouteCreator({
   },
   neededRoute: {
     add: true,
-    delete: true,
+    delete: false,
     getAll: true,
     getById: true,
-    update: true,
+    update: false,
   },
   withAuth: withAuth,
 });
