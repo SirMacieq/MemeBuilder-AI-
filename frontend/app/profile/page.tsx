@@ -1,39 +1,11 @@
+// app/profile/page.tsx (Server Component)
 import getCurrentUserData from "@/lib/actions/user/getCurrentUserData";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import updateProfile from "@/lib/actions/user/updateProfile";
-import { Button } from "@/components/ui/button";
-import DeleteAccountButton from "@/components/atoms/DeleteAccountButton";
+import ProfileForm from "@/components/organisms/ProfileForm"; // composant client
 
-const Page = async () => {
+export default async function Page() {
   const user = await getCurrentUserData();
-  return (
-    <div className="grow flex flex-col justify-center items-center">
-      <form className="bg-neutral-300 p-2 flex flex-col" action={updateProfile}>
-        <h2>Type your on-chain alter ego</h2>
-        <label className="flex flex-col">
-          Nickname
-          <Input
-            type="text"
-            placeholder="e.g. Not Elon Musk"
-            name="nickname"
-            required
-            defaultValue={user.nickname ?? undefined}
-          />
-        </label>
-        <label className="flex flex-col">
-          Bio
-          <Textarea
-            placeholder="Drop your bio..."
-            name="bio"
-            defaultValue={user.bio ?? undefined}
-          ></Textarea>
-        </label>
-        <input type="hidden" value={user._id} name="user_id" />
-        <Button type="submit">Save</Button>
-        <DeleteAccountButton />
-      </form>
-    </div>
-  );
-};
-export default Page;
+
+  return <div className="grow flex flex-col justify-center items-center bg-[#081028]">
+    <ProfileForm user={user} />
+  </div>;
+}

@@ -3,6 +3,7 @@ import logoutAction from "@/lib/actions/auth/logoutAction";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import signinAction from "../lib/actions/auth/signinAction";
+import getCurrentUserData from "@/lib/actions/user/getCurrentUserData";
 
 const Hoc = () => {
   const wallet = useWallet();
@@ -29,7 +30,6 @@ const Hoc = () => {
         const signedMessageString = Buffer.from(
           signedMessageUint8Array,
         ).toString("base64");
-
         await signinAction(walletId, signedMessageString, message);
       })();
     }

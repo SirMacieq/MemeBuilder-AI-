@@ -34,7 +34,6 @@ const signinAction = async (
       return {
         status: ResponseStatus.Ok,
       };
-
     const res = await userSignin({ wallet: walletId, signedMessage, message });
 
     //
