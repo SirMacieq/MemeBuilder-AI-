@@ -1,9 +1,25 @@
 /***********
  * Imports *
  ***********/
+/*
+ * TODO:
+ *   - Find a better data structure for storing votes as Anchor (and Solana in
+ * general) does not support complex data structures like HashMap in account
+ * data due to serialization constraints and account size limits.
+ */
 use std::collections::HashMap;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
+use anchor_lang::solana_program::sysvar;
+/*
+ * The SPL Token Program is part of the Solana Program Library. It's a separate
+ * program that is already deployed on-chain and that manages token creation,
+ * minting, transfers, and management. More than just a program, it's the
+ * standardized protocol for working with tokens on the Solana blockchain.
+ * As a standardized protocol, it ensures consistent behavior and
+ * interoperability for tokens across the Solana ecosystem.
+ */
+use spl_token::instruction as token_instruction;
 
 declare_id!("<PROGRAM_ID>");
 
@@ -66,14 +82,20 @@ pub struct Proposal {
     // Voting Mechanism
     pub complete: bool,
     pub vote_count: u32,
-    pub votes: HashMap<String, bool>,
+    pub votes: HashMap<Pubkey, bool>, // Problematic HashMap data structure
 
-    pub admin: String, //Pubkey,
+    pub admin: Pubkey,
 }
 
 #[derive(Accounts)]
-pub struct Create<'info> {
-    #[account(init, payer=user, space=9000, seeds=[b"PROPOSAL_DEMO".as_ref(), user.key().as_ref()], bump)]
+pub struct CreateTokenProposal<'info> {
+    #[account(
+        init,
+        payer=user,
+        space=9000,
+        seeds=[b"PROPOSAL_DEMO".as_ref(), user.key().as_ref()],
+        bump
+    )]
     pub proposal: Account<'info, Proposal>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -81,7 +103,7 @@ pub struct Create<'info> {
 }
 
 #[derive(Accounts)]
-pub struct Approve<'info> {
+pub struct ApproveTokenProposal<'info> {
     #[account(mut)]
     pub proposal: Account<'info, Proposal>,
     #[account(mut)]
@@ -90,20 +112,30 @@ pub struct Approve<'info> {
 }
 
 #[derive(Accounts)]
-pub struct Finalize<'info> {
+pub struct FinalizeTokenProposal<'info> {
     #[account(mut)]
     pub proposal: Account<'info, Proposal>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct CreateToken<'info> {
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    // Account to pay rent for mint account creation.
+    pub rent: AccountInfo<'info>,
+    pub mint_authority: Signer<'info>,
+    pub token_program: Program<'info, spl_token::program::SplToken>,
 }
 
 #[program]
 pub mod token_proposal {
     use super::*;
 
-    pub fn create(
-        context: Context<Create>,
+    pub fn createTokenProposal(
+        context: Context<CreateTokenProposal>,
         token: Token,
         selected_goals: SelectedGoals,
         funding_goals: FundingGoals,
@@ -134,33 +166,69 @@ pub mod token_proposal {
         Ok(())
     }
 
-    pub fn approve(context: Context<Approve>) -> ProgramResult {
-        /*
-         * TODO:
-         *   - Make sure user can vote;
-         *   - Make sure user hasn't already voted.
-         * E.g. votes.get[..]
-         */
-        let user_address: &str = &context.accounts.user.key()
-            let &mut proposal: Proposal = context.accounts.proposal;
+    pub fn approveTokenProposal(context: Context<ApproveTokenProposal>)
+        -> ProgramResult {
+            /*
+             * TODO:
+             *   - Make sure user can vote;
+             *   - Make sure user hasn't already voted.
+             * E.g. votes.get[..]
+             */
+            let user_address: &str = &context.accounts.user.key()
+                let &mut proposal: Proposal = context.accounts.proposal;
 
-        proposal.votes[user_address] = true;
-        proposal.vote_count += 1;
+            proposal.votes[user_address] = true;
+            proposal.vote_count += 1;
 
-        Ok(())
+            Ok(())
     }
 
-    pub fn finalize(context: Context<Finalize>) -> ProgramResult {
-        /*
-         * TODO:
-         *   - Make sure proposal is ready to be finalized;
-         *   - Make sure proposal hasn't already been finalized.
-         * E.g. require!(proposal.admin == *context.accounts.user.key, CustomError::Unauthorized);
-         * E.g. complete === false
-         */
-        let &mut proposal: Proposal = context.accounts.proposal;
+    pub fn finalizeTokenProposal(context: Context<FinalizeTokenProposal>)
+        -> ProgramResult {
+            /*
+             * TODO:
+             *   - Make sure proposal is ready to be finalized;
+             *   - Make sure proposal hasn't already been finalized.
+             * E.g. require!(proposal.admin == *context.accounts.user.key, CustomError::Unauthorized);
+             * E.g. complete === false
+             */
+            let &mut proposal: Proposal = context.accounts.proposal;
 
-        proposal.complete = true;
+            proposal.complete = true;
+
+            Ok(())
+    }
+
+    /*
+     * In token theory, creating and minting tokens are two different concepts,
+     * steps, and processes: On one hand, creating a new token refers to the
+     * creation of the type and structure of a token. It establishes the token's
+     * properties, such as name, symbol, total supply, etc. On the other hand,
+     * minting a token refers to the making of new copies, the generation of new
+     * units, of that established token. Minting a token actually increases the
+     * circulating supply. Minting tokens comes after creating a new token.
+     * Therefore, creating a new token is equivalent to minting a new token mint
+     * account.
+     */
+    pub fn create_token(context: Context<CreateToken>) -> ProgramResult {
+        /*
+         * Leverage Anchor's Cross-Program Invocation (CPI) to invoke SPL Token
+         * Program's "Initialize Mint" instruction.
+         */
+        let cpi_accounts = spl_token::instruction::InitializeMint {
+            mint: context.accounts.mint.to_account_info(),
+            rent: sysvar::rent::id().to_account_info(),
+            //rent: context.accounts.mint.to_account_info(),
+        };
+        let cpi_program = context.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+
+        token_instruction::initialize_mint(
+            cpi_context,
+            0, // decimals
+            &context.accounts.mint_authority.key(),
+            None, // freeze authority
+        )?;
 
         Ok(())
     }
