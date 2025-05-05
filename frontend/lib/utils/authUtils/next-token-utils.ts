@@ -13,7 +13,7 @@ import { CustomJWTClaims } from "@/types/auth";
  */
 export const getRole = async (): Promise<UserRole> => {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("next-token")?.value;
   if (!token) {
     return UserRole.Unauthenticated;
   }
@@ -24,12 +24,11 @@ export const getRole = async (): Promise<UserRole> => {
 /**
  * Retrives the token from cookie store end returns claims
  * @async
- * @returns claims
  *
  */
 export const getClaims = async (): Promise<CustomJWTClaims> => {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("next-token")?.value;
   if (!token) {
     throw new Error("No token found");
   }
@@ -39,4 +38,13 @@ export const getClaims = async (): Promise<CustomJWTClaims> => {
   } catch {
     throw new Error("Failed to decode token");
   }
+};
+
+/**
+ * tests if user is logged bu checking token
+ * @async
+ */
+export const isLogged = async () => {
+  const role = await getRole();
+  return role !== UserRole.Unauthenticated;
 };

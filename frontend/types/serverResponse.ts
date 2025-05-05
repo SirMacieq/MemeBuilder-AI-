@@ -1,7 +1,7 @@
 export enum ResponseStatus {
-  Ok,
-  Error,
-  Unsent,
+  Ok = "status_ok",
+  Error = "status_error",
+  Unsent = "status_unsent",
 }
 export enum ErrorType {
   BadRequest = "bad request",

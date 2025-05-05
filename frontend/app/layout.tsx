@@ -4,6 +4,7 @@ import "./globals.css";
 import AppWalletProvider from "@/components/contexts/AppWalletProvider";
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
+import Hoc from "@/components/Hoc";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <AppWalletProvider>
+          <Hoc />
           <AppHeader />
-          <main className="grow">{children}</main>
+          <main className="grow flex">{children}</main>
           <AppFooter />
         </AppWalletProvider>
       </body>
