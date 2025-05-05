@@ -20,7 +20,7 @@ export default function ProfileForm({ user }: { user: any }) {
         updateProfile(formData)
       }}
     >
-      <h2 className="font-inter font-bold text-[32px] text-white mb-[32px]">
+      <h2 className="font-inter font-bold text-[24px] md:text-[32px] text-white mb-[32px]">
         Type your on-chain alter ego
       </h2>
 
