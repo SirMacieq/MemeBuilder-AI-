@@ -14,7 +14,11 @@ export default function ProfileForm({ user }: { user: any }) {
   return (
     <form
       className="bg-[#0B1739] p-2 flex flex-col border border-white/5 rounded-[12px] p-[24px]"
-      action={updateProfile}
+      onSubmit={(e) => {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget);
+        updateProfile(formData)
+      }}
     >
       <h2 className="font-inter font-bold text-[32px] text-white mb-[32px]">
         Type your on-chain alter ego
