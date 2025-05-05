@@ -9,6 +9,9 @@ The platform integrates optional third-party modules including:
 - Personalized **AI agents**
 - **KOL** (Key Opinion Leader) campaign orchestration
 - **InfoFi** analytics for smart launch strategies
+- **UGC** to reward top community members on Socials as part of the User Generated Content campaigns
+
+The platform also provides the tools necessary to build and fund dedicated SubDAOs for each token launched - necessary to maintain long-term growth.
 
 Our mission: **replace fragmented token launch processes** with a scalable system that aligns incentives, ensures transparency, and leverages smart contract automation.
 

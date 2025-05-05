@@ -18,4 +18,5 @@ const verifySignedMessage = (
   const sigBytes = new Uint8Array(Buffer.from(signature, "base64"));
   return nacl.sign.detached.verify(messBytes, sigBytes, pkBytes.toBytes());
 };
+
 export default verifySignedMessage;
