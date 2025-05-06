@@ -13,7 +13,7 @@ export default function ProfileForm({ user }: { user: any }) {
 
   return (
     <form
-      className="bg-[#0B1739] p-2 flex flex-col border border-white/5 rounded-[12px] p-[24px]"
+      className="bg-[#0e131f] p-2 flex flex-col border border-white/5 rounded-[12px] p-[24px]"
       onSubmit={(e) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget);
@@ -27,7 +27,7 @@ export default function ProfileForm({ user }: { user: any }) {
       <label className="flex flex-col text-white gap-[8px] mb-[16px] font-medium">
         Nickname
         <Input
-          className="w-full bg-[#081028] border border-white/5 p-[24px] rounded-[12px] placeholder:text-white placeholder:text-opacity-5"
+          className="w-full bg-[#151925] border border-white/5 p-[24px] rounded-[12px] placeholder:text-white placeholder:text-opacity-5"
           type="text"
           placeholder="e.g. Not Elon Musk"
           name="nickname"
@@ -39,7 +39,7 @@ export default function ProfileForm({ user }: { user: any }) {
       <label className="flex flex-col text-white gap-[8px] mb-[16px] font-medium">
         Bio
         <Textarea
-          className="w-full h-[120px] resize-none bg-[#081028] border border-white/5 p-[16px] rounded-[12px] placeholder:text-white placeholder:text-opacity-50 text-white break-words break-all whitespace-pre-wrap overflow-auto"
+          className="w-full h-[120px] resize-none bg-[#151925] border border-white/5 p-[16px] rounded-[12px] placeholder:text-white placeholder:text-opacity-50 text-white break-words break-all whitespace-pre-wrap overflow-auto"
           placeholder="Drop your bio..."
           name="bio"
           value={bio}
@@ -57,8 +57,7 @@ export default function ProfileForm({ user }: { user: any }) {
         type="submit"
         className="w-full text-white font-semibold p-[24px] rounded-[12px] mt-[16px] mb-[8px]"
         style={{
-          background: "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
-          boxShadow: "0px 4px 33px 0px #7912FF",
+          background: "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)"
         }}
       >
         Almost apead

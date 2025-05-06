@@ -3,7 +3,7 @@ import Image from "next/image";
 
 const AppFooter = () => {
   return (
-    <footer className="bg-[#081028] flex flex-col md:flex-row items-center md:justify-between px-[32px] py-6 border-t-0">
+    <footer className="bg-[#010613] flex flex-col md:flex-row items-center md:justify-between px-[32px] py-8 md:py-6 border-t-0">
       <div className="flex gap-6 text-white text-sm md:items-start md:text-left items-center">
         <Link href="/privacy-policy" className="hover:underline">
           Privacy Policy
