@@ -1,10 +1,15 @@
 import { isLogged } from "@/lib/utils/authUtils/next-token-utils";
+import getCurrentUserData from "./lib/actions/user/getCurrentUserData";
 import { NextRequest, NextResponse } from "next/server";
 
 const middleware = async (req: NextRequest) => {
   const path = req.nextUrl.pathname;
 
   const isLoggedBool = await isLogged();
+  let user = null;
+  try {
+    user = await getCurrentUserData();
+  } catch {}
 
   //
   //handle not logges case
@@ -15,6 +20,10 @@ const middleware = async (req: NextRequest) => {
   //handling /login when isLogged
   if (isLoggedBool && path === "/login") {
     return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  if (path === "/dashboard" && !user?.nickname) {
+    return NextResponse.redirect(new URL("/profile", req.url));
   }
 
   return NextResponse.next();
