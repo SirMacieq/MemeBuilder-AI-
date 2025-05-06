@@ -1,11 +1,11 @@
-import React from "react";
-import TreasuryBalance from "@/components/atoms/TreasuryBalance";
+import Proposals from "@/components/organisms/dashboard/Proposals";
+import Success from "@/components/organisms/dashboard/Success";
 
 const Dashboard = () => {
   return (
-    <div>
-      <h2>Dashboard</h2>
-      <TreasuryBalance />
+    <div className="grow flex flex-col justify-center items-center bg-[#010613] px-[5%]">
+      <Success />
+      <Proposals />
     </div>
   );
 };
