@@ -3,6 +3,7 @@ import logoutAction from "@/lib/actions/auth/logoutAction";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import signinAction from "../lib/actions/auth/signinAction";
+import getCurrentUserData from "@/lib/actions/user/getCurrentUserData";
 
 const Hoc = () => {
   const wallet = useWallet();
@@ -21,7 +22,16 @@ const Hoc = () => {
       logoutAction();
     } else {
       const walletId = wallet.publicKey.toString();
-      signinAction(walletId);
+      (async () => {
+        const message = "connect to USM";
+        const signedMessageUint8Array = await wallet.signMessage!(
+          new TextEncoder().encode(message),
+        );
+        const signedMessageString = Buffer.from(
+          signedMessageUint8Array,
+        ).toString("base64");
+        await signinAction(walletId, signedMessageString, message);
+      })();
     }
   }, [wallet, isInitialized]);
 

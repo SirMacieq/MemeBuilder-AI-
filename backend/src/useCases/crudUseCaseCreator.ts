@@ -2,7 +2,7 @@ import ResponseError from "../frameworks/common/ResponseError";
 import ResponseRequest from "../frameworks/common/ResponseRequest";
 import { capitalizeFirstLetter } from "../services/utils/string";
 
-export function crudUseCase<Dto, DtoUpdate>({
+export function crudUseCase<Dto, DtoUpdate extends Record<string, any>>({
   repositoryName,
   useCaseName,
   alreadyExistFunction,
@@ -175,7 +175,7 @@ export function crudUseCase<Dto, DtoUpdate>({
       id: string
     ): Promise<ResponseRequest> => {
       const existEntity = await repository.getById(id);
-
+    
       if (!existEntity) {
         return new ResponseRequest({
           status: 404,
@@ -186,17 +186,26 @@ export function crudUseCase<Dto, DtoUpdate>({
           content: null,
         });
       }
-
-      let updatedEntity: any;
-
-      if (existEntity._doc) {
-        updatedEntity = { ...existEntity._doc, ...newData };
-      } else {
-        updatedEntity = { ...existEntity, ...newData };
+    
+      const currentData = existEntity._doc || existEntity;
+      const updatedEntity = { ...currentData, ...newData };
+    
+      const isUnchanged = Object.entries(newData).every(
+        ([key, value]) => currentData[key] === value
+      );
+    
+      if (isUnchanged) {
+        return new ResponseRequest({
+          status: 200,
+          error: null,
+          content: {
+            [useCaseName]: currentData,
+          },
+        });
       }
-
+    
       const updatedEntityDb = await repository.updateById(updatedEntity, id);
-
+    
       if (updatedEntityDb) {
         return new ResponseRequest({
           status: 200,
@@ -215,7 +224,7 @@ export function crudUseCase<Dto, DtoUpdate>({
           content: null,
         });
       }
-    };
+    };    
 
     return { execute };
   };
