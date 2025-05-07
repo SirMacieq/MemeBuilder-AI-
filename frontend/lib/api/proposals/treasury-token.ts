@@ -5,18 +5,14 @@ import { ResponseRequest } from "@/lib/api/genericResponse";
 
 export interface TreasuryToken {
   _id: string;
+  proposalType: "treasuryToken";
   token: {
     name: string;
     symbol: string;
     description: string;
     logoURL: string;
   };
-  selectedGoals: {
-    lp: boolean;
-    treasury: boolean;
-    kol: boolean;
-    ai: boolean;
-  };
+  chain: string;
   fundingGoals: {
     lp: number;
     treasury: number;
@@ -24,21 +20,37 @@ export interface TreasuryToken {
     ai: number;
   };
   softCap: number;
-  hardCap: number | "dynamic";
+  hardCap: number | null;
   fundingModel: {
-    dynamicUnlock: boolean;
-    endsEarlyOnHardCap: boolean;
+    source: string;
+    basedOnSelectedGoals: boolean;
+    tokensCreatedOnApproval: boolean;
   };
-  airdropModules?: {
+  tokenomics: {
+    supply: number;
+    allocations: {
+      lp: number;
+      daoVoters: number;
+      airdrop: number;
+    };
+  };
+  airdropModules: {
     dropScore: boolean;
+    gta: boolean;
   };
   voting: {
     periodDays: number;
     voteUnit: string;
+    quorum: string;
     escrowedFunds: boolean;
+    autoExecuteOnApproval: boolean;
   };
-  created_at?: number;
+  eligibilityRequirements: {
+    previousSuccess: boolean;
+    rateLimit: string;
+  };
   proposer_wallet: string;
+  created_at?: number;
 }
 type TreasuryTokenCreate = Omit<TreasuryToken, "_id" | "created_at">;
 type TreasuryTokenUpdate = Omit<

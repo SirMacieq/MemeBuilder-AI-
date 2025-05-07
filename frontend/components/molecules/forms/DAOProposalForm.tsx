@@ -40,81 +40,53 @@ const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
 } | null>(null);
 
-const FoundedTokenFormSchema = z.object({
-  token: z.object({
+const DAOProposalFormSchema = z.object({
+  proposal: z.object({
     name: z.string(),
-    symbol: z.string(),
     description: z.string(),
-    logoURL: z.string().url({ message: "Must be a valid URL" }),
+    relatedLinks: z.array(z.string()).optional(),
   }),
-  selectedGoals: z.object({
-    lp: z.boolean(),
-    treasury: z.boolean(),
-    kol: z.boolean(),
-    ai: z.boolean(),
+  governanceGoals: z.object({
+    subDAO: z.boolean(),
+    fundsAllocation: z.number().nonnegative().optional(),
+    otherActions: z.boolean(),
   }),
-  fundingGoals: z.object({
-    lp: z.number().nonnegative(),
-    treasury: z.number().nonnegative(),
-    kol: z.number().nonnegative(),
-    ai: z.number().nonnegative(),
-  }),
-  softCap: z.number().nonnegative(),
-  hardCap: z.union([z.number().nonnegative(), z.literal("dynamic")]),
-  fundingModel: z.object({
-    dynamicUnlock: z.boolean(),
-    endsEarlyOnHardCap: z.boolean(),
-  }),
-  airdropModules: z
+  governanceFunding: z
     .object({
-      dropScore: z.boolean(),
+      subDAOCreation: z.number().nonnegative().optional(),
+      generalReserve: z.number().nonnegative().optional(),
     })
     .optional(),
+  quorum: z.number().nonnegative().int(),
   voting: z.object({
     periodDays: z.number().int().positive(),
     voteUnit: z.string(),
-    escrowedFunds: z.boolean(),
   }),
   proposer_wallet: z.string(),
 });
-
-const FoundedTokenForm = () => {
-  const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
-    resolver: zodResolver(FoundedTokenFormSchema),
+const DAOProposalForm = () => {
+  const form = useForm<z.infer<typeof DAOProposalFormSchema>>({
+    resolver: zodResolver(DAOProposalFormSchema),
     defaultValues: {
-      token: {
-        name: undefined,
-        symbol: undefined,
-        description: undefined,
-        logoURL: undefined,
+      proposal: {
+        name: "",
+        description: "",
+        relatedLinks: [],
       },
-      selectedGoals: {
-        lp: false,
-        treasury: false,
-        kol: false,
-        ai: false,
+      governanceGoals: {
+        subDAO: false,
+        fundsAllocation: undefined,
+        otherActions: false,
       },
-      fundingGoals: {
-        lp: 0,
-        treasury: 0,
-        kol: 0,
-        ai: 0,
+      governanceFunding: {
+        subDAOCreation: 0,
+        generalReserve: 0,
       },
-      softCap: undefined,
-      hardCap: "dynamic",
-      fundingModel: {
-        dynamicUnlock: false,
-        endsEarlyOnHardCap: false,
-      },
-      airdropModules: {
-        dropScore: false,
-      },
+      quorum: 0,
       voting: {
-        periodDays: undefined,
-        voteUnit: undefined,
-        escrowedFunds: false,
+        periodDays: 0,
+        voteUnit: "",
       },
-      proposer_wallet: undefined,
     },
   });
   const formStates = [
@@ -146,7 +118,7 @@ const FoundedTokenForm = () => {
       element: <SummarySubmit />,
     },
   ];
-  const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof DAOProposalFormSchema>) => {
     // TODO:
     console.log(values);
   };
@@ -219,10 +191,10 @@ const FoundedTokenForm = () => {
     </div>
   );
 };
-export default FoundedTokenForm;
+export default DAOProposalForm;
 
 const TokenIdentity = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   // DONE token name,symbol
   // blockchain
   // DONE logo upload + desc
@@ -231,25 +203,12 @@ const TokenIdentity = () => {
     <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="token.name"
+        name="proposal.name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Token Name</FormLabel>
+            <FormLabel>Proposal Name</FormLabel>
             <FormControl>
-              <Input placeholder="Token Name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="token.symbol"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Token Symbol</FormLabel>
-            <FormControl>
-              <Input placeholder="Token Symbol" {...field} />
+              <Input placeholder="Your Proposal Name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -270,7 +229,7 @@ const TokenIdentity = () => {
       />
       <FormField
         control={form.control}
-        name="token.description"
+        name="proposal.description"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Description</FormLabel>
@@ -285,38 +244,22 @@ const TokenIdentity = () => {
   );
 };
 const CampaignBudgetGoals = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
-  const watchIsLp = useWatch({
-    control: form.control,
-    name: "selectedGoals.lp",
-  });
-  const watchIsTreasury = useWatch({
-    control: form.control,
-    name: "selectedGoals.treasury",
-  });
-  const watchIsKol = useWatch({
-    control: form.control,
-    name: "selectedGoals.kol",
-  });
-  const watchIsAi = useWatch({
-    control: form.control,
-    name: "selectedGoals.ai",
-  });
-
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   //Modular selection: LP Pool, Treasury, KOL, AI Agent
   // SoftCap auto-calculation
   // Optional HardCap
   // Display % and minimums
 
   return (
-    <fieldset className="w-full">
-      <div className="flex flex-row justify-between">
+    <fieldset className="w-full flex flex-row">
+      <div className="flex flex-col justify-between">
+        <h3>Governance Goals</h3>
         <FormField
           control={form.control}
-          name="selectedGoals.lp"
+          name="governanceGoals.subDAO"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Is LP</FormLabel>
+              <FormLabel>Sub DAO</FormLabel>
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -329,22 +272,23 @@ const CampaignBudgetGoals = () => {
         />
         <FormField
           control={form.control}
-          name="fundingGoals.lp"
+          name="governanceGoals.fundsAllocation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>LP %</FormLabel>
+              <FormLabel>Funds Allocation</FormLabel>
               <FormControl>
-                <Input placeholder="LP %" disabled={!watchIsLp} {...field} />
+                <Input
+                  type="number"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
-      <div className="flex flex-row justify-between">
         <FormField
           control={form.control}
-          name="selectedGoals.treasury"
+          name="governanceGoals.otherActions"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is Treasusy</FormLabel>
@@ -358,35 +302,21 @@ const CampaignBudgetGoals = () => {
             </FormItem>
           )}
         />
+      </div>
+      <div className="flex flex-col justify-between">
+        <h3>Governance Funding</h3>
         <FormField
           control={form.control}
-          name="fundingGoals.treasury"
+          name="governanceFunding.subDAOCreation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Treasury</FormLabel>
+              <FormLabel>Sub-DAO Creation</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Treasury"
-                  disabled={!watchIsTreasury}
+                  placeholder="Sub-DAO Creation"
+                  type="number"
                   {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="flex flex-row justify-between">
-        <FormField
-          control={form.control}
-          name="selectedGoals.kol"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Is Kol</FormLabel>
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -395,43 +325,17 @@ const CampaignBudgetGoals = () => {
         />
         <FormField
           control={form.control}
-          name="fundingGoals.kol"
+          name="governanceFunding.generalReserve"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Kol</FormLabel>
+              <FormLabel>General Reserve</FormLabel>
               <FormControl>
-                <Input placeholder="kol" disabled={!watchIsKol} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="flex flex-row justify-between">
-        <FormField
-          control={form.control}
-          name="selectedGoals.ai"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Is Ai</FormLabel>
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                <Input
+                  placeholder="General Reserve"
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fundingGoals.ai"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ai</FormLabel>
-              <FormControl>
-                <Input placeholder="ai" disabled={!watchIsAi} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -443,32 +347,13 @@ const CampaignBudgetGoals = () => {
 };
 
 const AidropModules = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   // DropScore / GTE toggle
-  return (
-    <fieldset className="w-full">
-      <FormField
-        control={form.control}
-        name="airdropModules.dropScore"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>DropScore</FormLabel>
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </fieldset>
-  );
+  return <fieldset className="w-full"></fieldset>;
 };
 
 const Tokenomics = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   // Total Supply
   // Allocation sliders (DAO, Voters, Airdrop, etc.)
 
@@ -476,14 +361,15 @@ const Tokenomics = () => {
     <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="fundingModel.dynamicUnlock"
+        name="quorum"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Dynamic Unlock</FormLabel>
+            <FormLabel>Quorum</FormLabel>
             <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
+              <Input
+                {...field}
+                type="number"
+                onChange={(e) => field.onChange(Number(e))}
               />
             </FormControl>
             <FormMessage />
@@ -504,7 +390,7 @@ const NarrativeVisuals = () => {
 };
 
 const VotingRules = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   // 1 NFT = 1 vote (or token equivalent)
   // Funds are escrowed
   // SoftCap must be met
@@ -513,22 +399,6 @@ const VotingRules = () => {
 
   return (
     <fieldset className="w-full">
-      <FormField
-        control={form.control}
-        name="fundingModel.endsEarlyOnHardCap"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Ends Early on HardCap</FormLabel>
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       <FormField
         control={form.control}
         name="voting.periodDays"
@@ -562,29 +432,13 @@ const VotingRules = () => {
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="voting.escrowedFunds"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Escrowed Funds</FormLabel>
-            <FormControl>
-              <Checkbox
-                onCheckedChange={field.onChange}
-                checked={field.value}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </fieldset>
   );
 };
 
 const SummarySubmit = () => {
-  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
-  const values = useWatch<z.infer<typeof FoundedTokenFormSchema>>();
+  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
+  const values = useWatch<z.infer<typeof DAOProposalFormSchema>>();
 
   // Preview data
   // Wallet Connect + Ownership Check
@@ -594,45 +448,36 @@ const SummarySubmit = () => {
     <div>
       <h2 className="font-medium text-2xl mb-4">Summary</h2>
       <ul>
-        <li>Token name: {values.token?.name}</li>
-        <li>Token symbol: {values.token?.symbol}</li>
-        <li>Token Description : {values.token?.description}</li>
+        <li>Proposal name: {values.proposal?.name}</li>
+        <li>Proposal Description : {values.proposal?.description}</li>
         <li>
-          Goals:
+          Related Links:
           <ul className="ml-4">
-            {values.selectedGoals &&
-              Object.entries(values.selectedGoals).map(([key, val]) => {
-                if (
-                  val === true &&
-                  values.fundingGoals &&
-                  Object.keys(values.fundingGoals).includes(key)
-                ) {
-                  return (
-                    <li key={key} className="list-disc">
-                      {key}:{" "}
-                      {typeof values.fundingGoals?.[
-                        key as "lp" | "treasury" | "kol" | "ai"
-                      ] === "string" &&
-                        values.fundingGoals?.[
-                          key as "lp" | "treasury" | "kol" | "ai"
-                        ]}
-                    </li>
-                  );
-                }
-                return;
-              })}
+            {values.proposal?.relatedLinks?.map((link, i) => (
+              <li key={i} className="list-disc">
+                {link}
+              </li>
+            ))}
           </ul>
         </li>
-        <li>SoftCap: {values.softCap}</li>
-        <li>HardCap: {values.hardCap}</li>
-        <li>Dynamic Unlock: {values.fundingModel?.dynamicUnlock}</li>
         <li>
-          Ends early on HardCap: {values.fundingModel?.endsEarlyOnHardCap}
+          Governance Goals & Funding
+          <ul className="ml-4 list-disc">
+            <li>Sub-DAO: {values.governanceGoals?.subDAO ? "Yes" : "No"}</li>
+            <li>Funds Allocation: {values.governanceGoals?.fundsAllocation}</li>
+            <li>
+              Other Actions:{" "}
+              {values.governanceGoals?.otherActions ? "Yes" : "No"}
+            </li>
+            <li>
+              Sub-DAO Creation: {values.governanceFunding?.subDAOCreation}
+            </li>
+            <li>General Reserve: {values.governanceFunding?.generalReserve}</li>
+          </ul>
         </li>
-        <li>Drop Score: {values.airdropModules?.dropScore}</li>
-        <li>Voting Days: {values.voting?.periodDays}</li>
-        <li>Vote unit: {values.voting?.voteUnit}</li>
-        <li>Escrowed funds: {values.voting?.escrowedFunds}</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
 
       {!form.formState.isValid && form.formState.isSubmitted && (
