@@ -12,7 +12,7 @@ import {
   CarouselItem,
   CarouselApi,
 } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,7 +40,7 @@ const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
 } | null>(null);
 
-const ProposalFormSchema = z.object({
+const TreasuryProposalFormSchema = z.object({
   token: z.object({
     name: z.string(),
     symbol: z.string(),
@@ -77,9 +77,9 @@ const ProposalFormSchema = z.object({
   }),
   proposer_wallet: z.string(),
 });
-const ProposalForm = () => {
-  const form = useForm<z.infer<typeof ProposalFormSchema>>({
-    resolver: zodResolver(ProposalFormSchema),
+const TreasuryProposalForm = () => {
+  const form = useForm<z.infer<typeof TreasuryProposalFormSchema>>({
+    resolver: zodResolver(TreasuryProposalFormSchema),
     defaultValues: {
       token: {
         name: undefined,
@@ -88,30 +88,30 @@ const ProposalForm = () => {
         logoURL: undefined,
       },
       selectedGoals: {
-        lp: undefined,
-        treasury: undefined,
-        kol: undefined,
-        ai: undefined,
+        lp: false,
+        treasury: false,
+        kol: false,
+        ai: false,
       },
       fundingGoals: {
-        lp: undefined,
-        treasury: undefined,
-        kol: undefined,
-        ai: undefined,
+        lp: 0,
+        treasury: 0,
+        kol: 0,
+        ai: 0,
       },
       softCap: undefined,
-      hardCap: undefined,
+      hardCap: "dynamic",
       fundingModel: {
-        dynamicUnlock: undefined,
-        endsEarlyOnHardCap: undefined,
+        dynamicUnlock: false,
+        endsEarlyOnHardCap: false,
       },
       airdropModules: {
-        dropScore: undefined,
+        dropScore: false,
       },
       voting: {
         periodDays: undefined,
         voteUnit: undefined,
-        escrowedFunds: undefined,
+        escrowedFunds: false,
       },
       proposer_wallet: undefined,
     },
@@ -145,7 +145,7 @@ const ProposalForm = () => {
       element: <SummarySubmit />,
     },
   ];
-  const onSubmit = (values: z.infer<typeof ProposalFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof TreasuryProposalFormSchema>) => {
     // TODO:
     console.log(values);
   };
@@ -160,9 +160,9 @@ const ProposalForm = () => {
   }, [api]);
 
   return (
-    <div>
+    <div className="w-full pt-[32px]">
       <ProposalFormContext.Provider value={{ carouselApi: api }}>
-        <Breadcrumb>
+        <Breadcrumb className="my-[16px]">
           <BreadcrumbList className="flex flex-row justify-center">
             {formStates.map((el, id) => (
               <Fragment key={id}>
@@ -183,15 +183,30 @@ const ProposalForm = () => {
           </BreadcrumbList>
         </Breadcrumb>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Carousel orientation="horizontal" setApi={setApi}>
+          <form
+            className="max-w-md mx-auto"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <Carousel opts={{ align: "start" }} setApi={setApi}>
               <CarouselContent>
                 {formStates.map((formState, i) => (
                   <CarouselItem key={i}>
-                    <Card>
+                    <Card className="">
                       <CardContent className="flex items-center justify-center p-6">
                         <>{formState.element}</>
                       </CardContent>
+                      <CardFooter
+                        className={
+                          "flex  " +
+                          (i === 0 ? "justify-end" : "justify-between")
+                        }
+                      >
+                        <>
+                          {i !== 0 && <PrevButton />}
+                          {i !== formStates.length - 1 && <NextButton />}
+                          {i === formStates.length - 1 && <SubmitButton />}
+                        </>
+                      </CardFooter>
                     </Card>
                   </CarouselItem>
                 ))}
@@ -203,19 +218,19 @@ const ProposalForm = () => {
     </div>
   );
 };
-export default ProposalForm;
+export default TreasuryProposalForm;
 
 const TokenIdentity = () => {
-  const form = useFormContext();
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
   // DONE token name,symbol
   // blockchain
   // DONE logo upload + desc
   // social links
   return (
-    <>
+    <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="tokenName"
+        name="token.name"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Token Name</FormLabel>
@@ -228,7 +243,7 @@ const TokenIdentity = () => {
       />
       <FormField
         control={form.control}
-        name="tokenSymbol"
+        name="token.symbol"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Token Symbol</FormLabel>
@@ -241,7 +256,7 @@ const TokenIdentity = () => {
       />
       <FormField
         control={form.control}
-        name="tokenLogourl"
+        name="token.logoURL"
         render={({ field }) => (
           <FormItem>
             <FormLabel>logoURL</FormLabel>
@@ -254,7 +269,7 @@ const TokenIdentity = () => {
       />
       <FormField
         control={form.control}
-        name="tokenDescription"
+        name="token.description"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Description</FormLabel>
@@ -265,18 +280,27 @@ const TokenIdentity = () => {
           </FormItem>
         )}
       />
-    </>
+    </fieldset>
   );
 };
 const CampaignBudgetGoals = () => {
-  const form = useFormContext();
-  const watchIsLp = useWatch({ control: form.control, name: "isLp" });
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const watchIsLp = useWatch({
+    control: form.control,
+    name: "selectedGoals.lp",
+  });
   const watchIsTreasury = useWatch({
     control: form.control,
-    name: "isTreasury",
+    name: "selectedGoals.treasury",
   });
-  const watchIsKol = useWatch({ control: form.control, name: "isKol" });
-  const watchIsAi = useWatch({ control: form.control, name: "isAi" });
+  const watchIsKol = useWatch({
+    control: form.control,
+    name: "selectedGoals.kol",
+  });
+  const watchIsAi = useWatch({
+    control: form.control,
+    name: "selectedGoals.ai",
+  });
 
   //Modular selection: LP Pool, Treasury, KOL, AI Agent
   // SoftCap auto-calculation
@@ -284,11 +308,11 @@ const CampaignBudgetGoals = () => {
   // Display % and minimums
 
   return (
-    <>
+    <fieldset className="w-full">
       <div className="flex flex-row justify-between">
         <FormField
           control={form.control}
-          name="isLp"
+          name="selectedGoals.lp"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is LP</FormLabel>
@@ -302,26 +326,24 @@ const CampaignBudgetGoals = () => {
             </FormItem>
           )}
         />
-        {watchIsLp === true && (
-          <FormField
-            control={form.control}
-            name="lp"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>LP %</FormLabel>
-                <FormControl>
-                  <Input placeholder="LP %" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="fundingGoals.lp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>LP %</FormLabel>
+              <FormControl>
+                <Input placeholder="LP %" disabled={!watchIsLp} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
       <div className="flex flex-row justify-between">
         <FormField
           control={form.control}
-          name="isTreasury"
+          name="selectedGoals.treasury"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is Treasusy</FormLabel>
@@ -335,26 +357,28 @@ const CampaignBudgetGoals = () => {
             </FormItem>
           )}
         />
-        {watchIsTreasury === true && (
-          <FormField
-            control={form.control}
-            name="treasury"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Treasury</FormLabel>
-                <FormControl>
-                  <Input placeholder="Treasury" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="fundingGoals.treasury"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Treasury</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Treasury"
+                  disabled={!watchIsTreasury}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
       <div className="flex flex-row justify-between">
         <FormField
           control={form.control}
-          name="isKol"
+          name="selectedGoals.kol"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is Kol</FormLabel>
@@ -368,26 +392,24 @@ const CampaignBudgetGoals = () => {
             </FormItem>
           )}
         />
-        {watchIsKol === true && (
-          <FormField
-            control={form.control}
-            name="kol"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Kol</FormLabel>
-                <FormControl>
-                  <Input placeholder="kol" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="fundingGoals.kol"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Kol</FormLabel>
+              <FormControl>
+                <Input placeholder="kol" disabled={!watchIsKol} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
       <div className="flex flex-row justify-between">
         <FormField
           control={form.control}
-          name="isAi"
+          name="selectedGoals.ai"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Is Ai</FormLabel>
@@ -401,34 +423,32 @@ const CampaignBudgetGoals = () => {
             </FormItem>
           )}
         />
-        {watchIsAi === true && (
-          <FormField
-            control={form.control}
-            name="ai"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ai</FormLabel>
-                <FormControl>
-                  <Input placeholder="ai" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="fundingGoals.ai"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ai</FormLabel>
+              <FormControl>
+                <Input placeholder="ai" disabled={!watchIsAi} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-    </>
+    </fieldset>
   );
 };
 
 const AidropModules = () => {
-  const form = useFormContext();
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
   // DropScore / GTE toggle
   return (
-    <>
+    <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="dropScore"
+        name="airdropModules.dropScore"
         render={({ field }) => (
           <FormItem>
             <FormLabel>DropScore</FormLabel>
@@ -442,20 +462,20 @@ const AidropModules = () => {
           </FormItem>
         )}
       />
-    </>
+    </fieldset>
   );
 };
 
 const Tokenomics = () => {
-  const form = useFormContext();
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
   // Total Supply
   // Allocation sliders (DAO, Voters, Airdrop, etc.)
 
   return (
-    <>
+    <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="dynamicUnlock"
+        name="fundingModel.dynamicUnlock"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Dynamic Unlock</FormLabel>
@@ -469,7 +489,7 @@ const Tokenomics = () => {
           </FormItem>
         )}
       />
-    </>
+    </fieldset>
   );
 };
 
@@ -483,19 +503,18 @@ const NarrativeVisuals = () => {
 };
 
 const VotingRules = () => {
-  const form = useFormContext();
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
   // 1 NFT = 1 vote (or token equivalent)
   // Funds are escrowed
   // SoftCap must be met
   // HardCap ends proposal early
   // Refund if SoftCap not reached
 
-  // TODO:
   return (
-    <>
+    <fieldset className="w-full">
       <FormField
         control={form.control}
-        name="endsEarlyOnHardCap"
+        name="fundingModel.endsEarlyOnHardCap"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Ends Early on HardCap</FormLabel>
@@ -511,12 +530,19 @@ const VotingRules = () => {
       />
       <FormField
         control={form.control}
-        name="votingDays"
+        name="voting.periodDays"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Voting Days</FormLabel>
             <FormControl>
-              <Input placeholder="votingDays" {...field} />
+              <Input
+                placeholder="votingDays"
+                type="number"
+                step={1}
+                {...field}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                value={field.value ?? 0}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -524,7 +550,7 @@ const VotingRules = () => {
       />
       <FormField
         control={form.control}
-        name="voteUnit"
+        name="voting.voteUnit"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Vote Unit</FormLabel>
@@ -537,7 +563,7 @@ const VotingRules = () => {
       />
       <FormField
         control={form.control}
-        name="escrowedFunds"
+        name="voting.escrowedFunds"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Escrowed Funds</FormLabel>
@@ -551,25 +577,99 @@ const VotingRules = () => {
           </FormItem>
         )}
       />
-    </>
+    </fieldset>
   );
 };
 
 const SummarySubmit = () => {
+  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const values = useWatch<z.infer<typeof TreasuryProposalFormSchema>>();
+
   // Preview data
   // Wallet Connect + Ownership Check
   // Confirm & Submit to DAO
 
   // TODO:
-  return <div>summary submit</div>;
+  return (
+    <div>
+      <h2 className="font-medium text-2xl mb-4">Summary</h2>
+      <ul>
+        <li>Token name: {values.token?.name}</li>
+        <li>Token symbol: {values.token?.symbol}</li>
+        <li>Token Description : {values.token?.description}</li>
+        <li>
+          Goals:
+          <ul className="ml-4">
+            {values.selectedGoals &&
+              Object.entries(values.selectedGoals).map(([key, val]) => {
+                if (
+                  val === true &&
+                  values.fundingGoals &&
+                  Object.keys(values.fundingGoals).includes(key)
+                ) {
+                  return (
+                    <li key={key} className="list-disc">
+                      {key}:{" "}
+                      {typeof values.fundingGoals?.[
+                        key as "lp" | "treasury" | "kol" | "ai"
+                      ] === "string" &&
+                        values.fundingGoals?.[
+                          key as "lp" | "treasury" | "kol" | "ai"
+                        ]}
+                    </li>
+                  );
+                }
+                return;
+              })}
+          </ul>
+        </li>
+        <li>SoftCap: {values.softCap}</li>
+        <li>HardCap: {values.hardCap}</li>
+        <li>Dynamic Unlock: {values.fundingModel?.dynamicUnlock}</li>
+        <li>
+          Ends early on HardCap: {values.fundingModel?.endsEarlyOnHardCap}
+        </li>
+        <li>Drop Score: {values.airdropModules?.dropScore}</li>
+        <li>Voting Days: {values.voting?.periodDays}</li>
+        <li>Vote unit: {values.voting?.voteUnit}</li>
+        <li>Escrowed funds: {values.voting?.escrowedFunds}</li>
+      </ul>
+
+      {!form.formState.isValid && form.formState.isSubmitted && (
+        <div className="text-red-800">
+          There is errors in this form. Please review previous steps.
+        </div>
+      )}
+    </div>
+  );
 };
 const NextButton = () => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
-  return <Button onClick={() => api.carouselApi?.scrollNext()}>Next</Button>;
+  return (
+    <Button type="button" onClick={() => api.carouselApi?.scrollNext()}>
+      Next
+    </Button>
+  );
 };
 const PrevButton = () => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
-  return <Button onClick={() => api.carouselApi?.scrollPrev()}>Next</Button>;
+  const onClick = () => {
+    api.carouselApi?.scrollPrev();
+  };
+  return (
+    <Button type="button" onClick={onClick}>
+      Previous
+    </Button>
+  );
+};
+const SubmitButton = () => {
+  const api = useContext(ProposalFormContext);
+  if (!api) return null;
+  return (
+    <Button type="submit" variant="secondary">
+      Submit
+    </Button>
+  );
 };
