@@ -35,6 +35,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import PotusAi from "../potusai/PotusAi";
+import { predictCustom } from "@/lib/api/portusai/potus-ai";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -152,6 +154,64 @@ const FoundedTokenForm = () => {
   };
   const [formState, setFormState] = useState<number>(0);
   const [api, setApi] = useState<CarouselApi>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<
+    { role: string; content: string; refusal?: any }[]
+  >([]);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const [resGpt, setResGpt] = useState<{
+    historical: { role: string; content: string; refusal?: any }[];
+    result: { role: string; content: string; refusal?: any };
+    structure: typeof FoundedTokenFormSchema;
+  } | null>(null);
+
+  const updateFormObject = () => {
+    if (!resGpt?.structure) return;
+
+    Object.entries(resGpt.structure).forEach(([key, value]) => {
+      form.setValue(key as any, value);
+    });
+    setIsChatOpen(false);
+  };
+
+  const handleSendMessage = (message: string) => {
+    setIsLoading(true);
+
+    const payload = {
+      text: message,
+      historical:
+        resGpt?.historical && resGpt.historical.length > 0
+          ? [...resGpt.historical, { role: "user", content: message }]
+          : undefined,
+    };
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", content: message },
+    ]);
+
+    predictCustom(payload).then((res) => {
+      if (res.status === 200) {
+        if (res.resGPT?.result.role) {
+          setMessages((prevMessages) => [...prevMessages, res.resGPT?.result]);
+        }
+        setResGpt(res.resGPT);
+      }
+
+      if (res.status === 500) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Oups, an error occured, please try again",
+          },
+        ]);
+      }
+
+      setIsLoading(false);
+    });
+  };
+
   useEffect(() => {
     if (!api) return;
     setFormState(api.selectedScrollSnap());
@@ -215,6 +275,25 @@ const FoundedTokenForm = () => {
             </Carousel>
           </form>
         </Form>
+        <PotusAi
+          onSendMessage={handleSendMessage}
+          messages={messages}
+          isLoading={isLoading}
+          isOpen={isChatOpen}
+          validation={updateFormObject}
+          onClose={() => setIsChatOpen(false)}
+        />
+        <Button
+          type="button"
+          className="w-[250px] mb-8 text-white font-semibold p-[24px] rounded-[12px]"
+          style={{
+            background:
+              "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
+          }}
+          onClick={() => setIsChatOpen(true)}
+        >
+          Generate with POTUS AI
+        </Button>
       </ProposalFormContext.Provider>
     </div>
   );
