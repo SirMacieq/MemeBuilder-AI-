@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,6 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -24,6 +22,15 @@ export default function ProfileForm({ user }: { user: User }) {
   const [avatar, setAvatar] = useState<string>(
     user.avatar ?? `avatar${Math.floor(1 + Math.random() * 13)}.jpeg`,
   );
+  useEffect(() => {
+    Array.from({ length: 13 }).forEach((_, i) => {
+      const img = new Image();
+      img.src = `/images/avatars/avatar${i + 1}.jpeg`;
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+      };
+    });
+  });
 
   return (
     <form
