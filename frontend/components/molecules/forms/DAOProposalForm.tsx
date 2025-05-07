@@ -62,7 +62,6 @@ const DAOProposalFormSchema = z.object({
     periodDays: z.number().int().positive(),
     voteUnit: z.string(),
   }),
-  proposer_wallet: z.string(),
 });
 const DAOProposalForm = () => {
   const form = useForm<z.infer<typeof DAOProposalFormSchema>>({
@@ -216,12 +215,17 @@ const TokenIdentity = () => {
       />
       <FormField
         control={form.control}
-        name="token.logoURL"
+        name="proposal.relatedLinks"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>logoURL</FormLabel>
+            <FormLabel>Related links</FormLabel>
             <FormControl>
-              <Input placeholder="logoURL" {...field} />
+              <Input
+                placeholder="logoURL"
+                {...field}
+                value={field.value?.[0]}
+                onChange={(e) => field.onChange([e.target.value])}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -347,7 +351,7 @@ const CampaignBudgetGoals = () => {
 };
 
 const AidropModules = () => {
-  const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
+  // const form = useFormContext<z.infer<typeof DAOProposalFormSchema>>();
   // DropScore / GTE toggle
   return <fieldset className="w-full"></fieldset>;
 };
@@ -475,9 +479,9 @@ const SummarySubmit = () => {
             <li>General Reserve: {values.governanceFunding?.generalReserve}</li>
           </ul>
         </li>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Quorum: {values.quorum}</li>
+        <li>Voting Days: {values.voting?.periodDays}</li>
+        <li>Vote Unit: {values.voting?.voteUnit}</li>
       </ul>
 
       {!form.formState.isValid && form.formState.isSubmitted && (
