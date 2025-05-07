@@ -10,11 +10,13 @@ export default async function updateProfile(fd: FormData) {
     .min(3, "Nickname is required")
     .parse(fd.get("nickname"));
   const userId = z.string().parse(fd.get("user_id"));
+  const avatar = z.string().optional().parse(fd.get("avatar"));
 
   await userUpdateById(
     {
       bio: bio,
       nickname: nickname,
+      avatar: avatar,
     },
     userId,
   );

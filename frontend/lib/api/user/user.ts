@@ -8,6 +8,7 @@ export interface User {
   wallet: string;
   nickname: string | null;
   bio: string | null;
+  avatar: string | null;
   created_at?: number; //timestamp,
 }
 
@@ -78,6 +79,7 @@ export async function userGetById(id: string): Promise<UserGetByIdResponse> {
 interface UserUpdateByIdRequest {
   nickname: string;
   bio: string;
+  avatar?: string;
 }
 type UserUpdateByIdResponse = ResponseRequest<{ user: User }>;
 export async function userUpdateById(
