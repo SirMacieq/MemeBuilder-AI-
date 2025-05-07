@@ -40,7 +40,7 @@ const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
 } | null>(null);
 
-const TreasuryProposalFormSchema = z.object({
+const FoundedTokenFormSchema = z.object({
   token: z.object({
     name: z.string(),
     symbol: z.string(),
@@ -77,9 +77,10 @@ const TreasuryProposalFormSchema = z.object({
   }),
   proposer_wallet: z.string(),
 });
-const TreasuryProposalForm = () => {
-  const form = useForm<z.infer<typeof TreasuryProposalFormSchema>>({
-    resolver: zodResolver(TreasuryProposalFormSchema),
+
+const FoundedTokenForm = () => {
+  const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
+    resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
       token: {
         name: undefined,
@@ -145,7 +146,7 @@ const TreasuryProposalForm = () => {
       element: <SummarySubmit />,
     },
   ];
-  const onSubmit = (values: z.infer<typeof TreasuryProposalFormSchema>) => {
+  const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
     // TODO:
     console.log(values);
   };
@@ -218,10 +219,10 @@ const TreasuryProposalForm = () => {
     </div>
   );
 };
-export default TreasuryProposalForm;
+export default FoundedTokenForm;
 
 const TokenIdentity = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   // DONE token name,symbol
   // blockchain
   // DONE logo upload + desc
@@ -284,7 +285,7 @@ const TokenIdentity = () => {
   );
 };
 const CampaignBudgetGoals = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   const watchIsLp = useWatch({
     control: form.control,
     name: "selectedGoals.lp",
@@ -442,7 +443,7 @@ const CampaignBudgetGoals = () => {
 };
 
 const AidropModules = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   // DropScore / GTE toggle
   return (
     <fieldset className="w-full">
@@ -467,7 +468,7 @@ const AidropModules = () => {
 };
 
 const Tokenomics = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   // Total Supply
   // Allocation sliders (DAO, Voters, Airdrop, etc.)
 
@@ -503,7 +504,7 @@ const NarrativeVisuals = () => {
 };
 
 const VotingRules = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   // 1 NFT = 1 vote (or token equivalent)
   // Funds are escrowed
   // SoftCap must be met
@@ -582,8 +583,8 @@ const VotingRules = () => {
 };
 
 const SummarySubmit = () => {
-  const form = useFormContext<z.infer<typeof TreasuryProposalFormSchema>>();
-  const values = useWatch<z.infer<typeof TreasuryProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  const values = useWatch<z.infer<typeof FoundedTokenFormSchema>>();
 
   // Preview data
   // Wallet Connect + Ownership Check

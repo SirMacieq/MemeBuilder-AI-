@@ -7,7 +7,6 @@ const Dashboard = () => {
     <div className="w-full grow flex flex-col justify-center items-center bg-[#010613] px-[5%]">
       <Success />
       <Proposals />
-      <TreasuryProposalForm />
     </div>
   );
 };

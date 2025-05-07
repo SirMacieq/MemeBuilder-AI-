@@ -1,10 +1,10 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PresaleProposalsTable from "../molecules/proposals/PresaleProposalsTable";
-import GeneralDAOTable from "../molecules/proposals/GeneralDAOTable";
-import TreasuryBackedTable from "../molecules/proposals/TreasuryBackedTable";
+import PresaleProposalsTable from "../../molecules/proposals/PresaleProposalsTable";
+import GeneralDAOTable from "../../molecules/proposals/GeneralDAOTable";
+import TreasuryBackedTable from "../../molecules/proposals/TreasuryBackedTable";
 
-const ProposalsFeed = () => {
+const FoundedTokenFeed = () => {
   return (
     <Tabs defaultValue="presale-proposals">
       <TabsList>
@@ -25,4 +25,4 @@ const ProposalsFeed = () => {
   );
 };
 
-export default ProposalsFeed;
+export default FoundedTokenFeed;

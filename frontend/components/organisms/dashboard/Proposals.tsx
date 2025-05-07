@@ -98,7 +98,7 @@ const Proposals = () => {
             background: "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
           }}
         >
-          <Link href="submitCoin/">Submit your memecoin</Link>
+          <Link href="proposals/">Submit your memecoin</Link>
         </Button>
     </div>
       <h2 className="text-[24px] font-bold mb-4 text-white">Proposals</h2>
@@ -160,7 +160,7 @@ const Proposals = () => {
             background: "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
           }}
         >
-          <Link href="submitCoin/">Submit your memecoin</Link>
+          <Link href="proposals/">Submit your memecoin</Link>
         </Button>
       </div>
 
