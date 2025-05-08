@@ -9,6 +9,7 @@ describe("User CRUD Test", () => {
     wallet: "wallet-fr-001",
     nickname: "Bobby",
     bio: "I love my bio",
+    avatar: "avatar1.jpg",
     created_at: 1672531200, // Timestamp : 01/01/2023
     last_login: 1704067200, // Timestamp : 01/01/2024
   });
@@ -17,6 +18,7 @@ describe("User CRUD Test", () => {
     wallet: "wallet-fr-002",
     nickname: "JCVD",
     bio: "I am aware bro!",
+    avatar: "avatar2.jpg",
     created_at: 1667260800, // Timestamp : 01/11/2022
     last_login: 1705459200, // Timestamp : 15/01/2024
   });

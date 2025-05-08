@@ -35,6 +35,7 @@ export default (dependencies: any) => {
           wallet: userData.wallet,
           nickname: null,
           bio: null,
+          avatar: null,
           created_at: now,
           last_login: now,
         });

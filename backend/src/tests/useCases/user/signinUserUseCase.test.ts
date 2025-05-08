@@ -44,6 +44,7 @@ describe("Signin User use case", () => {
       wallet: "wallet-fr-001",
       nickname: "Test User",
       bio: "Bio of Test User",
+      avatar: "avatar1.jpg",
       created_at: Date.now(),
       last_login: Date.now(),
     })

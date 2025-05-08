@@ -9,6 +9,7 @@ export const userRepositoryTests = (repositories: any) => {
         wallet: "wallet-fr-001",
         nickname: "Bobby",
         bio: "I love my bio",
+        avatar: "avatar1.jpg",
         created_at: 1672531200,
         last_login: 1704067200,
     });
@@ -17,6 +18,7 @@ export const userRepositoryTests = (repositories: any) => {
         wallet: "wallet-fr-002",
         nickname: "JCVD",
         bio: "I am aware bro!",
+        avatar: "avatar2.jpg",
         created_at: 1667260800,
         last_login: 1705459200,
     });

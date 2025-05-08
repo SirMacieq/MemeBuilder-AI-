@@ -5,6 +5,7 @@ export type mongoUserResponse = {
   wallet: string;
   nickname: string | null;
   bio: string | null;
+  avatar: string | null;
   created_at?: number; //timestamp,
   last_login?: number; //timestamp,
   _id: Types.ObjectId;
