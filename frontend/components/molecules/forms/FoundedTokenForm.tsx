@@ -37,6 +37,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import PotusAi from "../potusai/PotusAi";
 import { predictCustom } from "@/lib/api/portusai/potus-ai";
+import { X } from "lucide-react";
+import Image from "next/image";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -158,7 +160,8 @@ const FoundedTokenForm = () => {
   const [messages, setMessages] = useState<
     { role: string; content: string; refusal?: any }[]
   >([]);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true)
 
   const [resGpt, setResGpt] = useState<{
     historical: { role: string; content: string; refusal?: any }[];
@@ -283,17 +286,32 @@ const FoundedTokenForm = () => {
           validation={updateFormObject}
           onClose={() => setIsChatOpen(false)}
         />
-        <Button
-          type="button"
-          className="w-[250px] mb-8 text-white font-semibold p-[24px] rounded-[12px]"
-          style={{
-            background:
-              "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
-          }}
-          onClick={() => setIsChatOpen(true)}
-        >
-          Generate with POTUS AI
-        </Button>
+        <div className="fixed bottom-[70px] right-0 p-4">
+          {iaInfoOpen && <><div className="flex justify-end mb-2 mr-4">
+            <button
+              onClick={() => setAiInfoOpen(false)}
+              className="text-gray-500 hover:text-red-500 transition"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <p className="bg-[#0e131f] p-[16px] w-[278px] mb-6 mr-4 rounded-[12px]">
+            Yoo! I’m Potus AI 🤖 Ready to help you create your very own memecoin! 🚀
+          </p></>}
+
+  <div className="flex justify-end">
+    <Button
+      type="button"
+      className="bg-transparent hover:bg-transparent"
+      onClick={() => setIsChatOpen(true)}
+    >
+      <Image src="/images/potusai.svg" alt="" width={63} height={63} />
+    </Button>
+  </div>
+</div>
+
+       
       </ProposalFormContext.Provider>
     </div>
   );
