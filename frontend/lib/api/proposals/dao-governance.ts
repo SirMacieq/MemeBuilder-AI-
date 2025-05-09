@@ -28,8 +28,8 @@ export interface DaoGovToken {
   created_at?: number;
   proposer_wallet: string;
 }
-type DaoGovTokenCreate = Omit<DaoGovToken, "_id" | "created_at">;
-type DaoGovTokenUpdate = Omit<
+export type DaoGovTokenCreate = Omit<DaoGovToken, "_id" | "created_at">;
+export type DaoGovTokenUpdate = Omit<
   DaoGovToken,
   "_id" | "created_at" | "proposer_wallet"
 >;
@@ -38,7 +38,7 @@ type DaoGovTokenUpdate = Omit<
 type DaoGovTokenGetAllResponse = ResponseRequest<{
   daoGovernances: DaoGovToken[];
 }>;
-export async function treasuryTokenGetAll(): Promise<DaoGovTokenGetAllResponse> {
+export async function daoGovTokenGetAll(): Promise<DaoGovTokenGetAllResponse> {
   const res = await fetch(getApiUrl() + "/proposals/dao-governance/all", {
     method: "GET",
     headers: {
@@ -57,7 +57,7 @@ export async function treasuryTokenGetAll(): Promise<DaoGovTokenGetAllResponse> 
 type DaoGovTokenGetOneResponse = ResponseRequest<{
   daoGovernance: DaoGovToken;
 }>;
-export async function treasuryTokenGetOne(
+export async function daoGovTokenGetOne(
   id: string,
 ): Promise<DaoGovTokenGetOneResponse> {
   const res = await fetch(
@@ -81,7 +81,7 @@ export async function treasuryTokenGetOne(
 type DaoGovTokenCreateResponse = ResponseRequest<{
   daoGovernance: DaoGovToken;
 }>;
-export async function treasuryTokenCreate(
+export async function daoGovTokenCreate(
   data: DaoGovTokenCreate,
 ): Promise<DaoGovTokenCreateResponse> {
   const res = await fetch(getApiUrl() + "/proposals/dao-governance/add", {
@@ -103,7 +103,7 @@ export async function treasuryTokenCreate(
 type DaoGovTokenDeleteResponse = ResponseRequest<{
   daoGovernance: DaoGovToken;
 }>;
-export async function treasuryTokenDelete(
+export async function daoGovTokenDelete(
   id: string,
 ): Promise<DaoGovTokenDeleteResponse> {
   const res = await fetch(
@@ -125,7 +125,7 @@ export async function treasuryTokenDelete(
 
 //UPDATE
 type DaoGovTokenUpdateResponse = ResponseRequest<DaoGovToken>;
-export async function treasuryTokenUpdate(
+export async function daoGovTokenUpdate(
   id: string,
   data: DaoGovTokenUpdate,
 ): Promise<DaoGovTokenUpdateResponse> {

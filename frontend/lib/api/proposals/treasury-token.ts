@@ -3,6 +3,7 @@ import getApiUrl from "@/lib/getApiUrl";
 import getToken from "@/lib/api/getToken";
 import { ResponseRequest } from "@/lib/api/genericResponse";
 
+// DO NOT EDIT, copied from backend types
 export interface TreasuryToken {
   _id: string;
   proposalType: "treasuryToken";
@@ -52,8 +53,8 @@ export interface TreasuryToken {
   proposer_wallet: string;
   created_at?: number;
 }
-type TreasuryTokenCreate = Omit<TreasuryToken, "_id" | "created_at">;
-type TreasuryTokenUpdate = Omit<
+export type TreasuryTokenCreate = Omit<TreasuryToken, "_id" | "created_at">;
+export type TreasuryTokenUpdate = Omit<
   TreasuryToken,
   "_id" | "created_at" | "proposer_wallet"
 >;
@@ -118,6 +119,7 @@ export async function treasuryTokenCreate(
   });
   const json = await res.json();
   if (json.status !== 200) {
+    console.log(json);
     throw new Error(json.error?.error ?? "Unknown error");
   }
   return json;

@@ -6,6 +6,7 @@ import {
   createContext,
   useContext,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -35,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import createProposal from "@/lib/actions/proposals/dao/create";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -48,7 +50,7 @@ const DAOProposalFormSchema = z.object({
   }),
   governanceGoals: z.object({
     subDAO: z.boolean(),
-    fundsAllocation: z.number().nonnegative().optional(),
+    fundsAllocation: z.number().nonnegative(),
     otherActions: z.boolean(),
   }),
   governanceFunding: z
@@ -60,7 +62,7 @@ const DAOProposalFormSchema = z.object({
   quorum: z.number().nonnegative().int(),
   voting: z.object({
     periodDays: z.number().int().positive(),
-    voteUnit: z.string(),
+    voteUnit: z.string().min(1),
   }),
 });
 const DAOProposalForm = () => {
@@ -74,7 +76,7 @@ const DAOProposalForm = () => {
       },
       governanceGoals: {
         subDAO: false,
-        fundsAllocation: undefined,
+        fundsAllocation: 0,
         otherActions: false,
       },
       governanceFunding: {
@@ -117,9 +119,14 @@ const DAOProposalForm = () => {
       element: <SummarySubmit />,
     },
   ];
+  const router = useRouter();
+  console.log(form.formState.errors);
   const onSubmit = (values: z.infer<typeof DAOProposalFormSchema>) => {
-    // TODO:
     console.log(values);
+    (async () => {
+      await createProposal(values);
+      router.push("/dashboard");
+    })();
   };
   const [formState, setFormState] = useState<number>(0);
   const [api, setApi] = useState<CarouselApi>();
@@ -283,6 +290,7 @@ const CampaignBudgetGoals = () => {
               <FormControl>
                 <Input
                   type="number"
+                  min="0"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
@@ -389,7 +397,7 @@ const NarrativeVisuals = () => {
   // Campaign Slogan / Suggested Tweet
   // Optional Image / Meme Upload
 
-  // TODO:
+  // TODO: Add narrative visuals
   return <div>narrative visuals</div>;
 };
 
@@ -413,6 +421,7 @@ const VotingRules = () => {
               <Input
                 placeholder="votingDays"
                 type="number"
+                min="1"
                 step={1}
                 {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}

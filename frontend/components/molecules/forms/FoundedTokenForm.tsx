@@ -6,6 +6,7 @@ import {
   createContext,
   useContext,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -39,6 +40,7 @@ import PotusAi from "../potusai/PotusAi";
 import { predictCustom } from "@/lib/api/portusai/potus-ai";
 import { X } from "lucide-react";
 import Image from "next/image";
+import createAction from "@/lib/actions/proposals/funded/create";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -79,7 +81,6 @@ const FoundedTokenFormSchema = z.object({
     voteUnit: z.string(),
     escrowedFunds: z.boolean(),
   }),
-  proposer_wallet: z.string(),
 });
 
 const FoundedTokenForm = () => {
@@ -118,7 +119,6 @@ const FoundedTokenForm = () => {
         voteUnit: undefined,
         escrowedFunds: false,
       },
-      proposer_wallet: undefined,
     },
   });
   const formStates = [
@@ -150,9 +150,12 @@ const FoundedTokenForm = () => {
       element: <SummarySubmit />,
     },
   ];
+  const router = useRouter();
   const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
-    // TODO:
-    console.log(values);
+    (async () => {
+      await createAction(values);
+      router.push("/dashboard");
+    })();
   };
   const [formState, setFormState] = useState<number>(0);
   const [api, setApi] = useState<CarouselApi>();
@@ -161,7 +164,7 @@ const FoundedTokenForm = () => {
     { role: string; content: string; refusal?: any }[]
   >([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
-  const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true)
+  const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true);
 
   const [resGpt, setResGpt] = useState<{
     historical: { role: string; content: string; refusal?: any }[];
@@ -287,31 +290,34 @@ const FoundedTokenForm = () => {
           onClose={() => setIsChatOpen(false)}
         />
         <div className="fixed bottom-[70px] right-0 p-4">
-          {iaInfoOpen && <><div className="flex justify-end mb-2 mr-4">
-            <button
-              onClick={() => setAiInfoOpen(false)}
-              className="text-gray-500 hover:text-red-500 transition"
+          {iaInfoOpen && (
+            <>
+              <div className="flex justify-end mb-2 mr-4">
+                <button
+                  onClick={() => setAiInfoOpen(false)}
+                  className="text-gray-500 hover:text-red-500 transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <p className="bg-[#0e131f] p-[16px] w-[278px] mb-6 mr-4 rounded-[12px]">
+                Yoo! I’m Potus AI 🤖 Ready to help you create your very own
+                memecoin! 🚀
+              </p>
+            </>
+          )}
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              className="bg-transparent hover:bg-transparent"
+              onClick={() => setIsChatOpen(true)}
             >
-              <X size={24} />
-            </button>
+              <Image src="/images/potusai.svg" alt="" width={63} height={63} />
+            </Button>
           </div>
-
-          <p className="bg-[#0e131f] p-[16px] w-[278px] mb-6 mr-4 rounded-[12px]">
-            Yoo! I’m Potus AI 🤖 Ready to help you create your very own memecoin! 🚀
-          </p></>}
-
-  <div className="flex justify-end">
-    <Button
-      type="button"
-      className="bg-transparent hover:bg-transparent"
-      onClick={() => setIsChatOpen(true)}
-    >
-      <Image src="/images/potusai.svg" alt="" width={63} height={63} />
-    </Button>
-  </div>
-</div>
-
-       
+        </div>
       </ProposalFormContext.Provider>
     </div>
   );
@@ -535,6 +541,47 @@ const CampaignBudgetGoals = () => {
           )}
         />
       </div>
+      <FormField
+        control={form.control}
+        name="softCap"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Soft Cap</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Soft Cap"
+                {...field}
+                min="0"
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="hardCap"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hard Cap</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Hard Cap"
+                {...field}
+                type="number"
+                min="0"
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "0" ? "dynamic" : Number(e.target.value),
+                  )
+                }
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </fieldset>
   );
 };
@@ -596,7 +643,7 @@ const NarrativeVisuals = () => {
   // Campaign Slogan / Suggested Tweet
   // Optional Image / Meme Upload
 
-  // TODO:
+  // TODO: Add narrative visuals
   return <div>narrative visuals</div>;
 };
 
@@ -682,6 +729,7 @@ const VotingRules = () => {
 const SummarySubmit = () => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   const values = useWatch<z.infer<typeof FoundedTokenFormSchema>>();
+  console.log(form.formState.errors);
 
   // Preview data
   // Wallet Connect + Ownership Check
