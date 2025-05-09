@@ -186,7 +186,7 @@ const Proposals = () => {
               />
             </div>
             <div className="w-full p-[24px]">
-            <h3 className="text-[20px] uppercase font-semibold text-white mb-[8px]">{proposal.title}</h3>
+            <h3 className="text-[20px] uppercase font-semibold text-white mb-[8px]"><Link href={`proposal/${proposal.id}`}>{proposal.title}</Link></h3>
             <p className="text-sm text-[#BABABA] mb-[16px]">{proposal.description}</p>
 
             <div className="flex w-full mb-[16px]">
