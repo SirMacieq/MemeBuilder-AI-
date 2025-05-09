@@ -42,7 +42,7 @@ const AppNav = async () => {
       )}
 
       {!user && (
-        <Button className="text-white border border-[#7912FF] bg-transparent hover:bg-[#0B1739] p-6 rounded-[24px]">
+        <Button className="bg-none hover:bg-radial-[at_50%_50%] text-white border border-[#7912FF] bg-transparent hover:bg-[#0B1739] p-6 rounded-[24px]">
           <Link href="/login" className="flex items-center">
             <Image
               src="/images/wallet.png"

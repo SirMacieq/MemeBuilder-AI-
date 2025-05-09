@@ -258,20 +258,23 @@ const FoundedTokenForm = () => {
               <CarouselContent>
                 {formStates.map((formState, i) => (
                   <CarouselItem key={i}>
-                    <Card className="">
+                    <Card className="pt-0">
                       <CardContent className="flex items-center justify-center p-6">
-                        <>{formState.element}</>
+                        {formState.element}
                       </CardContent>
-                      <CardFooter
-                        className={
-                          "flex  " +
-                          (i === 0 ? "justify-end" : "justify-between")
-                        }
-                      >
+                      <CardFooter className="grid gap-[10px] grid-cols-2 w-full">
                         <>
-                          {i !== 0 && <PrevButton />}
-                          {i !== formStates.length - 1 && <NextButton />}
-                          {i === formStates.length - 1 && <SubmitButton />}
+                          {i !== 0 ? (
+                            <PrevButton className="order-1" />
+                          ) : (
+                            <div></div>
+                          )}
+                          {i !== formStates.length - 1 && (
+                            <NextButton className="order-2" />
+                          )}
+                          {i === formStates.length - 1 && (
+                            <SubmitButton className="order-2" />
+                          )}
                         </>
                       </CardFooter>
                     </Card>
@@ -309,13 +312,13 @@ const FoundedTokenForm = () => {
           )}
 
           <div className="flex justify-end">
-            <Button
+            <button
               type="button"
               className="bg-transparent hover:bg-transparent"
               onClick={() => setIsChatOpen(true)}
             >
               <Image src="/images/potusai.svg" alt="" width={63} height={63} />
-            </Button>
+            </button>
           </div>
         </div>
       </ProposalFormContext.Provider>
@@ -332,12 +335,12 @@ const TokenIdentity = () => {
   // social links
   return (
     <fieldset className="w-full">
+      <h2 className="font-bold text-2xl mb-6">Token Identity</h2>
       <FormField
         control={form.control}
         name="token.name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Token Name</FormLabel>
             <FormControl>
               <Input placeholder="Token Name" {...field} />
             </FormControl>
@@ -350,9 +353,8 @@ const TokenIdentity = () => {
         name="token.symbol"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Token Symbol</FormLabel>
             <FormControl>
-              <Input placeholder="Token Symbol" {...field} />
+              <Input placeholder="Symbol (e.g. $MEME)" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -363,7 +365,6 @@ const TokenIdentity = () => {
         name="token.logoURL"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>logoURL</FormLabel>
             <FormControl>
               <Input placeholder="logoURL" {...field} />
             </FormControl>
@@ -376,9 +377,8 @@ const TokenIdentity = () => {
         name="token.description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea placeholder="Token Description" {...field} />
+              <Textarea placeholder="Short Description..." {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -614,6 +614,13 @@ const CampaignBudgetGoals = () => {
 
 const AidropModules = () => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+  // TODO:
+  // const thisForm = useRef<HTMLFieldSetElement | null>(null);
+  // console.log(
+  //   "champs invalides",
+  //   thisForm.current?.querySelector("input[aria-invalid]"),
+  // );
+
   // DropScore / GTE toggle
   return (
     <fieldset className="w-full">
@@ -755,7 +762,6 @@ const VotingRules = () => {
 const SummarySubmit = () => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
   const values = useWatch<z.infer<typeof FoundedTokenFormSchema>>();
-  console.log(form.formState.errors);
 
   // Preview data
   // Wallet Connect + Ownership Check
@@ -814,32 +820,41 @@ const SummarySubmit = () => {
     </div>
   );
 };
-const NextButton = () => {
+const NextButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   return (
-    <Button type="button" onClick={() => api.carouselApi?.scrollNext()}>
+    <Button
+      className={className}
+      type="button"
+      onClick={() => api.carouselApi?.scrollNext()}
+    >
       Next
     </Button>
   );
 };
-const PrevButton = () => {
+const PrevButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   const onClick = () => {
     api.carouselApi?.scrollPrev();
   };
   return (
-    <Button type="button" onClick={onClick}>
+    <Button
+      className={className}
+      type="button"
+      variant="secondary"
+      onClick={onClick}
+    >
       Previous
     </Button>
   );
 };
-const SubmitButton = () => {
+const SubmitButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   return (
-    <Button type="submit" variant="secondary">
+    <Button className={className} type="submit">
       Submit
     </Button>
   );
