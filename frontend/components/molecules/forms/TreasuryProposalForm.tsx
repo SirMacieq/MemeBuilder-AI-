@@ -340,6 +340,8 @@ const CampaignBudgetGoals = () => {
                 placeholder="LP %"
                 {...field}
                 type="number"
+                min="0"
+                max="100"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
@@ -427,7 +429,7 @@ const CampaignBudgetGoals = () => {
             <FormLabel>Hard Cap</FormLabel>
             <FormControl>
               <Input
-                placeholder="Soft Cap"
+                placeholder="Hard Cap"
                 {...field}
                 type="number"
                 value={field.value ?? undefined}
@@ -674,7 +676,7 @@ const VotingRules = () => {
             <FormLabel>Quorum</FormLabel>
             <FormControl>
               <Input
-                placeholder="votingDays"
+                placeholder="Quorum"
                 type="number"
                 step={1}
                 {...field}

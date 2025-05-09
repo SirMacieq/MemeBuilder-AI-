@@ -437,7 +437,15 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>LP %</FormLabel>
               <FormControl>
-                <Input placeholder="LP %" disabled={!watchIsLp} {...field} />
+                <Input
+                  placeholder="LP %"
+                  disabled={!watchIsLp}
+                  {...field}
+                  type="number"
+                  min="0"
+                  max="100"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -472,6 +480,11 @@ const CampaignBudgetGoals = () => {
                   placeholder="Treasury"
                   disabled={!watchIsTreasury}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                  type="number"
+                  min="0"
                 />
               </FormControl>
               <FormMessage />
@@ -503,7 +516,13 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>Kol</FormLabel>
               <FormControl>
-                <Input placeholder="kol" disabled={!watchIsKol} {...field} />
+                <Input
+                  placeholder="kol"
+                  disabled={!watchIsKol}
+                  {...field}
+                  type="number"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -534,7 +553,14 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>Ai</FormLabel>
               <FormControl>
-                <Input placeholder="ai" disabled={!watchIsAi} {...field} />
+                <Input
+                  placeholder="ai"
+                  disabled={!watchIsAi}
+                  {...field}
+                  type="number"
+                  min="0"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -757,7 +783,7 @@ const SummarySubmit = () => {
                       {key}:{" "}
                       {typeof values.fundingGoals?.[
                         key as "lp" | "treasury" | "kol" | "ai"
-                      ] === "string" &&
+                      ] === "number" &&
                         values.fundingGoals?.[
                           key as "lp" | "treasury" | "kol" | "ai"
                         ]}

@@ -381,7 +381,7 @@ const Tokenomics = () => {
               <Input
                 {...field}
                 type="number"
-                onChange={(e) => field.onChange(Number(e))}
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />
