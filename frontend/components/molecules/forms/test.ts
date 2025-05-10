@@ -1,50 +1,63 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import { Connection } from "@solana/web3.js";
 import idl from "@/idl.json";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
 const { PublicKey, SystemProgram } = anchor.web3;
+const LAMPORTS_PER_SOL = 1_000_000;
 
 export const ProposalView = () => {
-  //
-  //
-  //
-  //   creating proposal factory PDO
-  //
-  //
-  const [tokenProposalFactoryAccountId, setTokenProposalFactoryAccountId] =
-    useState<any | null>(null);
+  const connection = new Connection("http://localhost:8899");
+  const wallet = useAnchorWallet();
+
   useEffect(() => {
-    if (!wallet) return;
+    console.log("top");
+
+    if (!wallet || !connection) return;
+
     (async () => {
+      //
+      //
+      //
+      // Retrieving provider
+      //
+      //
+      const getProvider = () => {
+        const provider = new AnchorProvider(connection, wallet, {
+          commitment: "confirmed",
+        });
+        console.log("provider", provider);
+        return provider;
+      };
+      const provider = getProvider();
+
+      const program = new Program(idl, provider);
+      //
+      //
+      //
+      //   creating proposal factory PDO
+      //
+      //
       const [tokenProposalFactoryAccountId, tokenProposalFactoryBump] =
         await PublicKey.findProgramAddress(
           [
             anchor.utils.bytes.utf8.encode("token_proposal_factory"),
-            wallet.publicKey.toBytes(),
+            new PublicKey(
+              "2PVCE27QQ9eFvBZdyNEi6MqgbasvF4ndkYf6UvfvEkvC",
+            ).toBytes(),
           ],
           program.programId,
         );
-      setTokenProposalFactoryAccountId(tokenProposalFactoryAccountId);
-    })();
-  }, []);
-  console.log("ici", tokenProposalFactoryAccountId);
-
-  //
-  //
-  //
-  // creating proposal PDO
-  //
-  //
-  //
-  const [tokenProposalAccountId, setTokenProposalAccountId] =
-    useState<any>(null);
-  useEffect(() => {
-    if (!wallet) return;
-    if (!tokenProposalFactoryAccountId) return;
-    (async () => {
+      //
+      //
+      //
+      // creating proposal PDO
+      //
+      //
+      //
+      console.log("avant", wallet.publicKey);
       const [tokenProposalAccountId, tokenProposalBump] =
         await PublicKey.findProgramAddress(
           [
@@ -54,43 +67,16 @@ export const ProposalView = () => {
           ],
           program.programId,
         );
+      console.log("apres");
       //
-      setTokenProposalAccountId(tokenProposalAccountId);
-    })();
-  }, [tokenProposalFactoryAccountId]);
-  console.log("accountId", tokenProposalAccountId);
-
-  const connection = new Connection("http://localhost:8899");
-  const wallet = useAnchorWallet();
-
-  //
-  //
-  //
-  //
-  //
-  const getProvider = () => {
-    const provider = new AnchorProvider(connection, wallet, {
-      commitment: "confirmed",
-    });
-    console.log("provider", provider);
-    return provider;
-  };
-  const provider = getProvider();
-
-  const program = new Program(idl, provider);
-
-  //
-  //
-  // Initializing token proposal factory
-  //
-  //
-  useEffect(() => {
-    console.log("top");
-    if (!tokenProposalFactoryAccountId) return;
-    if (!wallet || !wallet.publicKey) return;
-    if (!program.methods) return;
-
-    (async () => {
+      //
+      // Initializing token proposal factory
+      //
+      //
+      const airdropTx = await connection.requestAirdrop(
+        wallet.publicKey,
+        2 * LAMPORTS_PER_SOL,
+      );
       try {
         const tx = await program.methods
           .initializeTokenProposalFactory()
@@ -99,18 +85,18 @@ export const ProposalView = () => {
             systemProgram: SystemProgram.programId,
             tokenProposalFactory: tokenProposalFactoryAccountId,
           })
+          // .signers([wallet])
           .rpc();
         console.log("tx", tx);
       } catch (e) {
+        console.log("init error");
         console.log(e);
       }
 
       // Wait for confirmation.
       // await provider.connection.confirmTransaction(tx);
     })();
-  }, [tokenProposalFactoryAccountId, wallet, program.methods]);
-
-  return;
+  }, [connection, wallet]);
 
   // Generate PDA for the Token Proposal Factory account.
 
@@ -188,4 +174,5 @@ export const ProposalView = () => {
   // };
   //
   // // Additional UI implementation
+  return;
 };
