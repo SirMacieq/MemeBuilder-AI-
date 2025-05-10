@@ -22,6 +22,8 @@ export default function ProfileForm({ user }: { user: User }) {
   const [avatar, setAvatar] = useState<string>(
     user.avatar ?? `avatar${Math.floor(1 + Math.random() * 13)}.jpeg`,
   );
+
+  // preloading all profile image in background
   useEffect(() => {
     Array.from({ length: 13 }).forEach((_, i) => {
       const img = new Image();
@@ -53,7 +55,7 @@ export default function ProfileForm({ user }: { user: User }) {
       <input type="hidden" value={avatar} name="avatar" />
       <Dialog>
         <DialogTrigger asChild>
-          <Button type="button" className="mx-auto">
+          <Button type="button" className="mx-auto" variant="secondary">
             Change Avatar
           </Button>
         </DialogTrigger>
@@ -102,9 +104,6 @@ export default function ProfileForm({ user }: { user: User }) {
             if (e.target.value.length <= maxLength) setBio(e.target.value);
           }}
         />
-        <div className="text-right text-[#909090] mt-2">
-          {bio.length}/{maxLength}
-        </div>
       </label>
 
       <input type="hidden" value={user._id} name="user_id" />

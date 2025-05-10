@@ -40,8 +40,8 @@ export interface FundedToken {
   created_at?: number;
   proposer_wallet: string;
 }
-type FundedTokenCreate = Omit<FundedToken, "_id" | "created_at">;
-type FundedTokenUpdate = Omit<
+export type FundedTokenCreate = Omit<FundedToken, "_id" | "created_at">;
+export type FundedTokenUpdate = Omit<
   FundedToken,
   "_id" | "created_at" | "proposer_wallet"
 >;

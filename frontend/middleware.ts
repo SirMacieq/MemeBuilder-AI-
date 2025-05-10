@@ -34,5 +34,14 @@ export default middleware;
 // Execute the middleware for theses routes matcher
 //
 export const config = {
-  matcher: ["/profile", "/profile/:path*", "/dashboard", "/dashboard/:path*"],
+  matcher: [
+    "/profile",
+    "/profile/:path*",
+    "/dashboard",
+    "/dashboard/:path*",
+    "/proposals",
+    "/proposals/:path*",
+    "/proposal",
+    "/proposal/:path*",
+  ],
 };

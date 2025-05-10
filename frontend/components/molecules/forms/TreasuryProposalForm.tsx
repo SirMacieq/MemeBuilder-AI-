@@ -6,6 +6,7 @@ import {
   createContext,
   useContext,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -35,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import createProposal from "@/lib/actions/proposals/treasury/create";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -57,7 +59,7 @@ const FundedProposalFormSchema = z.object({
   softCap: z.number().nonnegative(),
   hardCap: z.number().nonnegative().nullable(),
   fundingModel: z.object({
-    source: z.string(),
+    source: z.string().min(1),
     basedOnSelectedGoals: z.boolean(),
     tokensCreatedOnApproval: z.boolean(),
   }),
@@ -75,16 +77,15 @@ const FundedProposalFormSchema = z.object({
   }),
   voting: z.object({
     periodDays: z.number().int().positive(),
-    voteUnit: z.string(),
-    quorum: z.string(),
+    voteUnit: z.string().min(1),
+    quorum: z.string().min(1),
     escrowedFunds: z.boolean(),
     autoExecuteOnApproval: z.boolean(),
   }),
-  elegibilityRequilements: z.object({
+  eligibilityRequirements: z.object({
     previousSuccess: z.boolean(),
-    rateLimit: z.string(),
+    rateLimit: z.string().min(1),
   }),
-  proposer_wallet: z.string(),
 });
 const FundedProposalForm = () => {
   const form = useForm<z.infer<typeof FundedProposalFormSchema>>({
@@ -129,11 +130,10 @@ const FundedProposalForm = () => {
         escrowedFunds: false,
         autoExecuteOnApproval: false,
       },
-      elegibilityRequilements: {
+      eligibilityRequirements: {
         previousSuccess: false,
         rateLimit: "",
       },
-      proposer_wallet: "",
     },
   });
   const formStates = [
@@ -165,9 +165,12 @@ const FundedProposalForm = () => {
       element: <SummarySubmit />,
     },
   ];
+  const router = useRouter();
   const onSubmit = (values: z.infer<typeof FundedProposalFormSchema>) => {
-    // TODO:
-    console.log(values);
+    (async () => {
+      await createProposal(values);
+      router.push("/dashboard");
+    })();
   };
   const [formState, setFormState] = useState<number>(0);
   const [api, setApi] = useState<CarouselApi>();
@@ -337,6 +340,8 @@ const CampaignBudgetGoals = () => {
                 placeholder="LP %"
                 {...field}
                 type="number"
+                min="0"
+                max="100"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
@@ -424,13 +429,60 @@ const CampaignBudgetGoals = () => {
             <FormLabel>Hard Cap</FormLabel>
             <FormControl>
               <Input
-                placeholder="Soft Cap"
+                placeholder="Hard Cap"
                 {...field}
                 type="number"
                 value={field.value ?? undefined}
                 onChange={(e) =>
                   field.onChange(e.target.value ? Number(e.target.value) : null)
                 }
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <hr />
+      <h3>Funding Model</h3>
+      <FormField
+        control={form.control}
+        name="fundingModel.source"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Source</FormLabel>
+            <FormControl>
+              <Input placeholder="Source" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="fundingModel.basedOnSelectedGoals"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Based on selected goals</FormLabel>
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="fundingModel.tokensCreatedOnApproval"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Token created on approval</FormLabel>
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
               />
             </FormControl>
             <FormMessage />
@@ -498,7 +550,7 @@ const Tokenomics = () => {
             <FormControl>
               <Input
                 type="number"
-                {...form}
+                {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
@@ -516,8 +568,8 @@ const Tokenomics = () => {
               <Input
                 type="number"
                 min="0"
+                {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}
-                {...form}
               />
             </FormControl>
             <FormMessage />
@@ -552,8 +604,8 @@ const Tokenomics = () => {
               <Input
                 type="number"
                 min="0"
+                {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}
-                {...form}
               />
             </FormControl>
             <FormMessage />
@@ -569,7 +621,7 @@ const NarrativeVisuals = () => {
   // Campaign Slogan / Suggested Tweet
   // Optional Image / Meme Upload
 
-  // TODO:
+  // TODO: add narrative visuals section
   return <div>narrative visuals</div>;
 };
 
@@ -624,11 +676,11 @@ const VotingRules = () => {
             <FormLabel>Quorum</FormLabel>
             <FormControl>
               <Input
-                placeholder="votingDays"
+                placeholder="Quorum"
                 type="number"
                 step={1}
                 {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
+                onChange={(e) => field.onChange(e.target.value)}
                 value={field.value ?? 0}
               />
             </FormControl>
@@ -670,7 +722,7 @@ const VotingRules = () => {
       />
       <FormField
         control={form.control}
-        name="elegibilityRequilements.previousSuccess"
+        name="eligibilityRequirements.previousSuccess"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Previous Success</FormLabel>
@@ -686,7 +738,7 @@ const VotingRules = () => {
       />
       <FormField
         control={form.control}
-        name="elegibilityRequilements.rateLimit"
+        name="eligibilityRequirements.rateLimit"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Rate Limit</FormLabel>
@@ -702,7 +754,7 @@ const VotingRules = () => {
 };
 
 const SummarySubmit = () => {
-  // const form = useFormContext<z.infer<typeof FundedProposalFormSchema>>();
+  const form = useFormContext<z.infer<typeof FundedProposalFormSchema>>();
   const values = useWatch<z.infer<typeof FundedProposalFormSchema>>();
 
   // Preview data
@@ -766,12 +818,17 @@ const SummarySubmit = () => {
         <li>Elegibility Requilements:</li>
         <ul>
           <li>
-            Previous Success: {values.elegibilityRequilements?.previousSuccess}
+            Previous Success: {values.eligibilityRequirements?.previousSuccess}
           </li>
-          <li>Rate Limit: {values.elegibilityRequilements?.rateLimit}</li>
+          <li>Rate Limit: {values.eligibilityRequirements?.rateLimit}</li>
         </ul>
-        <li>Proposer Wallet: {values.proposer_wallet}</li>
       </ul>
+
+      {!form.formState.isValid && form.formState.isSubmitted && (
+        <div className="text-red-800">
+          There is errors in this form. Please review previous steps.
+        </div>
+      )}
     </div>
   );
 };

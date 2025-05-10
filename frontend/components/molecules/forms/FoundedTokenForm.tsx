@@ -5,7 +5,9 @@ import {
   Fragment,
   createContext,
   useContext,
+  useRef,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -39,6 +41,7 @@ import PotusAi from "../potusai/PotusAi";
 import { predictCustom } from "@/lib/api/portusai/potus-ai";
 import { X } from "lucide-react";
 import Image from "next/image";
+import createAction from "@/lib/actions/proposals/funded/create";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -79,7 +82,6 @@ const FoundedTokenFormSchema = z.object({
     voteUnit: z.string(),
     escrowedFunds: z.boolean(),
   }),
-  proposer_wallet: z.string(),
 });
 
 const FoundedTokenForm = () => {
@@ -118,7 +120,6 @@ const FoundedTokenForm = () => {
         voteUnit: undefined,
         escrowedFunds: false,
       },
-      proposer_wallet: undefined,
     },
   });
   const formStates = [
@@ -150,18 +151,23 @@ const FoundedTokenForm = () => {
       element: <SummarySubmit />,
     },
   ];
+  const router = useRouter();
   const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
-    // TODO:
-    console.log(values);
+    (async () => {
+      await createAction(values);
+      router.push("/dashboard");
+    })();
   };
   const [formState, setFormState] = useState<number>(0);
+  const [errorSections, setErrorSections] = useState<string[]>([]);
+  console.log("errorSections", errorSections);
   const [api, setApi] = useState<CarouselApi>();
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { role: string; content: string; refusal?: any }[]
   >([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
-  const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true)
+  const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true);
 
   const [resGpt, setResGpt] = useState<{
     historical: { role: string; content: string; refusal?: any }[];
@@ -233,7 +239,8 @@ const FoundedTokenForm = () => {
                 <BreadcrumbItem
                   className={
                     (id === formState ? "text-[#f5a856]" : "") +
-                    " cursor-pointer"
+                    " cursor-pointer" +
+                    (errorSections.includes(el.key) ? " text-red-500" : "")
                   }
                   onClick={() => {
                     api?.scrollTo(id);
@@ -255,20 +262,38 @@ const FoundedTokenForm = () => {
               <CarouselContent>
                 {formStates.map((formState, i) => (
                   <CarouselItem key={i}>
-                    <Card className="">
+                    <Card className="pt-0">
                       <CardContent className="flex items-center justify-center p-6">
-                        <>{formState.element}</>
+                        <ErrorCatcher
+                          setError={(b) =>
+                            setErrorSections(
+                              b
+                                ? [...errorSections, formState.key]
+                                : [
+                                    ...errorSections.filter(
+                                      (e) => e !== formState.key,
+                                    ),
+                                  ],
+                            )
+                          }
+                          error={errorSections.includes(formState.key)}
+                        >
+                          {formState.element}
+                        </ErrorCatcher>
                       </CardContent>
-                      <CardFooter
-                        className={
-                          "flex  " +
-                          (i === 0 ? "justify-end" : "justify-between")
-                        }
-                      >
+                      <CardFooter className="grid gap-[10px] grid-cols-2 w-full">
                         <>
-                          {i !== 0 && <PrevButton />}
-                          {i !== formStates.length - 1 && <NextButton />}
-                          {i === formStates.length - 1 && <SubmitButton />}
+                          {i !== 0 ? (
+                            <PrevButton className="order-1" />
+                          ) : (
+                            <div></div>
+                          )}
+                          {i !== formStates.length - 1 && (
+                            <NextButton className="order-2" />
+                          )}
+                          {i === formStates.length - 1 && (
+                            <SubmitButton className="order-2" />
+                          )}
                         </>
                       </CardFooter>
                     </Card>
@@ -287,31 +312,34 @@ const FoundedTokenForm = () => {
           onClose={() => setIsChatOpen(false)}
         />
         <div className="fixed bottom-[70px] right-0 p-4">
-          {iaInfoOpen && <><div className="flex justify-end mb-2 mr-4">
+          {iaInfoOpen && (
+            <>
+              <div className="flex justify-end mb-2 mr-4">
+                <button
+                  onClick={() => setAiInfoOpen(false)}
+                  className="text-gray-500 hover:text-red-500 transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <p className="bg-[#0e131f] p-[16px] w-[278px] mb-6 mr-4 rounded-[12px]">
+                Yoo! I’m Potus AI 🤖 Ready to help you create your very own
+                memecoin! 🚀
+              </p>
+            </>
+          )}
+
+          <div className="flex justify-end">
             <button
-              onClick={() => setAiInfoOpen(false)}
-              className="text-gray-500 hover:text-red-500 transition"
+              type="button"
+              className="bg-transparent hover:bg-transparent"
+              onClick={() => setIsChatOpen(true)}
             >
-              <X size={24} />
+              <Image src="/images/potusai.svg" alt="" width={63} height={63} />
             </button>
           </div>
-
-          <p className="bg-[#0e131f] p-[16px] w-[278px] mb-6 mr-4 rounded-[12px]">
-            Yoo! I’m Potus AI 🤖 Ready to help you create your very own memecoin! 🚀
-          </p></>}
-
-  <div className="flex justify-end">
-    <Button
-      type="button"
-      className="bg-transparent hover:bg-transparent"
-      onClick={() => setIsChatOpen(true)}
-    >
-      <Image src="/images/potusai.svg" alt="" width={63} height={63} />
-    </Button>
-  </div>
-</div>
-
-       
+        </div>
       </ProposalFormContext.Provider>
     </div>
   );
@@ -326,12 +354,12 @@ const TokenIdentity = () => {
   // social links
   return (
     <fieldset className="w-full">
+      <h2 className="font-bold text-2xl mb-6">Token Identity</h2>
       <FormField
         control={form.control}
         name="token.name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Token Name</FormLabel>
             <FormControl>
               <Input placeholder="Token Name" {...field} />
             </FormControl>
@@ -344,9 +372,8 @@ const TokenIdentity = () => {
         name="token.symbol"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Token Symbol</FormLabel>
             <FormControl>
-              <Input placeholder="Token Symbol" {...field} />
+              <Input placeholder="Symbol (e.g. $MEME)" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -357,7 +384,6 @@ const TokenIdentity = () => {
         name="token.logoURL"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>logoURL</FormLabel>
             <FormControl>
               <Input placeholder="logoURL" {...field} />
             </FormControl>
@@ -370,9 +396,8 @@ const TokenIdentity = () => {
         name="token.description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea placeholder="Token Description" {...field} />
+              <Textarea placeholder="Short Description..." {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -431,7 +456,15 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>LP %</FormLabel>
               <FormControl>
-                <Input placeholder="LP %" disabled={!watchIsLp} {...field} />
+                <Input
+                  placeholder="LP %"
+                  disabled={!watchIsLp}
+                  {...field}
+                  type="number"
+                  min="0"
+                  max="100"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -466,6 +499,11 @@ const CampaignBudgetGoals = () => {
                   placeholder="Treasury"
                   disabled={!watchIsTreasury}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                  type="number"
+                  min="0"
                 />
               </FormControl>
               <FormMessage />
@@ -497,7 +535,13 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>Kol</FormLabel>
               <FormControl>
-                <Input placeholder="kol" disabled={!watchIsKol} {...field} />
+                <Input
+                  placeholder="kol"
+                  disabled={!watchIsKol}
+                  {...field}
+                  type="number"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -528,19 +572,109 @@ const CampaignBudgetGoals = () => {
             <FormItem>
               <FormLabel>Ai</FormLabel>
               <FormControl>
-                <Input placeholder="ai" disabled={!watchIsAi} {...field} />
+                <Input
+                  placeholder="ai"
+                  disabled={!watchIsAi}
+                  {...field}
+                  type="number"
+                  min="0"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
+      <FormField
+        control={form.control}
+        name="softCap"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Soft Cap</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Soft Cap"
+                {...field}
+                type="number"
+                min="0"
+                value={field.value}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="hardCap"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hard Cap</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Hard Cap"
+                {...field}
+                type="number"
+                min="0"
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "0" ? "dynamic" : Number(e.target.value),
+                  )
+                }
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </fieldset>
+  );
+};
+const ErrorCatcher = ({
+  children,
+  setError,
+  error,
+}: {
+  children: React.ReactNode;
+  setError: (hasError: boolean) => void;
+  error: boolean;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const form = useFormContext();
+  useEffect(() => {
+    const namesList: string[] = [];
+    ref.current?.querySelectorAll("[aria-invalid='true']").forEach((input) => {
+      // @ts-expect-error indeed has name attribute
+      namesList.push(input.name);
+    });
+    // console.log("namelist", namesList);
+    if (error && !(namesList.length > 0)) {
+      setError(false);
+    }
+    if (!error && namesList.length > 0) {
+      setError(true);
+    }
+  }, [form, form.formState.errors, error, setError]);
+
+  return (
+    <div className="w-full" ref={ref}>
+      {children}
+    </div>
   );
 };
 
 const AidropModules = () => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+
+  // TODO:
+  // const thisForm = useRef<HTMLFieldSetElement | null>(null);
+  // console.log(
+  //   "champs invalides",
+  //   thisForm.current?.querySelector("input[aria-invalid]"),
+  // );
+
   // DropScore / GTE toggle
   return (
     <fieldset className="w-full">
@@ -596,7 +730,7 @@ const NarrativeVisuals = () => {
   // Campaign Slogan / Suggested Tweet
   // Optional Image / Meme Upload
 
-  // TODO:
+  // TODO: Add narrative visuals
   return <div>narrative visuals</div>;
 };
 
@@ -709,7 +843,7 @@ const SummarySubmit = () => {
                       {key}:{" "}
                       {typeof values.fundingGoals?.[
                         key as "lp" | "treasury" | "kol" | "ai"
-                      ] === "string" &&
+                      ] === "number" &&
                         values.fundingGoals?.[
                           key as "lp" | "treasury" | "kol" | "ai"
                         ]}
@@ -740,32 +874,41 @@ const SummarySubmit = () => {
     </div>
   );
 };
-const NextButton = () => {
+const NextButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   return (
-    <Button type="button" onClick={() => api.carouselApi?.scrollNext()}>
+    <Button
+      className={className}
+      type="button"
+      onClick={() => api.carouselApi?.scrollNext()}
+    >
       Next
     </Button>
   );
 };
-const PrevButton = () => {
+const PrevButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   const onClick = () => {
     api.carouselApi?.scrollPrev();
   };
   return (
-    <Button type="button" onClick={onClick}>
+    <Button
+      className={className}
+      type="button"
+      variant="secondary"
+      onClick={onClick}
+    >
       Previous
     </Button>
   );
 };
-const SubmitButton = () => {
+const SubmitButton = ({ className }: { className: string }) => {
   const api = useContext(ProposalFormContext);
   if (!api) return null;
   return (
-    <Button type="submit" variant="secondary">
+    <Button className={className} type="submit">
       Submit
     </Button>
   );
