@@ -42,6 +42,7 @@ import { predictCustom } from "@/lib/api/portusai/potus-ai";
 import { X } from "lucide-react";
 import Image from "next/image";
 import createAction from "@/lib/actions/proposals/funded/create";
+import { ProposalView } from "./test";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -154,6 +155,7 @@ const FoundedTokenForm = () => {
   const router = useRouter();
   const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
     (async () => {
+      // TODO: blockchain action here
       await createAction(values);
       router.push("/dashboard");
     })();
@@ -231,6 +233,7 @@ const FoundedTokenForm = () => {
 
   return (
     <div className="w-full pt-[32px]">
+      <ProposalView />
       <ProposalFormContext.Provider value={{ carouselApi: api }}>
         <Breadcrumb className="my-[16px]">
           <BreadcrumbList className="flex flex-row justify-center">
