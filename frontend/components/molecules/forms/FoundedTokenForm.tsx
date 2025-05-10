@@ -5,6 +5,7 @@ import {
   Fragment,
   createContext,
   useContext,
+  useRef,
 } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -158,6 +159,8 @@ const FoundedTokenForm = () => {
     })();
   };
   const [formState, setFormState] = useState<number>(0);
+  const [errorSections, setErrorSections] = useState<string[]>([]);
+  console.log("errorSections", errorSections);
   const [api, setApi] = useState<CarouselApi>();
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
@@ -236,7 +239,8 @@ const FoundedTokenForm = () => {
                 <BreadcrumbItem
                   className={
                     (id === formState ? "text-[#f5a856]" : "") +
-                    " cursor-pointer"
+                    " cursor-pointer" +
+                    (errorSections.includes(el.key) ? " text-red-500" : "")
                   }
                   onClick={() => {
                     api?.scrollTo(id);
@@ -260,7 +264,22 @@ const FoundedTokenForm = () => {
                   <CarouselItem key={i}>
                     <Card className="pt-0">
                       <CardContent className="flex items-center justify-center p-6">
-                        {formState.element}
+                        <ErrorCatcher
+                          setError={(b) =>
+                            setErrorSections(
+                              b
+                                ? [...errorSections, formState.key]
+                                : [
+                                    ...errorSections.filter(
+                                      (e) => e !== formState.key,
+                                    ),
+                                  ],
+                            )
+                          }
+                          error={errorSections.includes(formState.key)}
+                        >
+                          {formState.element}
+                        </ErrorCatcher>
                       </CardContent>
                       <CardFooter className="grid gap-[10px] grid-cols-2 w-full">
                         <>
@@ -577,7 +596,9 @@ const CampaignBudgetGoals = () => {
               <Input
                 placeholder="Soft Cap"
                 {...field}
+                type="number"
                 min="0"
+                value={field.value}
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
@@ -611,9 +632,42 @@ const CampaignBudgetGoals = () => {
     </fieldset>
   );
 };
+const ErrorCatcher = ({
+  children,
+  setError,
+  error,
+}: {
+  children: React.ReactNode;
+  setError: (hasError: boolean) => void;
+  error: boolean;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const form = useFormContext();
+  useEffect(() => {
+    const namesList: string[] = [];
+    ref.current?.querySelectorAll("[aria-invalid='true']").forEach((input) => {
+      // @ts-expect-error indeed has name attribute
+      namesList.push(input.name);
+    });
+    // console.log("namelist", namesList);
+    if (error && !(namesList.length > 0)) {
+      setError(false);
+    }
+    if (!error && namesList.length > 0) {
+      setError(true);
+    }
+  }, [form, form.formState.errors, error, setError]);
+
+  return (
+    <div className="w-full" ref={ref}>
+      {children}
+    </div>
+  );
+};
 
 const AidropModules = () => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+
   // TODO:
   // const thisForm = useRef<HTMLFieldSetElement | null>(null);
   // console.log(
