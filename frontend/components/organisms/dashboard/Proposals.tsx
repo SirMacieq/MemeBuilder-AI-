@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
 import Voters from "@/public/images/voters.png"
+import type { FundedToken } from "@/lib/api/proposals/funded-token";
 
 const fakeProposals = [
   {
-    id: 1,
+    id: "0",
     title: "Proposal 1",
     description: "Description of proposal 1",
     percentage: 60,
@@ -16,7 +17,7 @@ const fakeProposals = [
     status: "Voting",
   },
   {
-    id: 2,
+    id: "1",
     title: "Proposal 2",
     description: "Description of proposal 2",
     percentage: 30,
@@ -25,7 +26,7 @@ const fakeProposals = [
     status: "Passed",
   },
   {
-    id: 3,
+    id: "2",
     title: "Proposal 3",
     description: "Description of proposal 3",
     percentage: 85,
@@ -34,7 +35,7 @@ const fakeProposals = [
     status: "Failed",
   },
   {
-    id: 4,
+    id: "3",
     title: "Proposal 4",
     description: "Description of proposal 4",
     percentage: 50,
@@ -43,7 +44,7 @@ const fakeProposals = [
     status: "Voting",
   },
   {
-    id: 5,
+    id: "4",
     title: "Proposal 5",
     description: "Description of proposal 5",
     percentage: 75,
@@ -52,7 +53,7 @@ const fakeProposals = [
     status: "Passed",
   },
   {
-    id: 6,
+    id: "6",
     title: "Proposal 6",
     description: "Description of proposal 6",
     percentage: 45,
@@ -62,13 +63,31 @@ const fakeProposals = [
   },
 ];
 
-const Proposals = () => {
+const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
   const [filter, setFilter] = useState("All");
+  const reducedProposals: typeof workingfakeProposals = proposals.map(
+    (proposal) => ({
+      id: proposal._id,
+      title: proposal.token.name,
+      description: proposal.token.description,
+      percentage: 22,
+      voters: 800,
+      imgSrc: proposal.token.logoURL,
+      status: "Voting",
+    }),
+  );
 
+  const workingfakeProposals = [
+    ...fakeProposals,
+    ...reducedProposals,
+  ] as typeof fakeProposals;
   const filteredProposals =
     filter === "All"
-      ? fakeProposals
-      : fakeProposals.filter((proposal) => proposal.status === filter);
+      ? workingfakeProposals
+      : workingfakeProposals.filter(
+          (proposal: (typeof workingfakeProposals)[1]) =>
+            proposal.status === filter,
+        );
 
     const generateRandomGradient = () => {
       const colors = [
@@ -179,10 +198,9 @@ const Proposals = () => {
             <Image
                 src={proposal.imgSrc}
                 alt="Avatar voters"
-                width={500}
-                height={500}
-                className="w-full h-auto object-cover rounded-md"
-                layout="responsive"
+                width={300}
+                height={200}
+                className="h-[200px] object-center object-cover rounded-t-md"
               />
             </div>
             <div className="w-full p-[24px]">
