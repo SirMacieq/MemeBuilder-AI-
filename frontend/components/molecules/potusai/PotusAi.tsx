@@ -53,7 +53,7 @@ export default function ChatGPT({
     >
       <div className="flex items-center justify-between px-[8px] pb-[8px]">
         <div className="flex items-center">
-          <Image src="/images/potusai.svg" alt="" width={30} height={30} />
+          <Image src="/images/potusai.jpeg" alt="" className="rounded-[222px]" width={35} height={35} />
           <h3 className="text-[24px] font-semibold ml-4">POTUS AI</h3>
         </div>
         
