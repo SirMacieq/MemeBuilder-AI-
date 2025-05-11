@@ -8,6 +8,7 @@ import {
   useRef,
 } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Carousel,
   CarouselContent,
@@ -41,8 +42,15 @@ import PotusAi from "../potusai/PotusAi";
 import { predictCustom } from "@/lib/api/portusai/potus-ai";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { createTokenProposal } from "@/lib/net-api/chain"
-import { useAnchorWallet } from "@solana/wallet-adapter-react"
+import { createTokenProposal } from "@/lib/net-api/chain";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -92,10 +100,10 @@ const FoundedTokenForm = () => {
     resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
       token: {
-        name: undefined,
-        symbol: undefined,
-        description: undefined,
-        logoURL: undefined,
+        name: "",
+        symbol: "",
+        description: "",
+        logoURL: "",
       },
       selectedGoals: {
         lp: false,
@@ -109,7 +117,7 @@ const FoundedTokenForm = () => {
         kol: 0,
         ai: 0,
       },
-      softCap: undefined,
+      softCap: 0,
       hardCap: "dynamic",
       fundingModel: {
         dynamicUnlock: false,
@@ -119,8 +127,8 @@ const FoundedTokenForm = () => {
         dropScore: false,
       },
       voting: {
-        periodDays: undefined,
-        voteUnit: undefined,
+        periodDays: 0,
+        voteUnit: "",
         escrowedFunds: false,
       },
     },
@@ -155,49 +163,50 @@ const FoundedTokenForm = () => {
     },
   ];
   const router = useRouter();
-  const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
-    if(!wallet){
-      alert("Please connect your wallet to submit a proposal")
+  const onSubmit = async (values: z.infer<typeof FoundedTokenFormSchema>) => {
+    if (!wallet) {
+      alert("Please connect your wallet to submit a proposal");
       return;
     }
-    (async () => {
-      // TODO: blockchain action here
-      await createTokenProposal(wallet,{
-        token: {
-          name: values.token.name,
-          symbol: values.token.symbol,
-          description: values.token.description,
-          logoURL: values.token.logoURL,
-        },
-        selectedGoals: values.selectedGoals,
-        fundingGoals: values.fundingGoals,
-        softCap: 0,
-        hardCap: 0,
-        fundingModel: values.fundingModel,
-        airdropModules: {
-          dropScore: values.airdropModules?.dropScore ?? false,
-        },
-        voting: {
-          periodDays: values.voting.periodDays,
-          voteUnit: values.voting.voteUnit,
-          escrowedFund: values.voting.escrowedFunds,
-        },
-      })
+    setDialogMessage("Connecting to the blockchain...");
+    const tx = await createTokenProposal(wallet, {
+      token: {
+        name: values.token.name,
+        symbol: values.token.symbol,
+        description: values.token.description,
+        //@ts-expect-error error expected due to mismatching typo between chain and backend
+        logoUrl: values.token.logoURL, //
+      },
+      selectedGoals: values.selectedGoals,
+      fundingGoals: values.fundingGoals,
+      softCap: 0,
+      hardCap: 0,
+      fundingModel: values.fundingModel,
+      airdropModules: {
+        dropScore: values.airdropModules?.dropScore ?? false,
+      },
+      voting: {
+        periodDays: values.voting.periodDays,
+        voteUnit: values.voting.voteUnit,
+        escrowedFund: values.voting.escrowedFunds,
+      },
+    });
+    setCreatedProposalHash(tx);
+    setDialogMessage("Proposal submitted successfully!");
 
-      // await createAction(values);
-      router.push("/dashboard");
-    })();
+    // await createAction(values);
   };
   const [formState, setFormState] = useState<number>(0);
   const [errorSections, setErrorSections] = useState<string[]>([]);
-  console.log("errorSections", errorSections);
   const [api, setApi] = useState<CarouselApi>();
+  const [dialogMessage, setDialogMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { role: string; content: string; refusal?: any }[]
   >([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true);
+  const [createdProposalHash, setCreatedProposalHash] = useState<string>("");
 
   const [resGpt, setResGpt] = useState<{
     historical: { role: string; content: string; refusal?: any }[];
@@ -209,7 +218,10 @@ const FoundedTokenForm = () => {
     if (!resGpt?.structure) return;
 
     Object.entries(resGpt.structure).forEach(([key, value]) => {
-      form.setValue(key as any, value);
+      form.setValue(key as any, value, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
     });
     setIsChatOpen(false);
   };
@@ -261,6 +273,35 @@ const FoundedTokenForm = () => {
 
   return (
     <div className="w-full pt-[32px]">
+      <Dialog open={form.formState.isSubmitting || true}>
+        <DialogTrigger />
+        <DialogContent>
+          <DialogTitle>We're cooking it...</DialogTitle>
+          <DialogDescription className="text-wrap wrap-anywhere">
+            You should see your wallet asking you to validate transaction to
+            create the proposal
+            <div>Status: {dialogMessage}</div>
+            {createdProposalHash && (
+              <>
+                <br />
+                Proposal hash: {createdProposalHash}
+                <br />
+                <Link
+                  href={`https://explorer.solana.com/tx/${createdProposalHash}`}
+                  target="_blank"
+                  className="text-[#f5a856]"
+                >
+                  View on Solana explorer
+                </Link>
+                <br />
+                <Link href="/dashboard" className="text-[#f5a856]">
+                  Go to dashboard
+                </Link>
+              </>
+            )}
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
       <ProposalFormContext.Provider value={{ carouselApi: api }}>
         <Breadcrumb className="my-[16px]">
           <BreadcrumbList className="flex flex-row justify-center">
@@ -366,7 +407,13 @@ const FoundedTokenForm = () => {
               className="bg-transparent hover:bg-transparent"
               onClick={() => setIsChatOpen(true)}
             >
-              <Image src="/images/potusai.jpeg" alt="" className="rounded-[222px]" width={63} height={63} />
+              <Image
+                src="/images/potusai.jpeg"
+                alt=""
+                className="rounded-[222px]"
+                width={63}
+                height={63}
+              />
             </button>
           </div>
         </div>
@@ -491,8 +538,8 @@ const CampaignBudgetGoals = () => {
                   disabled={!watchIsLp}
                   {...field}
                   type="number"
-                  min="0"
-                  max="100"
+                  // min="0"
+                  // max="100"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
@@ -533,7 +580,7 @@ const CampaignBudgetGoals = () => {
                     field.onChange(Number(e.target.value));
                   }}
                   type="number"
-                  min="0"
+                  // min="0"
                 />
               </FormControl>
               <FormMessage />
@@ -607,7 +654,7 @@ const CampaignBudgetGoals = () => {
                   disabled={!watchIsAi}
                   {...field}
                   type="number"
-                  min="0"
+                  // min="0"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
@@ -647,7 +694,7 @@ const CampaignBudgetGoals = () => {
                 placeholder="Hard Cap"
                 {...field}
                 type="number"
-                min="0"
+                // min="0"
                 onChange={(e) =>
                   field.onChange(
                     e.target.value === "0" ? "dynamic" : Number(e.target.value),

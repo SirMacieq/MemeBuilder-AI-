@@ -62,7 +62,7 @@ const getTokenProposalPDA = async (
     tokenProposalFactoryAccountId,
   );
 
-  const newCount = parseInt(tokenProposalFactory.tokenProposalCount)
+  const newCount = parseInt(tokenProposalFactory.tokenProposalCount);
 
   const [tokenProposalAccountId, tokenProposalBump] =
     // console.log("bn",new BN(0))
@@ -70,9 +70,8 @@ const getTokenProposalPDA = async (
       [
         anchor.utils.bytes.utf8.encode("token_proposal"),
         tokenProposalFactoryAccountId.toBytes(),
-        new anchor.BN(newCount).toArrayLike(Buffer,'le',4),
+        new anchor.BN(newCount).toArrayLike(Buffer, "le", 4),
         wallet.publicKey.toBytes(),
-
       ],
       program.programId,
     );
@@ -96,7 +95,7 @@ export const initializeTokenFactory = async (wallet: AnchorWallet) => {
       })
       // .signers([wallet])
       .rpc();
-    console.log(tx)
+    console.log(tx);
     return tx;
   } catch (e) {
     console.log("init error");
@@ -178,18 +177,20 @@ export const getAllTokenProposals = async (wallet: AnchorWallet) => {
   const tokenProposalFactory = await program.account.tokenProposalFactory.fetch(
     tokenProposalFactoryAccountId,
   );
-  console.log("tokenProposalFactory",tokenProposalFactory)
+  console.log("tokenProposalFactory", tokenProposalFactory);
 
   const tokenProposals = await Promise.all(
-    tokenProposalFactory.tokenProposalIds.map(async (proposalId:typeof PublicKey) => {
-      const tokenProposalAccount = await program.account.tokenProposal
-        .fetch(proposalId);
-      return tokenProposalAccount
-    })
-  )
-  console.log("tokenProposals",tokenProposals)
-  return tokenProposals
-}
+    tokenProposalFactory.tokenProposalIds.map(
+      async (proposalId: typeof PublicKey) => {
+        const tokenProposalAccount =
+          await program.account.tokenProposal.fetch(proposalId);
+        return tokenProposalAccount;
+      },
+    ),
+  );
+  console.log("tokenProposals", tokenProposals);
+  return tokenProposals;
+};
 
 /**
  * Get All
