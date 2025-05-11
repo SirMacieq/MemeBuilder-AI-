@@ -22,6 +22,10 @@ const ChainTesting = () => {
       <Button type="button" onClick={() => api.createUser(wallet)}>
         Create user
       </Button>
+      <Button type="button" onClick={() => api.getAllTokenProposals(wallet)}>
+        getAllTokenProposals
+      </Button>
+
     </div>
   );
 };

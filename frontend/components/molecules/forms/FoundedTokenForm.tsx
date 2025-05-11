@@ -41,7 +41,8 @@ import PotusAi from "../potusai/PotusAi";
 import { predictCustom } from "@/lib/api/portusai/potus-ai";
 import { X } from "lucide-react";
 import Image from "next/image";
-import createAction from "@/lib/actions/proposals/funded/create";
+import { createTokenProposal } from "@/lib/net-api/chain"
+import { useAnchorWallet } from "@solana/wallet-adapter-react"
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -52,7 +53,7 @@ const FoundedTokenFormSchema = z.object({
     name: z.string(),
     symbol: z.string(),
     description: z.string(),
-    logoURL: z.string().url({ message: "Must be a valid URL" }),
+    logoURL: z.string(),
   }),
   selectedGoals: z.object({
     lp: z.boolean(),
@@ -85,6 +86,8 @@ const FoundedTokenFormSchema = z.object({
 });
 
 const FoundedTokenForm = () => {
+  const wallet = useAnchorWallet();
+
   const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
     resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
@@ -153,9 +156,35 @@ const FoundedTokenForm = () => {
   ];
   const router = useRouter();
   const onSubmit = (values: z.infer<typeof FoundedTokenFormSchema>) => {
+    if(!wallet){
+      alert("Please connect your wallet to submit a proposal")
+      return;
+    }
     (async () => {
       // TODO: blockchain action here
-      await createAction(values);
+      await createTokenProposal(wallet,{
+        token: {
+          name: values.token.name,
+          symbol: values.token.symbol,
+          description: values.token.description,
+          logoURL: values.token.logoURL,
+        },
+        selectedGoals: values.selectedGoals,
+        fundingGoals: values.fundingGoals,
+        softCap: 0,
+        hardCap: 0,
+        fundingModel: values.fundingModel,
+        airdropModules: {
+          dropScore: values.airdropModules?.dropScore ?? false,
+        },
+        voting: {
+          periodDays: values.voting.periodDays,
+          voteUnit: values.voting.voteUnit,
+          escrowedFund: values.voting.escrowedFunds,
+        },
+      })
+
+      // await createAction(values);
       router.push("/dashboard");
     })();
   };

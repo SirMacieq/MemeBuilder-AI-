@@ -1,10 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Image from "next/image";
 import Voters from "@/public/images/voters.png"
 import type { FundedToken } from "@/lib/api/proposals/funded-token";
+import { getAllTokenProposals } from "@/lib/net-api/chain";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 const fakeProposals = [
   {
@@ -63,8 +65,31 @@ const fakeProposals = [
   },
 ];
 
-const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
+const Proposals = ({proposals}:{ proposals:FundedToken[] }) => {
+  const wallet  = useAnchorWallet();
   const [filter, setFilter] = useState("All");
+  const [ onChainProposals, setOnChainProposals ] = useState<any[]>([]);
+
+  useEffect(()=>{
+    if(!wallet) return;
+    (async ()=>{
+      const res = await getAllTokenProposals(wallet)
+      setOnChainProposals(res)
+      console.log("res",res)
+    })()
+  },[wallet])
+
+  console.log(onChainProposals)
+  const reducedOnChainProposals: typeof workingfakeProposals = onChainProposals.map((proposal,i) => ({
+    id:"chain"+i,
+    title: proposal.token.name,
+    description: proposal.token.description,
+    percentage: 22,
+    voters: proposal.amountContributed.toNumber() + parseInt(Math.random() * 100),
+    imgSrc: proposal.token.logoUrl,
+    status: "Voting",
+
+  }))
   const reducedProposals: typeof workingfakeProposals = proposals.map(
     (proposal) => ({
       id: proposal._id,
@@ -78,8 +103,9 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
   );
 
   const workingfakeProposals = [
-    ...fakeProposals,
+    // ...fakeProposals,
     ...reducedProposals,
+    ...reducedOnChainProposals,
   ] as typeof fakeProposals;
   const filteredProposals =
     filter === "All"
@@ -190,17 +216,18 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
             className="bg-[#151925] rounded-[12px] shadow-lg flex flex-col items-start"
           >
             <div
-            className="w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none"
+            className="relative w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none"
             style={{
               background: generateRandomGradient(),
             }}
+            suppressHydrationWarning
             >
             <Image
-                src={proposal.imgSrc}
+                src={proposal.imgSrc??"/images/memes/meme-1.svg"}
                 alt="Avatar voters"
                 width={300}
                 height={200}
-                className="h-[200px] object-center object-cover rounded-t-md"
+                className="h-[200px] w-full object-center object-cover rounded-t-md"
               />
             </div>
             <div className="w-full p-[24px]">

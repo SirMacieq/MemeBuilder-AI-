@@ -1,7 +1,7 @@
 export const dummyFundedToken = {
   token: {
     name: "Test Token",
-    symbol: "TST",
+    symbol: "waaaaah",
     description: "Test Description",
     logoURL: "https://test.com/logo.png",
   },

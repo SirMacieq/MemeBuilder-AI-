@@ -2,15 +2,18 @@
 import Image from "next/image";
 import { Rocket, Clipboard, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import { fundedTokenGetOne } from "@/lib/api/proposals/funded-token";
+
+
 const Detail = ({ id }: { id: string | string[] | undefined }) => {
-  const proposal = {
-    id: 1,
+  const defaultProposal = {
+    id: "1",
     title: "Proposal 1",
     description: "Description of proposal 1",
     percentage: 60,
     voters: 1200,
-    imgSrc: "images/memes/meme.svg",
+    imgSrc: "/images/memes/meme-1.svg",
     status: "Voting",
     tokenomics: {
         Team: 15,
@@ -20,6 +23,31 @@ const Detail = ({ id }: { id: string | string[] | undefined }) => {
     },
     narrative: "$DOGE99 is a community-first memecoin project on Solana with a humorous twist and real DeFi utility. Backed by a strong team and fair distribution."
   };
+  const [ proposal,setProposal ] = useState(defaultProposal);
+  useEffect(()=>{
+    (async ()=>{
+      const res = await fundedTokenGetOne(id as string);
+      const data = res.content.fundedToken
+      setProposal({
+        id:data._id,
+        title:data.token.name,
+        description:data.token.description,
+        percentage:20,
+        voters: 1200,
+        imgSrc: data.token.logoURL,
+        status: "Voting",
+        tokenomics: {
+            Team: 15,
+            Community: 50,
+            Investores: 20,
+            Reserve: 15
+        },
+        narrative: "$DOGE99 is a community-first memecoin project on Solana with a humorous twist and real DeFi utility. Backed by a strong team and fair distribution."
+      });
+      
+    })()
+
+  },[id])
 
   const content = `**$DOGE99 Presale is Live!**
 
@@ -54,7 +82,7 @@ Vote now & join the future of $DOGE99! 🐶🚀`;
 
 <div className="w-full md:w-[49%] relative rounded-[12px] overflow-hidden bg-[#0e131f]">
       <Image
-        src="/images/memes/meme-1.svg"
+        src={proposal.imgSrc}
         alt="Meme"
         width={800}
         height={0}
@@ -153,7 +181,7 @@ Vote now & join the future of $DOGE99! 🐶🚀`;
         </article>
         <article className="mb-[24px]">
           <h2 className="text-[16px] font-semibold mb-[16px]">Suggested Tweet</h2>
-          <p className="p-[16px] rounded-[12px] bg-[#151925] text-white/70">"Just voted for $DOGE99 🐶💥 65% raised and counting. Let’s get this to 100%! Presale ends in 3 hours. Stake and vote now — no rug, just doge. #Solana #crypto"</p>
+          <p className="p-[16px] rounded-[12px] bg-[#151925] text-white/70">Just voted for $DOGE99 🐶💥 65% raised and counting. Let’s get this to 100%! Presale ends in 3 hours. Stake and vote now — no rug, just doge. #Solana #crypto</p>
         </article>
         <article>
           <h2 className="text-[16px] font-semibold mb-[16px]">Markdown / Copy</h2>

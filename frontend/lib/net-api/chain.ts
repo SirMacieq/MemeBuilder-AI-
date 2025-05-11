@@ -3,6 +3,7 @@ import { Connection } from "@solana/web3.js";
 import idl from "@/idl.json";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
+import { BN } from "@coral-xyz/anchor";
 import { dummyFundedToken } from "./testing/testingData";
 
 type FundedTokenCreate = typeof dummyFundedToken;
@@ -57,12 +58,21 @@ const getTokenProposalPDA = async (
 ) => {
   const program = getProgram(wallet);
 
+  const tokenProposalFactory = await program.account.tokenProposalFactory.fetch(
+    tokenProposalFactoryAccountId,
+  );
+
+  const newCount = parseInt(tokenProposalFactory.tokenProposalCount)
+
   const [tokenProposalAccountId, tokenProposalBump] =
+    // console.log("bn",new BN(0))
     await PublicKey.findProgramAddress(
       [
         anchor.utils.bytes.utf8.encode("token_proposal"),
         tokenProposalFactoryAccountId.toBytes(),
+        new anchor.BN(newCount).toArrayLike(Buffer,'le',4),
         wallet.publicKey.toBytes(),
+
       ],
       program.programId,
     );
@@ -86,6 +96,7 @@ export const initializeTokenFactory = async (wallet: AnchorWallet) => {
       })
       // .signers([wallet])
       .rpc();
+    console.log(tx)
     return tx;
   } catch (e) {
     console.log("init error");
@@ -156,3 +167,30 @@ export const createUser = async (wallet: AnchorWallet) => {
     .rpc();
   return tx;
 };
+
+/**
+ * Get all token proposals
+ */
+export const getAllTokenProposals = async (wallet: AnchorWallet) => {
+  const program = getProgram(wallet);
+  const tokenProposalFactoryAccountId = await getProposalFactoryPDA(wallet);
+
+  const tokenProposalFactory = await program.account.tokenProposalFactory.fetch(
+    tokenProposalFactoryAccountId,
+  );
+  console.log("tokenProposalFactory",tokenProposalFactory)
+
+  const tokenProposals = await Promise.all(
+    tokenProposalFactory.tokenProposalIds.map(async (proposalId:typeof PublicKey) => {
+      const tokenProposalAccount = await program.account.tokenProposal
+        .fetch(proposalId);
+      return tokenProposalAccount
+    })
+  )
+  console.log("tokenProposals",tokenProposals)
+  return tokenProposals
+}
+
+/**
+ * Get All
+ */
