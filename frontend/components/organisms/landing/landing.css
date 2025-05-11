@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Climate+Crisis&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+
+.dm-mono-light {
+    font-family: "DM Mono", monospace;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .dm-mono-regular {
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .dm-mono-medium {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-style: normal;
+  }
+  
+  .dm-mono-light-italic {
+    font-family: "DM Mono", monospace;
+    font-weight: 300;
+    font-style: italic;
+  }
+  
+  .dm-mono-regular-italic {
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .dm-mono-medium-italic {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-style: italic;
+  }
+  
+.climate-crisis-regular {
+    font-family: "Climate Crisis", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings:
+      "YEAR" 1979;
+  }
+
+.description {
+    background-image: url("../../../public/images/usm.svg");
+    background-size: cover;
+    background-position: center;
+}

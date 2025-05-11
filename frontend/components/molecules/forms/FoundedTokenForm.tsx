@@ -366,7 +366,7 @@ const FoundedTokenForm = () => {
               className="bg-transparent hover:bg-transparent"
               onClick={() => setIsChatOpen(true)}
             >
-              <Image src="/images/potusai.svg" alt="" width={63} height={63} />
+              <Image src="/images/potusai.jpeg" alt="" className="rounded-[222px]" width={63} height={63} />
             </button>
           </div>
         </div>
