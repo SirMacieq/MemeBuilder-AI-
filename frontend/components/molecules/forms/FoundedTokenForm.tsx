@@ -282,14 +282,15 @@ const FoundedTokenForm = () => {
           <DialogDescription className="text-wrap wrap-anywhere">
             You should see your wallet asking you to validate transaction to
             create the proposal
-            <div>Status: {dialogMessage}</div>
+            <span>Status: {dialogMessage}</span>
+            <br />
             {createdProposalHash && (
               <>
                 <br />
                 Proposal hash: {createdProposalHash}
                 <br />
                 <Link
-                  href={`https://explorer.solana.com/tx/${createdProposalHash}`}
+                  href={`https://explorer.solana.com/tx/${createdProposalHash}?cluster=devnet`}
                   target="_blank"
                   className="text-[#f5a856]"
                 >
