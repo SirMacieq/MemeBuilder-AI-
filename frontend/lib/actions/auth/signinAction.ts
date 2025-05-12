@@ -11,6 +11,7 @@ import { encode } from "../../utils/authUtils/jwtUtils";
 import { userSignin } from "@/lib/api/user/user";
 import setTokenCookie from "@/lib/api/setTokenCookie";
 import { revalidatePath } from "next/cache";
+import getCurrentUserData from "../user/getCurrentUserData";
 
 /**
  *
@@ -25,6 +26,7 @@ const signinAction = async (
   signedMessage: string,
   message: string,
 ): Promise<Response> => {
+  let user = null;
   try {
     const cookieStore = await cookies();
     const isDev = process.env.NODE_ENV === "development";
@@ -75,6 +77,9 @@ const signinAction = async (
     //
     // finally returning Ok response
     //
+    try {
+      user = await getCurrentUserData();
+    } catch {}
   } catch {
     return {
       type: ErrorType.InternalError,
@@ -82,6 +87,10 @@ const signinAction = async (
     };
   }
   revalidatePath("/");
-  redirect("/profile");
+  if (user?.nickname) {
+    redirect("/dashboard");
+  } else {
+    redirect("/profile");
+  }
 };
 export default signinAction;

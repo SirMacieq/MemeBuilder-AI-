@@ -19,7 +19,7 @@ const middleware = async (req: NextRequest) => {
   //
   //handling /login when isLogged
   if (isLoggedBool && path === "/login") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   if (path === "/dashboard" && !user?.nickname) {
@@ -35,6 +35,7 @@ export default middleware;
 //
 export const config = {
   matcher: [
+    "/login",
     "/profile",
     "/profile/:path*",
     "/dashboard",
