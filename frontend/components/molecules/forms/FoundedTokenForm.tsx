@@ -168,6 +168,7 @@ const FoundedTokenForm = () => {
       alert("Please connect your wallet to submit a proposal");
       return;
     }
+    setIsDialogOpen(true);
     setDialogMessage("Connecting to the blockchain...");
     const tx = await createTokenProposal(wallet, {
       token: {
@@ -207,6 +208,7 @@ const FoundedTokenForm = () => {
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [iaInfoOpen, setAiInfoOpen] = useState<boolean>(true);
   const [createdProposalHash, setCreatedProposalHash] = useState<string>("");
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
   const [resGpt, setResGpt] = useState<{
     historical: { role: string; content: string; refusal?: any }[];
@@ -273,7 +275,7 @@ const FoundedTokenForm = () => {
 
   return (
     <div className="w-full pt-[32px]">
-      <Dialog open={form.formState.isSubmitting || true}>
+      <Dialog open={isDialogOpen}>
         <DialogTrigger />
         <DialogContent>
           <DialogTitle>We're cooking it...</DialogTitle>
