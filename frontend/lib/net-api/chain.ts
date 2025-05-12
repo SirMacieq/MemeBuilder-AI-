@@ -177,21 +177,78 @@ export const getAllTokenProposals = async (wallet: AnchorWallet) => {
   const tokenProposalFactory = await program.account.tokenProposalFactory.fetch(
     tokenProposalFactoryAccountId,
   );
-  console.log("tokenProposalFactory", tokenProposalFactory);
 
   const tokenProposals = await Promise.all(
     tokenProposalFactory.tokenProposalIds.map(
       async (proposalId: typeof PublicKey) => {
         const tokenProposalAccount =
           await program.account.tokenProposal.fetch(proposalId);
-        return tokenProposalAccount;
+        return { ...tokenProposalAccount, id: proposalId.toBase58() };
       },
     ),
   );
-  console.log("tokenProposals", tokenProposals);
   return tokenProposals;
 };
 
 /**
- * Get All
+ * Get One token proposal
+ *
  */
+export const getOneTokenProposals = async (
+  wallet: AnchorWallet,
+  proposalIdString: string,
+) => {
+  const proposalId = new anchor.web3.PublicKey(proposalIdString);
+  const program = getProgram(wallet);
+
+  const tokenProposalAccount =
+    await program.account.tokenProposal.fetch(proposalId);
+
+  return {
+    ...tokenProposalAccount,
+    id: proposalId.toBase58(),
+  } as OnChainProposal;
+};
+
+export type OnChainProposal = {
+  token: {
+    name: string;
+    symbol: string;
+    description: string;
+    logoUrl: string;
+  };
+  selectedGoals: {
+    lp: boolean;
+    treasury: boolean;
+    kol: boolean;
+    ai: boolean;
+  };
+  fundingGoals: {
+    lp: number;
+    treasury: number;
+    kol: number;
+    ai: number;
+  };
+  softCap: number;
+  hardCap: number;
+  fundingModel: {
+    dynamicUnlock: boolean;
+    endsEarlyOnHardCap: boolean;
+  };
+  airdropModules: {
+    dropScore: boolean;
+  };
+  voting: {
+    periodDays: number;
+    voteUnit: string;
+    escrowedFund: boolean;
+  };
+  amountContributed: anchor.BN;
+  contributionCount: number;
+  readyToBeFinalized: boolean;
+  finalized: boolean;
+  completed: boolean;
+  owner: anchor.web3.PublicKey;
+  /** proposal pubkey in base58 */
+  id: string;
+};
