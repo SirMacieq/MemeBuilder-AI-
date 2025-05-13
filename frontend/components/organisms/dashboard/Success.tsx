@@ -28,7 +28,7 @@ const Success = () => {
           alt="Logo"
           width={16}
           height={16}
-          className="mx-2"
+          className="h-auto w-auto mx-2"
         />
         <span className="text-[#49DE80]">
           {fakeSuccess.treasuryTokenBalance} SOL

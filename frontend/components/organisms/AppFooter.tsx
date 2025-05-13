@@ -15,16 +15,41 @@ const AppFooter = () => {
 
       <div className="flex gap-4 items-center mt-4 md:mt-0">
         <a href="https://x.com" target="_blank" rel="noopener noreferrer">
-          <Image src="/images/twitter.svg" alt="Twitter" width={20} height={20} />
+          <Image
+            src="/images/twitter.svg"
+            alt="Twitter"
+            width={20}
+            height={20}
+          />
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-          <Image src="/images/insta.svg" alt="Instagram" width={20} height={20} />
+        <a
+          href="https://instagram.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            src="/images/insta.svg"
+            alt="Instagram"
+            width={20}
+            height={20}
+          />
         </a>
         <a href="https://threads.com" target="_blank" rel="noopener noreferrer">
-          <Image src="/images/threads.svg" alt="Threads" width={20} height={20} />
+          <Image
+            src="/images/threads.svg"
+            alt="Threads"
+            width={20}
+            height={20}
+          />
         </a>
         <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
-          <Image src="/images/discord.svg" alt="Discord" width={20} height={20} />
+          <Image
+            src="/images/discord.svg"
+            className="h-auto w-auto"
+            alt="Discord"
+            width={20}
+            height={20}
+          />
         </a>
       </div>
     </footer>

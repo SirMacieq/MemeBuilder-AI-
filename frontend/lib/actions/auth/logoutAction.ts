@@ -1,7 +1,6 @@
 "use server";
 import "server-only";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -22,7 +21,6 @@ const logoutAction = async () => {
   cookieStore.delete("api-token");
 
   revalidatePath("/");
-  redirect("/");
 };
 
 export default logoutAction;

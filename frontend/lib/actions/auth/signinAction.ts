@@ -70,7 +70,7 @@ const signinAction = async (
       httpOnly: true,
       secure: isDev ? undefined : true,
       expires: exp,
-      sameSite: isDev ? undefined : "strict",
+      sameSite: isDev ? "lax" : "strict",
       path: "/",
     });
 
@@ -87,10 +87,11 @@ const signinAction = async (
     };
   }
   revalidatePath("/");
-  if (user?.nickname) {
-    redirect("/dashboard");
-  } else {
+  if (!user?.nickname) {
     redirect("/profile");
   }
+  return {
+    status: ResponseStatus.Ok,
+  };
 };
 export default signinAction;

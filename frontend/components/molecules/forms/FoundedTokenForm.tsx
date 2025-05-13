@@ -6,8 +6,8 @@ import {
   createContext,
   useContext,
   useRef,
+  useMemo,
 } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Carousel,
@@ -51,6 +51,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -93,9 +94,11 @@ const FoundedTokenFormSchema = z.object({
   }),
 });
 
+/**
+ * Founded token form
+ */
 const FoundedTokenForm = () => {
   const wallet = useAnchorWallet();
-
   const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
     resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
@@ -162,7 +165,10 @@ const FoundedTokenForm = () => {
       element: <SummarySubmit />,
     },
   ];
-  const router = useRouter();
+
+  /**
+   * Submit action
+   */
   const onSubmit = async (values: z.infer<typeof FoundedTokenFormSchema>) => {
     if (!wallet) {
       alert("Please connect your wallet to submit a proposal");
@@ -180,8 +186,8 @@ const FoundedTokenForm = () => {
       },
       selectedGoals: values.selectedGoals,
       fundingGoals: values.fundingGoals,
-      softCap: 0,
-      hardCap: 0,
+      softCap: values.softCap,
+      hardCap: values.hardCap === "dynamic" ? 0 : values.hardCap,
       fundingModel: values.fundingModel,
       airdropModules: {
         dropScore: values.airdropModules?.dropScore ?? false,
@@ -197,6 +203,10 @@ const FoundedTokenForm = () => {
 
     // await createAction(values);
   };
+
+  /**
+   * States
+   */
   const [formState, setFormState] = useState<number>(0);
   const [errorSections, setErrorSections] = useState<string[]>([]);
   const [api, setApi] = useState<CarouselApi>();
@@ -216,6 +226,11 @@ const FoundedTokenForm = () => {
     structure: typeof FoundedTokenFormSchema;
   } | null>(null);
 
+  const solanaCluster = useMemo(getSolanaCluster, []);
+
+  /**
+   * Action Handlers
+   */
   const updateFormObject = () => {
     if (!resGpt?.structure) return;
 
@@ -278,7 +293,7 @@ const FoundedTokenForm = () => {
       <Dialog open={isDialogOpen}>
         <DialogTrigger />
         <DialogContent>
-          <DialogTitle>We're cooking it...</DialogTitle>
+          <DialogTitle>We&apos;re cooking it...</DialogTitle>
           <DialogDescription className="text-wrap wrap-anywhere">
             You should see your wallet asking you to validate transaction to
             create the proposal
@@ -290,7 +305,7 @@ const FoundedTokenForm = () => {
                 Proposal hash: {createdProposalHash}
                 <br />
                 <Link
-                  href={`https://explorer.solana.com/tx/${createdProposalHash}?cluster=devnet`}
+                  href={`https://explorer.solana.com/tx/${createdProposalHash}${solanaCluster === "devnet" ? "?cluster=devnet" : ""}`}
                   target="_blank"
                   className="text-[#f5a856]"
                 >

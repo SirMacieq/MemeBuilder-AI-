@@ -3,69 +3,19 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Voters from "@/public/images/voters.png";
-import type { FundedToken } from "@/lib/api/proposals/funded-token";
 import { getAllTokenProposals } from "@/lib/net-api/chain";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-const fakeProposals = [
-  {
-    id: "0",
-    title: "Proposal 1",
-    description: "Description of proposal 1",
-    percentage: 60,
-    voters: 1200,
-    imgSrc: "images/memes/meme.svg",
-    status: "Voting",
-  },
-  {
-    id: "1",
-    title: "Proposal 2",
-    description: "Description of proposal 2",
-    percentage: 30,
-    voters: 800,
-    imgSrc: "images/memes/meme-1.svg",
-    status: "Passed",
-  },
-  {
-    id: "2",
-    title: "Proposal 3",
-    description: "Description of proposal 3",
-    percentage: 85,
-    voters: 1400,
-    imgSrc: "images/memes/meme-2.svg",
-    status: "Failed",
-  },
-  {
-    id: "3",
-    title: "Proposal 4",
-    description: "Description of proposal 4",
-    percentage: 50,
-    voters: 1000,
-    imgSrc: "images/memes/meme-3.svg",
-    status: "Voting",
-  },
-  {
-    id: "4",
-    title: "Proposal 5",
-    description: "Description of proposal 5",
-    percentage: 75,
-    voters: 1300,
-    imgSrc: "images/memes/meme-4.svg",
-    status: "Passed",
-  },
-  {
-    id: "6",
-    title: "Proposal 6",
-    description: "Description of proposal 6",
-    percentage: 45,
-    voters: 950,
-    imgSrc: "images/memes/meme-5.svg",
-    status: "Failed",
-  },
-];
-
-const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
+type RefinedProposal = {
+  id: string;
+  title: string;
+  description: string;
+  percentage: number;
+  voters: number;
+  imgSrc: string;
+  status: string | "Voting" | "Passed" | "Failed";
+};
+const Proposals = () => {
   const wallet = useAnchorWallet();
   const [filter, setFilter] = useState("All");
   const [onChainProposals, setOnChainProposals] = useState<any[]>([]);
@@ -75,13 +25,12 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
     (async () => {
       const res = await getAllTokenProposals(wallet);
       setOnChainProposals(res);
-      console.log("res", res);
     })();
   }, [wallet]);
 
   const reducedOnChainProposals: typeof workingfakeProposals =
-    onChainProposals.map((proposal, i) => ({
-      id: "chain" + i,
+    onChainProposals.map((proposal) => ({
+      id: proposal.id,
       title: proposal.token.name,
       description: proposal.token.description,
       percentage: 22,
@@ -90,23 +39,10 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
       imgSrc: proposal.token.logoUrl,
       status: "Voting",
     }));
-  // const reducedProposals: typeof workingfakeProposals = proposals.map(
-  //   (proposal) => ({
-  //     id: proposal._id,
-  //     title: proposal.token.name,
-  //     description: proposal.token.description,
-  //     percentage: 22,
-  //     voters: 800,
-  //     imgSrc: proposal.token.logoURL,
-  //     status: "Voting",
-  //   }),
-  // );
 
   const workingfakeProposals = [
-    // ...fakeProposals,
-    // ...reducedProposals,
     ...reducedOnChainProposals,
-  ] as typeof fakeProposals;
+  ] as RefinedProposal[];
   const filteredProposals =
     filter === "All"
       ? workingfakeProposals
@@ -230,7 +166,7 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
             className="bg-[#151925] rounded-[12px] shadow-lg flex flex-col items-start"
           >
             <div
-              className="relative w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none"
+              className="h-[200px] w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none overflow-clip flex flex-col justify-center"
               style={{
                 background: generateRandomGradient(),
               }}
@@ -245,7 +181,8 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
                 alt="Avatar voters"
                 width={300}
                 height={200}
-                className="h-[200px] w-full object-center object-cover rounded-t-md"
+                className="h-full w-full object-center object-cover"
+                priority={true}
               />
             </div>
             <div className="w-full p-[24px]">
@@ -276,7 +213,7 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
                   alt="Avatar voters"
                   width={54}
                   height={33}
-                  className="mr-2"
+                  className="h-auto w-auto mr-2"
                 />
                 <div>
                   <p className="text-white">{proposal.voters}</p>
