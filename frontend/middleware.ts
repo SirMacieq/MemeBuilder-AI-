@@ -14,12 +14,19 @@ const middleware = async (req: NextRequest) => {
   //
   //handle not logges case
   if (!isLoggedBool && path !== "/login") {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const url = new URL("/login", req.url);
+    url.searchParams.set("redirect", path);
+    return NextResponse.redirect(url);
   }
   //
   //handling /login when isLogged
   if (isLoggedBool && path === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    const redirect = req.nextUrl.searchParams.get("redirect");
+    if (redirect) {
+      return NextResponse.redirect(new URL(redirect, req.url));
+    } else {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
   }
 
   if (path === "/dashboard" && !user?.nickname) {

@@ -87,10 +87,11 @@ const signinAction = async (
     };
   }
   revalidatePath("/");
-  if (user?.nickname) {
-    redirect("/dashboard");
-  } else {
+  if (!user?.nickname) {
     redirect("/profile");
   }
+  return {
+    status: ResponseStatus.Ok,
+  };
 };
 export default signinAction;
