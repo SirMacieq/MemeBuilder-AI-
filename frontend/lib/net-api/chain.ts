@@ -3,7 +3,6 @@ import { Connection } from "@solana/web3.js";
 import idl from "@/idl.json";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
-import { BN } from "@coral-xyz/anchor";
 import { dummyFundedToken } from "./testing/testingData";
 
 type FundedTokenCreate = typeof dummyFundedToken;

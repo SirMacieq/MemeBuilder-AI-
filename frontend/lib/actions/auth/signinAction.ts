@@ -70,7 +70,7 @@ const signinAction = async (
       httpOnly: true,
       secure: isDev ? undefined : true,
       expires: exp,
-      sameSite: isDev ? undefined : "strict",
+      sameSite: isDev ? "lax" : "strict",
       path: "/",
     });
 

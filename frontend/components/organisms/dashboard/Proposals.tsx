@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import type { FundedToken } from "@/lib/api/proposals/funded-token";
 import { getAllTokenProposals } from "@/lib/net-api/chain";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
@@ -16,7 +15,7 @@ type RefinedProposal = {
   imgSrc: string;
   status: string | "Voting" | "Passed" | "Failed";
 };
-const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
+const Proposals = () => {
   const wallet = useAnchorWallet();
   const [filter, setFilter] = useState("All");
   const [onChainProposals, setOnChainProposals] = useState<any[]>([]);
@@ -26,7 +25,6 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
     (async () => {
       const res = await getAllTokenProposals(wallet);
       setOnChainProposals(res);
-      console.log("res", res);
     })();
   }, [wallet]);
 
@@ -168,7 +166,7 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
             className="bg-[#151925] rounded-[12px] shadow-lg flex flex-col items-start"
           >
             <div
-              className="relative w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none"
+              className="h-[200px] w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none overflow-clip flex flex-col justify-center"
               style={{
                 background: generateRandomGradient(),
               }}
@@ -183,7 +181,8 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
                 alt="Avatar voters"
                 width={300}
                 height={200}
-                className="h-[200px] w-full object-center object-cover rounded-t-md"
+                className="h-full w-full object-center object-cover"
+                priority={true}
               />
             </div>
             <div className="w-full p-[24px]">
@@ -214,7 +213,7 @@ const Proposals = ({ proposals }: { proposals: FundedToken[] }) => {
                   alt="Avatar voters"
                   width={54}
                   height={33}
-                  className="mr-2"
+                  className="h-auto w-auto mr-2"
                 />
                 <div>
                   <p className="text-white">{proposal.voters}</p>
