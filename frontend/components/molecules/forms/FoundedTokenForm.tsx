@@ -6,6 +6,7 @@ import {
   createContext,
   useContext,
   useRef,
+  useMemo,
 } from "react";
 import Link from "next/link";
 import {
@@ -50,6 +51,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -224,6 +226,8 @@ const FoundedTokenForm = () => {
     structure: typeof FoundedTokenFormSchema;
   } | null>(null);
 
+  const solanaCluster = useMemo(getSolanaCluster, []);
+
   /**
    * Action Handlers
    */
@@ -301,7 +305,7 @@ const FoundedTokenForm = () => {
                 Proposal hash: {createdProposalHash}
                 <br />
                 <Link
-                  href={`https://explorer.solana.com/tx/${createdProposalHash}?cluster=devnet`}
+                  href={`https://explorer.solana.com/tx/${createdProposalHash}${solanaCluster === "devnet" ? "?cluster=devnet" : ""}`}
                   target="_blank"
                   className="text-[#f5a856]"
                 >

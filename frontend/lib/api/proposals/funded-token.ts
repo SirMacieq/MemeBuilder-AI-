@@ -1,5 +1,5 @@
 "use server";
-import getApiUrl from "@/lib/getApiUrl";
+import getApiUrl from "@/lib/envGetters/getApiUrl";
 import getToken from "@/lib/api/getToken";
 import { ResponseRequest } from "@/lib/api/genericResponse";
 
