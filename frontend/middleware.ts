@@ -4,37 +4,42 @@ import { NextRequest, NextResponse } from "next/server";
 
 const middleware = async (req: NextRequest) => {
   const path = req.nextUrl.pathname;
+  const isHomePage = path === "/";
 
-  const isLoggedBool = await isLogged();
-  let user = null;
-  try {
-    user = await getCurrentUserData();
-  } catch {}
+  let res = NextResponse.next();
 
-  //
-  //handle not logges case
-  if (!isLoggedBool && path !== "/login") {
-    return NextResponse.redirect(new URL("/login", req.url));
+  if (isHomePage) {
+    res.cookies.set("isHomePage", "true");
+  } else {
+    res.cookies.set("isHomePage", "false");
+
+    const isLoggedBool = await isLogged();
+    let user = null;
+    try {
+      user = await getCurrentUserData();
+    } catch {}
+
+    if (!isLoggedBool && path !== "/login") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    if (isLoggedBool && path === "/login") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
+    if (path === "/dashboard" && !user?.nickname) {
+      return NextResponse.redirect(new URL("/profile", req.url));
+    }
   }
-  //
-  //handling /login when isLogged
-  if (isLoggedBool && path === "/login") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
 
-  if (path === "/dashboard" && !user?.nickname) {
-    return NextResponse.redirect(new URL("/profile", req.url));
-  }
-
-  return NextResponse.next();
+  return res;
 };
+
 export default middleware;
 
-//
-// Execute the middleware for theses routes matcher
-//
 export const config = {
   matcher: [
+    "/",
     "/profile",
     "/profile/:path*",
     "/dashboard",

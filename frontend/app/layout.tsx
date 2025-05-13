@@ -5,6 +5,8 @@ import AppWalletProvider from "@/components/contexts/AppWalletProvider";
 import AppHeader from "@/components/organisms/AppHeader";
 import AppFooter from "@/components/organisms/AppFooter";
 import Hoc from "@/components/Hoc";
+import HeaderHome from "@/components/organisms/HeaderHome";
+import { cookies } from "next/headers"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +23,14 @@ export const metadata: Metadata = {
   description: "Meme Builder(ai)",
 };
 
-export default function RootLayout({
-  children,
+export default async function RootLayout({
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
+  const isHomePage = (await cookies()).get("isHomePage")?.value === "true";
+
   return (
     <html lang="en">
       <body
@@ -33,7 +38,7 @@ export default function RootLayout({
       >
         <AppWalletProvider>
           <Hoc />
-          <AppHeader />
+          {isHomePage ? <HeaderHome /> : <AppHeader />}
           <main className="grow flex">{children}</main>
           <AppFooter />
         </AppWalletProvider>
