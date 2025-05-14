@@ -194,7 +194,7 @@ pub mod meme_builder_ai {
         //require!(
         //    current_timestamp >
         //    token_proposal.voting_started_at,
-        //    CustomError::VotingPeriodNotStartedAYet
+        //    CustomError::VotingPeriodNotStartedYet
         //);
 
         require!(
@@ -571,7 +571,7 @@ pub struct Voting {
 #[error_code]
 enum CustomError {
     #[msg("The voting period on the Token Proposal has not started yet.")]
-    VotingPeriodNotStartedAYet,
+    VotingPeriodNotStartedYet,
     #[msg("The voting period on the Token Proposal has already ended.")]
     VotingPeriodAlreadyEnded,
     #[msg("The votes on the Token Proposal have already reached the hard cap.")]
