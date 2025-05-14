@@ -39,6 +39,8 @@ pub const VOTING_PERIOD_SECONDS: i64 = 5 * 24 * 60 * 60; // 5 days (fixed for MV
 
 // Texts
 pub const TEXTS_TOKEN_PROPOSAL_FACTORY_INITIALIZE_SUCCESS: &str = "You successfully initialized Token Proposal Factory. Token Proposal Factory ID:";
+pub const TEXTS_TOKEN_PROPOSAL_HARD_CAP_REACHED: &str = "The HardCap has been reached! Reached at:";
+pub const TEXTS_TOKEN_PROPOSAL_SOFT_CAP_REACHED: &str = "The SoftCap has been reached! Reached at:";
 pub const TEXTS_USER_CREATE_SUCCESS: &str = "You successfully created User. User ID:";
 
 /***********
@@ -100,8 +102,8 @@ pub mod meme_builder_ai {
         token: Token,
         selected_goals: SelectedGoals,
         funding_goals: FundingGoals,
-        soft_cap: u32,
-        hard_cap: u32,
+        soft_cap: u64,
+        hard_cap: u64,
         funding_model: FundingModel,
         airdrop_modules: AirdropModules,
         voting: Voting,
@@ -167,7 +169,7 @@ pub mod meme_builder_ai {
          */
         let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
         token_proposal_factory.token_proposal_ids
-            .push(*ctx.accounts.token_proposal.to_account_info().key);
+            .push(*token_proposal.to_account_info().key);
         token_proposal_factory.token_proposal_count += 1;
         // Timestamps
         token_proposal_factory.updated_at = current_timestamp;
@@ -268,6 +270,40 @@ pub mod meme_builder_ai {
         // Timestamps
         user.updated_at = current_timestamp;
 
+        /*
+         * Voting Mechanics
+         */
+        // If voting active,
+        if current_timestamp <
+            (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS) {
+                // If HardCap has been reached,
+                if token_proposal.amount_contributed >= token_proposal.hard_cap {
+                    msg!(
+                        "{} {}",
+                        TEXTS_TOKEN_PROPOSAL_HARD_CAP_REACHED, current_timestamp
+                    );
+
+                    token_proposal.status = String::from("hard-cap-reached");
+                    token_proposal.hard_cap_reached_at = current_timestamp;
+                    // end the vote early.
+                    token_proposal.voting_ended_at = current_timestamp;
+
+                    // -> Automatically launch Token.
+
+                    // Else if SoftCap has been reached,
+                } else if token_proposal.amount_contributed >= token_proposal.soft_cap {
+                    msg!(
+                        "{} {}",
+                        TEXTS_TOKEN_PROPOSAL_SOFT_CAP_REACHED, current_timestamp
+                    );
+
+                    token_proposal.status = String::from("soft-cap-reached");
+                    token_proposal.soft_cap_reached_at = current_timestamp;
+
+                    // voting continue.
+                }
+            }
+
         Ok(())
     }
 }
@@ -352,6 +388,9 @@ pub struct CreateTokenProposal<'info> {
             + U32_SPACE // treasury (u32)
             + U32_SPACE // kol (u32)
             + U32_SPACE // ai (u32)
+            // SoftCap and HardCap
+            + U64_SPACE // soft_cap (u64)
+            + U64_SPACE // hard_cap (u64)
             // FundingModel struct
             + BOOL_SPACE // dynamic_unlock (bool)
             + BOOL_SPACE // ends_early_on_hard_cap (bool)
@@ -470,8 +509,8 @@ pub struct TokenProposal {
     pub token: Token,
     pub selected_goals: SelectedGoals,
     pub funding_goals: FundingGoals,
-    pub soft_cap: u32,
-    pub hard_cap: u32,
+    pub soft_cap: u64,
+    pub hard_cap: u64,
     pub funding_model: FundingModel,
     pub airdrop_modules: AirdropModules,
     pub voting: Voting,
