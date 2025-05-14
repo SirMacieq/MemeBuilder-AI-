@@ -1,10 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import ProposalTypeBadge from "@/components/atoms/ProposalTypeBadge";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { getAllTokenProposals } from "@/lib/net-api/chain";
+import { getAllTokenProposals, OnChainProposalBase } from "@/lib/net-api/chain";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import FractionProgress from "@/components/atoms/FractionProgress";
 
 type RefinedProposal = {
   id: string;
@@ -14,11 +16,15 @@ type RefinedProposal = {
   voters: number;
   imgSrc: string;
   status: string | "Voting" | "Passed" | "Failed";
+  totalGoal: number;
+  raisedAmount: number;
 };
 const Proposals = () => {
   const wallet = useAnchorWallet();
   const [filter, setFilter] = useState("All");
-  const [onChainProposals, setOnChainProposals] = useState<any[]>([]);
+  const [onChainProposals, setOnChainProposals] = useState<
+    OnChainProposalBase[]
+  >([]);
 
   useEffect(() => {
     if (!wallet) return;
@@ -34,8 +40,13 @@ const Proposals = () => {
       title: proposal.token.name,
       description: proposal.token.description,
       percentage: 22,
-      voters:
-        proposal.amountContributed.toNumber() + parseInt(Math.random() * 100),
+      totalGoal:
+        proposal.fundingGoals.lp +
+        proposal.fundingGoals.treasury +
+        proposal.fundingGoals.kol +
+        proposal.fundingGoals.ai,
+      raisedAmount: proposal.amountContributed.toNumber(),
+      voters: proposal.contributionCount,
       imgSrc: proposal.token.logoUrl,
       status: "Voting",
     }));
@@ -160,7 +171,7 @@ const Proposals = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[24px]">
-        {filteredProposals.map((proposal) => (
+        {filteredProposals.toReversed().map((proposal) => (
           <div
             key={proposal.id}
             className="bg-[#151925] rounded-[12px] shadow-lg flex flex-col items-start"
@@ -186,25 +197,25 @@ const Proposals = () => {
               />
             </div>
             <div className="w-full p-[24px]">
-              <h3 className="text-[20px] uppercase font-semibold text-white mb-[8px]">
-                <Link href={`proposal/${proposal.id}`}>{proposal.title}</Link>
+              <h3 className="flex flex-row justify-between items-center">
+                <Link
+                  href={`proposal/${proposal.id}`}
+                  className="text-[20px] uppercase font-semibold text-white mb-[8px]"
+                >
+                  {proposal.title}
+                </Link>
+                <ProposalTypeBadge type="funded" variant="small" />
               </h3>
               <p className="text-sm text-[#BABABA] mb-[16px]">
                 {proposal.description}
               </p>
 
               <div className="flex w-full mb-[16px]">
-                {[...Array(5)].map((_, index) => {
-                  const isFilled = proposal.percentage >= (index + 1) * 20;
-                  return (
-                    <div
-                      key={index}
-                      className={`w-1/5 h-2 rounded-lg ${
-                        isFilled ? "bg-green-500" : "bg-white"
-                      } ${index !== 4 ? "mr-1" : ""}`}
-                    />
-                  );
-                })}
+                <FractionProgress
+                  current={proposal.raisedAmount}
+                  target={proposal.totalGoal}
+                  fractions={5}
+                />
               </div>
 
               <div className="flex items-center">

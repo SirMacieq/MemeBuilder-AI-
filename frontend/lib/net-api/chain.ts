@@ -1,6 +1,7 @@
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import { Connection } from "@solana/web3.js";
 import idl from "@/idl.json";
+import { type MemeBuilderAi } from "@/types/idlType";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
 import { dummyFundedToken } from "./testing/testingData";
@@ -26,9 +27,9 @@ const getProvider = (wallet: AnchorWallet) => {
 /**
  * Gets program
  */
-const getProgram = (wallet: AnchorWallet) => {
+export const getProgram = (wallet: AnchorWallet) => {
   const provider = getProvider(wallet);
-  return new Program(idl, provider);
+  return new Program<MemeBuilderAi>(idl, provider);
 };
 
 /**
@@ -140,7 +141,7 @@ export const createTokenProposal = async (
 /**
  * Gets or create user PDA
  */
-const getUserPDA = async (wallet: AnchorWallet) => {
+export const getUserPDA = async (wallet: AnchorWallet) => {
   const program = getProgram(wallet);
   const [userAccountId, userBump] = await PublicKey.findProgramAddress(
     [anchor.utils.bytes.utf8.encode("user"), wallet.publicKey.toBytes()],
@@ -152,18 +153,18 @@ const getUserPDA = async (wallet: AnchorWallet) => {
 /**
  * Creates User
  */
-export const createUser = async (wallet: AnchorWallet) => {
+export const createUser = async (
+  wallet: AnchorWallet,
+  userAccountId: anchor.web3.PublicKey,
+) => {
   const program = getProgram(wallet);
-  const userAccountId = await getUserPDA(wallet);
-  const tx = await program.methods
-    .createUser()
-    .accounts({
-      signer: wallet.publicKey,
-      systemProgram: SystemProgram.programId,
-      user: userAccountId,
-    })
-    .rpc();
-  return tx;
+
+  const tx = program.methods.createUser().accounts({
+    signer: wallet.publicKey,
+    systemProgram: SystemProgram.programId,
+    user: userAccountId,
+  });
+  return tx.rpc();
 };
 
 /**
@@ -177,23 +178,19 @@ export const getAllTokenProposals = async (wallet: AnchorWallet) => {
     tokenProposalFactoryAccountId,
   );
 
-  const tokenProposals = await Promise.all(
-    tokenProposalFactory.tokenProposalIds.map(
-      async (proposalId: typeof PublicKey) => {
-        const tokenProposalAccount =
-          await program.account.tokenProposal.fetch(proposalId);
-        return { ...tokenProposalAccount, id: proposalId.toBase58() };
-      },
-    ),
-  );
-  return tokenProposals;
+  const ids = tokenProposalFactory.tokenProposalIds;
+
+  const tokenProposals = (
+    await program.account.tokenProposal.fetchMultiple(ids)
+  ).map((p, i) => ({ ...p, id: ids[i].toBase58() }));
+  return tokenProposals as OnChainProposalBase[];
 };
 
 /**
  * Get One token proposal
  *
  */
-export const getOneTokenProposals = async (
+export const getOneTokenProposal = async (
   wallet: AnchorWallet,
   proposalIdString: string,
 ) => {
@@ -203,13 +200,67 @@ export const getOneTokenProposals = async (
   const tokenProposalAccount =
     await program.account.tokenProposal.fetch(proposalId);
 
+  const signatures = await connection.getSignaturesForAddress(proposalId);
+
+  if (!signatures[0].blockTime) throw new Error("blockTime not found");
+  const createdAt = signatures.reduce((acc, cur) => {
+    if (cur.blockTime) {
+      return cur.blockTime < acc ? cur.blockTime : acc;
+    } else return acc;
+  }, signatures[0].blockTime);
+
   return {
     ...tokenProposalAccount,
     id: proposalId.toBase58(),
+    createdAt: new Date(createdAt * 1000),
   } as OnChainProposal;
 };
+/**
+ * Gets or create contribution PDA
+ */
+export const getContributionPDA = async (
+  wallet: AnchorWallet,
+  tokenProposalAccountId: anchor.web3.PublicKey,
+) => {
+  const program = getProgram(wallet);
 
-export type OnChainProposal = {
+  const [contributionAccountId] = await PublicKey.findProgramAddress(
+    [
+      anchor.utils.bytes.utf8.encode("contribution"),
+      tokenProposalAccountId.toBytes(),
+      wallet.publicKey.toBytes(), // should be admin
+    ],
+    program.programId,
+  );
+  return contributionAccountId;
+};
+
+/**
+ * Contribute to proposal
+ */
+export const contributeToProposal = async (
+  wallet: AnchorWallet,
+  proposalIdString: string,
+  amount: anchor.BN,
+  contributionAccountId: anchor.web3.PublicKey,
+  userAccountId: anchor.web3.PublicKey,
+) => {
+  const proposalId = new anchor.web3.PublicKey(proposalIdString);
+  const program = getProgram(wallet);
+
+  const tx = await program.methods
+    .contributeToTokenProposal(amount)
+    .accounts({
+      contribution: contributionAccountId,
+      signer: wallet.publicKey, // should be admin
+      systemProgram: SystemProgram.programId,
+      tokenProposal: proposalId,
+      user: userAccountId,
+    })
+    .rpc();
+  return tx;
+};
+export type OnChainProposalBase = {
   token: {
     name: string;
     symbol: string;
@@ -251,3 +302,6 @@ export type OnChainProposal = {
   /** proposal pubkey in base58 */
   id: string;
 };
+export interface OnChainProposal extends OnChainProposalBase {
+  createdAt: Date;
+}

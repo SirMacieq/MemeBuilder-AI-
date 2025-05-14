@@ -5,10 +5,12 @@ import { useEffect } from "react";
 import signinAction from "../lib/actions/auth/signinAction";
 import { useRouter } from "next/navigation";
 import { isLogged } from "@/lib/utils/authUtils/next-token-utils";
+import { usePathname } from "next/navigation";
 
 const Hoc = () => {
   const wallet = useWallet();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // to grant that the useris logged, we have to make sure some conditions are met:
@@ -64,7 +66,7 @@ const Hoc = () => {
       router.refresh();
     })();
     return;
-  }, [wallet, router]);
+  }, [wallet, router, pathname]);
 
   return null;
 };

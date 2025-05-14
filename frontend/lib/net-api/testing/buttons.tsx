@@ -8,6 +8,16 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 const ChainTesting = () => {
   const wallet = useAnchorWallet();
   if (!wallet) return <div>Wallet not connected</div>;
+  const onClick = async () => {
+    console.log("bite");
+    const program = api.getProgram(wallet);
+    const useerPda = await api.getUserPDA(wallet);
+    console.log("userPda", useerPda);
+
+    const userPdaData = await program.account.user.fetch(useerPda);
+    console.log("userPdaData", userPdaData);
+  };
+
   return (
     <div>
       <Button type="button" onClick={() => api.initializeTokenFactory(wallet)}>
@@ -25,7 +35,9 @@ const ChainTesting = () => {
       <Button type="button" onClick={() => api.getAllTokenProposals(wallet)}>
         getAllTokenProposals
       </Button>
-
+      <Button type="button" onClick={() => onClick()}>
+        custom
+      </Button>
     </div>
   );
 };
