@@ -17,11 +17,12 @@ use anchor_lang::solana_program::sysvar;
 declare_id!("7iEZx5UGZZfiTEj1vXqLXWsxybw9De7Xh1J7DHrRecin");
 
 // Constants
-pub const DISCRIMINATOR_SPACE: usize = 8;
+pub const ANCHOR_DISCRIMINATOR_SPACE: usize = 8;
 pub const BOOL_SPACE: usize = 4;
 pub const I64_SPACE: usize = 8;
 pub const PUBKEY_COUNT_MAX: usize = 10_000;
 pub const PUBKEY_SPACE: usize = 32;
+pub const STATUS_LENGTH_MAX: usize = 17; // "tokens-distributed"
 pub const STRING_SPACE: usize = 4;
 pub const TIMESTAMP_SPACE: usize = I64_SPACE;
 pub const TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX: usize = 100;
@@ -122,10 +123,36 @@ pub mod meme_builder_ai {
         // Contributions
         token_proposal.amount_contributed = 0;
         token_proposal.contribution_count = 0;
-        // Flags
-        token_proposal.ready_to_be_finalized = false;
-        token_proposal.finalized = false;
-        token_proposal.completed = false;
+        /*
+         * Status:
+         *   - "submitted";
+         *   - "voting-started";
+         *   - "voting-active";
+         *   - "voting-ended";
+         *   - "soft-cap-reached";
+         *   - "hard-cap-reached";
+         *   - "quorum-reached";
+         *   - "passed";
+         *   - "executed";
+         *   - "cancelled";
+         *   - "rejected";
+         *   - "funds-released";
+         *   - "tokens-distributed".
+         */
+        token_proposal.status = String::from("voting-active");
+        // Lifecycle States (Key State/Flags) Timestamps
+        token_proposal.submitted_at = current_timestamp;
+        token_proposal.voting_started_at = current_timestamp;
+        token_proposal.voting_ended_at = 0;
+        token_proposal.soft_cap_reached_at = 0;
+        token_proposal.hard_cap_reached_at = 0;
+        token_proposal.quorum_reached_at = 0;
+        token_proposal.passed_at = 0;
+        token_proposal.executed_at = 0;
+        token_proposal.cancelled_at = 0;
+        token_proposal.rejected_at = 0;
+        token_proposal.funds_released_at = 0;
+        token_proposal.tokens_distributed_at = 0;
         // Owner
         token_proposal.owner = *ctx.accounts.signer.key;
         // Timestamps
@@ -221,7 +248,7 @@ pub struct InitializeTokenProposalFactory<'info> {
         ],
         bump,
         payer = signer,
-        space = DISCRIMINATOR_SPACE // discriminator
+        space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
             + VEC_SPACE + (PUBKEY_SPACE * TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX) // token_proposal_ids (Vec<Pubkey>)
             + U32_SPACE //  token_proposal_count (u32)
             + PUBKEY_SPACE // admin (Pubkey)
@@ -244,7 +271,7 @@ pub struct CreateUser<'info> {
         ],
         bump,
         payer = signer,
-        space = DISCRIMINATOR_SPACE // discriminator
+        space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
             + VEC_SPACE + (PUBKEY_SPACE * USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX) // contribution_ids (Vec<Pubkey>)
             + U64_SPACE // total_contributions (u64)
             + TIMESTAMP_SPACE // created_at (i64 timestamp)
@@ -268,7 +295,7 @@ pub struct CreateTokenProposal<'info> {
         ],
         bump,
         payer = signer,
-        space = DISCRIMINATOR_SPACE // discriminator
+        space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
             // Token struct
             + (STRING_SPACE * TOKEN_PROPOSAL_NAME_LENGTH_MAX)
             + (STRING_SPACE * TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX)
@@ -296,10 +323,24 @@ pub struct CreateTokenProposal<'info> {
             // Other fields
             + U64_SPACE // amount_contributed (u64)
             + U32_SPACE // contribution_count (u32)
-            + BOOL_SPACE // ready_to_be_finalized (bool)
-            + BOOL_SPACE // finalized (bool)
-            + BOOL_SPACE // completed (bool)
+            // Status
+            + (STRING_SPACE * STATUS_LENGTH_MAX) // status (String)
+            // Lifecycle States (Key State/Flags) Timestamps
+            + TIMESTAMP_SPACE // submitted_at (i64 timestamp)
+            + TIMESTAMP_SPACE // voting_started_at (i64 timestamp)
+            + TIMESTAMP_SPACE // voting_ended_at (i64 timestamp)
+            + TIMESTAMP_SPACE // soft_cap_reached_at (i64 timestamp)
+            + TIMESTAMP_SPACE // hard_cap_reached_at: i64
+            + TIMESTAMP_SPACE // quorum_reached_at (i64 timestamp)
+            + TIMESTAMP_SPACE // passed_at (i64 timestamp)
+            + TIMESTAMP_SPACE // executed_at (i64 timestamp)
+            + TIMESTAMP_SPACE // cancelled_at (i64 timestamp)
+            + TIMESTAMP_SPACE // rejected_at (i64 timestamp)
+            + TIMESTAMP_SPACE // funds_released_at (i64 timestamp)
+            + TIMESTAMP_SPACE // tokens_distributed_at (i64 timestamp)
+            // Owner
             + PUBKEY_SPACE // owner (Pubkey)
+            // Timestamps
             + TIMESTAMP_SPACE // created_at (i64 timestamp)
             + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
@@ -319,7 +360,7 @@ pub struct ContributeToTokenProposal<'info> {
         ],
         bump,
         payer = signer,
-        space = DISCRIMINATOR_SPACE // discriminator
+        space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
             + U64_SPACE // amount (u64)
             + PUBKEY_SPACE // token_proposal_id (Pubkey)
             + PUBKEY_SPACE // user_id (Pubkey)
@@ -348,8 +389,8 @@ pub struct TokenProposalFactory {
     // Admin
     pub admin: Pubkey,
     // Timestamps
-    created_at: i64,
-    updated_at: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
 
     //pub bump: u8,
 }
@@ -361,8 +402,8 @@ pub struct User {
     pub contribution_ids: Vec<Pubkey>,
     pub total_contributions: u64,
     // Timestamps
-    created_at: i64,
-    updated_at: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
 
     //pub bump: u8,
 }
@@ -374,8 +415,8 @@ pub struct Contribution {
     pub token_proposal_id: Pubkey,
     pub user_id: Pubkey,
     // Timestamps
-    created_at: i64,
-    updated_at: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
 
     //pub bump: u8,
 }
@@ -394,15 +435,27 @@ pub struct TokenProposal {
     // Contributions
     pub amount_contributed: u64,
     pub contribution_count: u32,
-    // Flags
-    pub ready_to_be_finalized: bool,
-    pub finalized: bool,
-    pub completed: bool,
+    // Status
+    #[max_len(STATUS_LENGTH_MAX)]
+    pub status: String,
+    // Lifecycle States (Key State/Flags) Timestamps
+    pub submitted_at: i64,
+    pub voting_started_at: i64,
+    pub voting_ended_at: i64,
+    pub soft_cap_reached_at: i64,
+    pub hard_cap_reached_at: i64,
+    pub quorum_reached_at: i64,
+    pub passed_at: i64,
+    pub executed_at: i64,
+    pub cancelled_at: i64,
+    pub rejected_at: i64,
+    pub funds_released_at: i64,
+    pub tokens_distributed_at: i64,
     // Owner
     pub owner: Pubkey,
     // Timestamps
-    created_at: i64,
-    updated_at: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
 
     //pub bump: u8,
 }
