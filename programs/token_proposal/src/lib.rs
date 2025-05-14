@@ -19,9 +19,11 @@ declare_id!("7iEZx5UGZZfiTEj1vXqLXWsxybw9De7Xh1J7DHrRecin");
 // Constants
 pub const DISCRIMINATOR_SPACE: usize = 8;
 pub const BOOL_SPACE: usize = 4;
+pub const I64_SPACE: usize = 8;
 pub const PUBKEY_COUNT_MAX: usize = 10_000;
 pub const PUBKEY_SPACE: usize = 32;
 pub const STRING_SPACE: usize = 4;
+pub const TIMESTAMP_SPACE: usize = I64_SPACE;
 pub const TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX: usize = 100;
 pub const TOKEN_PROPOSAL_NAME_LENGTH_MAX: usize = 50;
 pub const TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX: usize = 3;
@@ -45,26 +47,45 @@ pub mod meme_builder_ai {
     use super::*;
 
     pub fn initialize_token_proposal_factory(
-        ctx: Context<InitializeTokenProposalFactory>
+        ctx: Context<InitializeTokenProposalFactory>,
     ) -> ProgramResult {
-        let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
 
+        /*
+         * Token Proposal Factory
+         */
+        let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
         token_proposal_factory.token_proposal_ids = Vec::new();
         token_proposal_factory.token_proposal_count = 0;
-
-        // Owner
+        // Admin
         token_proposal_factory.admin = *ctx.accounts.signer.key;
+        // Timestamps
+        token_proposal_factory.created_at = current_timestamp;
+        token_proposal_factory.updated_at = current_timestamp;
 
         msg!("{} {:?}", TEXTS_TOKEN_PROPOSAL_FACTORY_INITIALIZE_SUCCESS, ctx.program_id);
 
         Ok(())
     }
 
-    pub fn create_user(ctx: Context<CreateUser>) -> ProgramResult {
-        let user = &mut ctx.accounts.user;
+    pub fn create_user(
+        ctx: Context<CreateUser>,
+    ) -> ProgramResult {
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
 
+        /*
+         * User
+         */
+        let user = &mut ctx.accounts.user;
         user.contribution_ids = Vec::new();
         user.total_contributions = 0;
+        // Timestamps
+        user.created_at = current_timestamp;
+        user.updated_at = current_timestamp;
 
         msg!("{} {:?}", TEXTS_USER_CREATE_SUCCESS, ctx.program_id);
 
@@ -82,8 +103,14 @@ pub mod meme_builder_ai {
         airdrop_modules: AirdropModules,
         voting: Voting,
     ) -> ProgramResult {
-        let token_proposal = &mut ctx.accounts.token_proposal;
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
 
+        /*
+         * Token Proposal
+         */
+        let token_proposal = &mut ctx.accounts.token_proposal;
         token_proposal.token = token;
         token_proposal.selected_goals = selected_goals;
         token_proposal.funding_goals = funding_goals;
@@ -92,43 +119,50 @@ pub mod meme_builder_ai {
         token_proposal.funding_model = funding_model;
         token_proposal.airdrop_modules = airdrop_modules;
         token_proposal.voting = voting;
-
         // Contributions
         token_proposal.amount_contributed = 0;
         token_proposal.contribution_count = 0;
-
         // Flags
         token_proposal.ready_to_be_finalized = false;
         token_proposal.finalized = false;
         token_proposal.completed = false;
-
         // Owner
         token_proposal.owner = *ctx.accounts.signer.key;
+        // Timestamps
+        token_proposal.created_at = current_timestamp;
+        token_proposal.updated_at = current_timestamp;
 
         /*
          * Store Token Proposal's Program Derived Addresses (PDA) in Token
          * Proposal Factory.
          */
         let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
-
         token_proposal_factory.token_proposal_ids
             .push(*ctx.accounts.token_proposal.to_account_info().key);
         token_proposal_factory.token_proposal_count += 1;
+        // Timestamps
+        token_proposal_factory.updated_at = current_timestamp;
 
         Ok(())
     }
 
     pub fn contribute_to_token_proposal(
         ctx: Context<ContributeToTokenProposal>,
-        amount: u64
+        amount: u64,
     ) -> ProgramResult {
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
+
+        /*
+         * Transfer
+         */
         // Create the transfer instruction.
         let instruction = anchor_lang::solana_program::system_instruction::transfer(
             &ctx.accounts.signer.key(),
             &ctx.accounts.token_proposal.key(),
             amount,
         );
-
         // Invoke the transfer instruction.
         let _ = anchor_lang::solana_program::program::invoke(
             &instruction,
@@ -138,24 +172,34 @@ pub mod meme_builder_ai {
             ],
         );
 
-        // Create Contribution.
+        /*
+         * Contribution
+         */
         let contribution = &mut ctx.accounts.contribution;
-
         contribution.amount = amount;
         contribution.token_proposal_id = *ctx.accounts.token_proposal.to_account_info().key;
         contribution.user_id = *ctx.accounts.user.to_account_info().key;
+        // Timestamps
+        contribution.created_at = current_timestamp;
+        contribution.updated_at = current_timestamp;
 
-        // Update User's Contributions.
-        let user = &mut ctx.accounts.user;
-
-        user.contribution_ids.push(*ctx.accounts.contribution.to_account_info().key);
-        user.total_contributions += amount;
-
-        // Update Token Proposal.
+        /*
+         * Token Proposal
+         */
         let token_proposal = &mut ctx.accounts.token_proposal;
-
         token_proposal.amount_contributed += amount;
         token_proposal.contribution_count += 1;
+        // Timestamps
+        token_proposal.updated_at = current_timestamp;
+
+        /*
+         * User
+         */
+        let user = &mut ctx.accounts.user;
+        user.contribution_ids.push(*ctx.accounts.contribution.to_account_info().key);
+        user.total_contributions += amount;
+        // Timestamps
+        user.updated_at = current_timestamp;
 
         Ok(())
     }
@@ -171,16 +215,18 @@ pub struct InitializeTokenProposalFactory<'info> {
     pub system_program: Program<'info, System>,
     #[account(
         init,
-        seeds=[
+        seeds = [
             b"token_proposal_factory".as_ref(),
-            signer.key().as_ref(),
+            //signer.key().as_ref(),
         ],
         bump,
-        payer=signer,
+        payer = signer,
         space = DISCRIMINATOR_SPACE // discriminator
             + VEC_SPACE + (PUBKEY_SPACE * TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX) // token_proposal_ids (Vec<Pubkey>)
             + U32_SPACE //  token_proposal_count (u32)
             + PUBKEY_SPACE // admin (Pubkey)
+            + TIMESTAMP_SPACE // created_at (i64 timestamp)
+            + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
     pub token_proposal_factory: Account<'info, TokenProposalFactory>,
 }
@@ -192,12 +238,17 @@ pub struct CreateUser<'info> {
     pub system_program: Program<'info, System>,
     #[account(
         init,
-        seeds = [b"user".as_ref(), signer.key().as_ref()],
+        seeds = [
+            b"user".as_ref(),
+            signer.key().as_ref(),
+        ],
         bump,
         payer = signer,
         space = DISCRIMINATOR_SPACE // discriminator
             + VEC_SPACE + (PUBKEY_SPACE * USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX) // contribution_ids (Vec<Pubkey>)
             + U64_SPACE // total_contributions (u64)
+            + TIMESTAMP_SPACE // created_at (i64 timestamp)
+            + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
     pub user: Account<'info, User>,
 }
@@ -209,15 +260,15 @@ pub struct CreateTokenProposal<'info> {
     pub system_program: Program<'info, System>,
     #[account(
         init,
-        seeds=[
+        seeds = [
             b"token_proposal".as_ref(),
             token_proposal_factory.key().as_ref(),
             token_proposal_factory.token_proposal_count.to_le_bytes().as_ref(),
             signer.key().as_ref(),
         ],
         bump,
-        payer=signer,
-        space= DISCRIMINATOR_SPACE // discriminator
+        payer = signer,
+        space = DISCRIMINATOR_SPACE // discriminator
             // Token struct
             + (STRING_SPACE * TOKEN_PROPOSAL_NAME_LENGTH_MAX)
             + (STRING_SPACE * TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX)
@@ -249,6 +300,8 @@ pub struct CreateTokenProposal<'info> {
             + BOOL_SPACE // finalized (bool)
             + BOOL_SPACE // completed (bool)
             + PUBKEY_SPACE // owner (Pubkey)
+            + TIMESTAMP_SPACE // created_at (i64 timestamp)
+            + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
     pub token_proposal: Account<'info, TokenProposal>,
     #[account(mut)]
@@ -270,6 +323,8 @@ pub struct ContributeToTokenProposal<'info> {
             + U64_SPACE // amount (u64)
             + PUBKEY_SPACE // token_proposal_id (Pubkey)
             + PUBKEY_SPACE // user_id (Pubkey)
+            + TIMESTAMP_SPACE // created_at (i64 timestamp)
+            + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
     pub contribution: Account<'info, Contribution>,
     #[account(mut)]
@@ -290,9 +345,11 @@ pub struct TokenProposalFactory {
     #[max_len(TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX)]
     pub token_proposal_ids: Vec<Pubkey>,
     pub token_proposal_count: u32,
-
-    // Owner
+    // Admin
     pub admin: Pubkey,
+    // Timestamps
+    created_at: i64,
+    updated_at: i64,
 
     //pub bump: u8,
 }
@@ -303,6 +360,9 @@ pub struct User {
     #[max_len(USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX)]
     pub contribution_ids: Vec<Pubkey>,
     pub total_contributions: u64,
+    // Timestamps
+    created_at: i64,
+    updated_at: i64,
 
     //pub bump: u8,
 }
@@ -313,6 +373,9 @@ pub struct Contribution {
     pub amount: u64,
     pub token_proposal_id: Pubkey,
     pub user_id: Pubkey,
+    // Timestamps
+    created_at: i64,
+    updated_at: i64,
 
     //pub bump: u8,
 }
@@ -328,18 +391,18 @@ pub struct TokenProposal {
     pub funding_model: FundingModel,
     pub airdrop_modules: AirdropModules,
     pub voting: Voting,
-
     // Contributions
     pub amount_contributed: u64,
     pub contribution_count: u32,
-
     // Flags
     pub ready_to_be_finalized: bool,
     pub finalized: bool,
     pub completed: bool,
-
     // Owner
     pub owner: Pubkey,
+    // Timestamps
+    created_at: i64,
+    updated_at: i64,
 
     //pub bump: u8,
 }
