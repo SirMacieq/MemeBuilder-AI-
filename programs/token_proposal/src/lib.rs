@@ -2,7 +2,7 @@
  * Imports *
  ***********/
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::entrypoint::ProgramResult;
+//use anchor_lang::solana_program::entrypoint::ProgramResult;
 use anchor_lang::solana_program::sysvar;
 /*
  * The SPL Token Program is part of the Solana Program Library. It's a separate
@@ -35,6 +35,7 @@ pub const USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX: usize = 100;
 pub const U32_SPACE: usize = 4;
 pub const U64_SPACE: usize = 8;
 pub const VEC_SPACE: usize = 4;
+pub const VOTING_PERIOD_SECONDS: i64 = 5 * 24 * 60 * 60; // 5 days (fixed for MVP)
 
 // Texts
 pub const TEXTS_TOKEN_PROPOSAL_FACTORY_INITIALIZE_SUCCESS: &str = "You successfully initialized Token Proposal Factory. Token Proposal Factory ID:";
@@ -49,7 +50,7 @@ pub mod meme_builder_ai {
 
     pub fn initialize_token_proposal_factory(
         ctx: Context<InitializeTokenProposalFactory>,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         // Clock
         let clock = Clock::get()?;
         let current_timestamp = clock.unix_timestamp;
@@ -73,7 +74,7 @@ pub mod meme_builder_ai {
 
     pub fn create_user(
         ctx: Context<CreateUser>,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         // Clock
         let clock = Clock::get()?;
         let current_timestamp = clock.unix_timestamp;
@@ -84,6 +85,7 @@ pub mod meme_builder_ai {
         let user = &mut ctx.accounts.user;
         user.contribution_ids = Vec::new();
         user.total_contributions = 0;
+        user.votes = Vec::new();
         // Timestamps
         user.created_at = current_timestamp;
         user.updated_at = current_timestamp;
@@ -103,7 +105,7 @@ pub mod meme_builder_ai {
         funding_model: FundingModel,
         airdrop_modules: AirdropModules,
         voting: Voting,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         // Clock
         let clock = Clock::get()?;
         let current_timestamp = clock.unix_timestamp;
@@ -176,26 +178,65 @@ pub mod meme_builder_ai {
     pub fn contribute_to_token_proposal(
         ctx: Context<ContributeToTokenProposal>,
         amount: u64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         // Clock
         let clock = Clock::get()?;
         let current_timestamp = clock.unix_timestamp;
+
+        /*
+         * Token Proposal
+         */
+        let token_proposal = &mut ctx.accounts.token_proposal;
+
+        /*
+         * Guard Checks
+         */
+        //require!(
+        //    current_timestamp >
+        //    token_proposal.voting_started_at,
+        //    CustomError::VotingPeriodNotStartedAYet
+        //);
+
+        require!(
+            current_timestamp <
+            (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
+            CustomError::VotingPeriodAlreadyEnded
+        );
+
+        require!(
+            token_proposal.hard_cap_reached_at == 0,
+            CustomError::VotesAlreadyReachedHardCap
+        );
+
+        /*
+         * User
+         */
+        let user = &mut ctx.accounts.user;
+        require!(
+            !user.votes.contains(&token_proposal.to_account_info().key),
+            CustomError::UserAlreadyVoted
+        );
+
+        /*
+         * Signer
+         */
+        let signer = &ctx.accounts.signer;
 
         /*
          * Transfer
          */
         // Create the transfer instruction.
         let instruction = anchor_lang::solana_program::system_instruction::transfer(
-            &ctx.accounts.signer.key(),
-            &ctx.accounts.token_proposal.key(),
+            &signer.key(),
+            &token_proposal.key(),
             amount,
         );
         // Invoke the transfer instruction.
         let _ = anchor_lang::solana_program::program::invoke(
             &instruction,
             &[
-                ctx.accounts.signer.to_account_info(),
-                ctx.accounts.token_proposal.to_account_info(),
+                signer.to_account_info(),
+                token_proposal.to_account_info(),
             ],
         );
 
@@ -204,8 +245,8 @@ pub mod meme_builder_ai {
          */
         let contribution = &mut ctx.accounts.contribution;
         contribution.amount = amount;
-        contribution.token_proposal_id = *ctx.accounts.token_proposal.to_account_info().key;
-        contribution.user_id = *ctx.accounts.user.to_account_info().key;
+        contribution.token_proposal_id = *token_proposal.to_account_info().key;
+        contribution.user_id = *user.to_account_info().key;
         // Timestamps
         contribution.created_at = current_timestamp;
         contribution.updated_at = current_timestamp;
@@ -213,7 +254,6 @@ pub mod meme_builder_ai {
         /*
          * Token Proposal
          */
-        let token_proposal = &mut ctx.accounts.token_proposal;
         token_proposal.amount_contributed += amount;
         token_proposal.contribution_count += 1;
         // Timestamps
@@ -222,9 +262,9 @@ pub mod meme_builder_ai {
         /*
          * User
          */
-        let user = &mut ctx.accounts.user;
-        user.contribution_ids.push(*ctx.accounts.contribution.to_account_info().key);
+        user.contribution_ids.push(*contribution.to_account_info().key);
         user.total_contributions += amount;
+        user.votes.push(*token_proposal.to_account_info().key);
         // Timestamps
         user.updated_at = current_timestamp;
 
@@ -274,6 +314,7 @@ pub struct CreateUser<'info> {
         space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
             + VEC_SPACE + (PUBKEY_SPACE * USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX) // contribution_ids (Vec<Pubkey>)
             + U64_SPACE // total_contributions (u64)
+            + VEC_SPACE + (PUBKEY_SPACE * USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX) // votes (Vec<Pubkey>)
             + TIMESTAMP_SPACE // created_at (i64 timestamp)
             + TIMESTAMP_SPACE // updated_at (i64 timestamp)
     )]
@@ -401,6 +442,8 @@ pub struct User {
     #[max_len(USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX)]
     pub contribution_ids: Vec<Pubkey>,
     pub total_contributions: u64,
+    #[max_len(USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX)]
+    pub votes: Vec<Pubkey>, // Token Proposal IDs
     // Timestamps
     pub created_at: i64,
     pub updated_at: i64,
@@ -526,17 +569,13 @@ pub struct Voting {
  * Enums *
  *********/
 #[error_code]
-pub enum CustomError {
-    #[msg("The Token Proposal has already been completed.")]
-    TokenProposalAlreadyCompleted,
-    #[msg("The Token Proposal has already been finalized.")]
-    TokenProposalAlreadyFinalized,
-    #[msg("The Token Proposal has not been finalized.")]
-    TokenProposalNotFinalized,
-    #[msg("The Token Proposal is not ready to be finalized.")]
-    TokenProposalNotReadyToBeFinalized,
+enum CustomError {
+    #[msg("The voting period on the Token Proposal has not started yet.")]
+    VotingPeriodNotStartedAYet,
+    #[msg("The voting period on the Token Proposal has already ended.")]
+    VotingPeriodAlreadyEnded,
+    #[msg("The votes on the Token Proposal have already reached the hard cap.")]
+    VotesAlreadyReachedHardCap,
     #[msg("The User has already voted on the Token Proposal.")]
     UserAlreadyVoted,
-    #[msg("The User is not the Owner of the Token Proposal.")]
-    UserNotOwner,
 }
