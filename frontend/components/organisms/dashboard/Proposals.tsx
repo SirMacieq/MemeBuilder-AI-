@@ -6,7 +6,13 @@ import { useState } from "react";
 import Image from "next/image";
 import FractionProgress from "@/components/atoms/FractionProgress";
 import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
+import { useWallet } from "@solana/wallet-adapter-react";
+//@ts-ignore
+import("@jup-ag/terminal/css");
+//@ts-ignore
+import('./Dashboard.css')
 
+const endpoint = "https://api.mainnet-beta.solana.com";
 type RefinedProposal = {
   id: string;
   title: string;
@@ -22,7 +28,7 @@ const Proposals = () => {
   const [filter, setFilter] = useState("All");
   const { proposals: onChainProposals } = useFundedProposals();
   console.log("onChainProposals", onChainProposals);
-
+  const walletProps = useWallet();
   const reducedOnChainProposals: typeof workingfakeProposals =
     onChainProposals.map((proposal) => ({
       id: proposal.id,
@@ -141,7 +147,38 @@ const Proposals = () => {
             Failed
           </Button>
         </nav>
-
+        <div className="flex justify-end md:max-w-[50%]">
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              if (typeof window !== "undefined") {
+                import("@jup-ag/terminal").then((mod) => {
+                  const init = mod.init;
+                  init({
+                    enableWalletPassthrough: true,
+                    passthroughWalletContextState: walletProps,
+                    endpoint,
+                    formProps: {
+                      fixedOutputMint: true,
+                      initialAmount: "0",
+                      initialInputMint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+                      initialOutputMint: "So11111111111111111111111111111111111111112",
+                    },
+                    containerStyles: { maxHeight: '390px', padding: 16, boxShadow: "0 0 30px 10px #7912FF"}
+                    
+                  });
+                });
+              }
+            }}
+            type="submit"
+            className="w-[417px] text-white font-semibold p-[24px] rounded-[12px] hidden md:flex mr-4"
+            style={{
+              background:
+                "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
+            }}
+          >
+            Swap token
+          </Button>
         <Button
           asChild
           type="submit"
@@ -153,6 +190,7 @@ const Proposals = () => {
         >
           <Link href="proposals/">Submit your memecoin</Link>
         </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[24px]">
