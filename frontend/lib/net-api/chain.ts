@@ -133,7 +133,7 @@ export const createTokenProposal = async (
 
   const tx = await program.methods
     .createTokenProposal(
-      data.token,
+      { ...data.token, logoUrl: data.token.logoURL },
       data.selectedGoals,
       data.fundingGoals,
       data.softCap,
@@ -256,7 +256,6 @@ export const getOneTokenProposal = async (
 /**
  * Gets or create contribution PDA
  */
-// FIX:
 export const getContributionPDA = async (
   wallet: AnchorWallet,
   tokenProposalAccountId: anchor.web3.PublicKey,
@@ -278,7 +277,6 @@ export const getContributionPDA = async (
 /**
  * Contribute to proposal
  */
-// FIX:
 export const contributeToProposal = async (
   wallet: AnchorWallet,
   proposalIdString: string,

@@ -40,11 +40,7 @@ const Proposals = () => {
       title: proposal.token.name,
       description: proposal.token.description,
       percentage: 22,
-      totalGoal:
-        proposal.fundingGoals.lp +
-        proposal.fundingGoals.treasury +
-        proposal.fundingGoals.kol +
-        proposal.fundingGoals.ai,
+      totalGoal: proposal.hardCap.toNumber(),
       raisedAmount: proposal.amountContributed.toNumber(),
       voters: proposal.contributionCount,
       imgSrc: proposal.token.logoUrl,
