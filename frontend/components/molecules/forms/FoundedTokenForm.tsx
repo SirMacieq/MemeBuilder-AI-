@@ -52,6 +52,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
+import { BN } from "@coral-xyz/anchor";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -186,8 +187,8 @@ const FoundedTokenForm = () => {
       },
       selectedGoals: values.selectedGoals,
       fundingGoals: values.fundingGoals,
-      softCap: values.softCap,
-      hardCap: values.hardCap === "dynamic" ? 0 : values.hardCap,
+      softCap: new BN(values.softCap),
+      hardCap: new BN(values.hardCap === "dynamic" ? 0 : values.hardCap),
       fundingModel: values.fundingModel,
       airdropModules: {
         dropScore: values.airdropModules?.dropScore ?? false,
@@ -290,7 +291,7 @@ const FoundedTokenForm = () => {
 
   return (
     <div className="w-full pt-[32px]">
-      <Dialog open={isDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger />
         <DialogContent>
           <DialogTitle>We&apos;re cooking it...</DialogTitle>

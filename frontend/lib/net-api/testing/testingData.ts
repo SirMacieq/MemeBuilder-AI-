@@ -1,6 +1,8 @@
+import { BN } from "@coral-xyz/anchor";
+
 export const dummyFundedToken = {
   token: {
-    name: "Test Token",
+    name: "Test Token 2",
     symbol: "waaaaah",
     description: "Test Description",
     logoURL: "https://test.com/logo.png",
@@ -12,13 +14,13 @@ export const dummyFundedToken = {
     ai: false,
   },
   fundingGoals: {
-    lp: 0,
-    treasury: 0,
-    kol: 0,
-    ai: 0,
+    lp: 10,
+    treasury: 10,
+    kol: 10,
+    ai: 10,
   },
-  softCap: 0,
-  hardCap: 0,
+  softCap: new BN(0),
+  hardCap: new BN(0),
   fundingModel: {
     dynamicUnlock: false,
     endsEarlyOnHardCap: false,
