@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  anchor-dev:
+    build:
+      dockerfile: anchor.Dockerfile
+      context: .
+      args:
+        - ANCHOR_CLI=v0.31.1
+        - SOLANA_CLI=v2.1.0
+    volumes:
+      - .:/workdir
+      - cargo-cache:/root/.cargo
+      - solana-cache:/root/.local/share/solana
+      - anchor-cache:/root/.avm
+      - wallet:/root/.config/solana
+    working_dir: /workdir
+    command: tail -f /dev/null # Keeps container running
+
+volumes:
+  cargo-cache:
+  solana-cache:
+  anchor-cache:
+  wallet:
