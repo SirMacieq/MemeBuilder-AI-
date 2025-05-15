@@ -14,6 +14,7 @@ export default class TreasuryToken {
   public airdropModules: TreasuryTokenDtoQuery["airdropModules"];
   public voting: TreasuryTokenDtoQuery["voting"];
   public eligibilityRequirements: TreasuryTokenDtoQuery["eligibilityRequirements"];
+  public proposal_id: string;
   public proposer_wallet: string;
   public created_at: number;
 
@@ -28,6 +29,7 @@ export default class TreasuryToken {
     airdropModules,
     voting,
     eligibilityRequirements,
+    proposal_id,
     proposer_wallet,
     created_at,
   }: Omit<TreasuryTokenDtoQuery, "proposalType"> & { created_at?: number }) {
@@ -41,6 +43,7 @@ export default class TreasuryToken {
     this.airdropModules = airdropModules;
     this.voting = voting;
     this.eligibilityRequirements = eligibilityRequirements;
+    this.proposal_id = proposal_id
     this.proposer_wallet = proposer_wallet;
     this.created_at = created_at ?? now;
   }

@@ -8,7 +8,7 @@ const tokenSchema = new mongoose.Schema(
       name: { type: String, required: true },
       symbol: { type: String, required: true },
       description: { type: String, required: true },
-      logoURL: { type: String },
+      logoUrl: { type: String },
       totalSupply: { type: Number, required: true },
       tokenAddress: { type: String, required: true },
       network: { type: String, enum: ["solana", "sonic"], required: true }

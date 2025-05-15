@@ -29,8 +29,7 @@ export default {
       app.get("/", async (req, res) => {
         res.json({ status: 200, msg: "Welcome to MemeBuilder-AI API" }); 
       });
-
-  
+      
       //Common Error handler
   
       // app.use(ErrorHandler);

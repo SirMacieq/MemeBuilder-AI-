@@ -21,6 +21,7 @@ export type mongoDaoGovernanceResponse = {
     periodDays: number;
     voteUnit: string;
   };
+  proposal_id: string;
   proposer_wallet: string;
   created_at?: number;
   _id: Types.ObjectId;

@@ -9,6 +9,7 @@ export default class DaoGovernance {
   public governanceFunding?: DaoGovernanceDtoQuery["governanceFunding"];
   public quorum: number;
   public voting: DaoGovernanceDtoQuery["voting"];
+  public proposal_id: string;
   public proposer_wallet: string;
   public created_at: number;
 
@@ -18,6 +19,7 @@ export default class DaoGovernance {
     governanceFunding,
     quorum,
     voting,
+    proposal_id,
     proposer_wallet,
     created_at,
   }: Omit<DaoGovernanceDtoQuery, "proposalType"> & { created_at?: number }) {
@@ -26,6 +28,7 @@ export default class DaoGovernance {
     this.governanceFunding = governanceFunding;
     this.quorum = quorum;
     this.voting = voting;
+    this.proposal_id = proposal_id;
     this.proposer_wallet = proposer_wallet;
     this.created_at = created_at ?? now;
   }

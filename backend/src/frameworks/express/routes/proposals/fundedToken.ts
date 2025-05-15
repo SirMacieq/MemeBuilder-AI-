@@ -2,6 +2,8 @@ import express from "express";
 import dependencies from "../../../../config/dependencies";
 import { withAuth } from "../../middlewares/withAuth";
 import { crudRouteCreator } from "../crudRouteCreator";
+import { botFundedToken } from "../../../../services/monitoring/bot";
+import cron from "node-cron";
 
 export const fundedTokenRouter = express.Router();
 
@@ -25,3 +27,18 @@ crudRouteCreator({
   },
   withAuth: withAuth,
 });
+
+let isRunning = false;
+//"*/10 * * * * *"
+cron.schedule("*/15 * * * *", async () => {
+  if (isRunning) return console.log("⏳ botFundedToken déjà en cours");
+  isRunning = true;
+
+  try {
+    await botFundedToken(dependencies);
+  } catch (error) {
+    console.error("Erreur botFundedToken:", error)
+  } finally {
+    isRunning = false;
+  }
+})

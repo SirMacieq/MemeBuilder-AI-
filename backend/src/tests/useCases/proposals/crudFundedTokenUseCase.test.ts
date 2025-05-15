@@ -10,7 +10,7 @@ describe("User CRUD Test", () => {
           name: "TurboFrog",
           symbol: "TFROG",
           description: "TurboFrog is the fastest memecoin on-chain. Powered by the DAO.",
-          logoURL: "https://memesite.xyz/turbofrog.png"
+          logoUrl: "https://memesite.xyz/turbofrog.png"
         },
         selectedGoals: {
           lp: true,
@@ -38,6 +38,7 @@ describe("User CRUD Test", () => {
           voteUnit: "1 NFT or token equivalent = 1 vote",
           escrowedFunds: true
         },
+        proposal_id: "lbsfbfbfevb",
         proposer_wallet: "wallet-fr-001"
       });
 
@@ -46,7 +47,7 @@ describe("User CRUD Test", () => {
           name: "PepeAI",
           symbol: "PEPAI",
           description: "Pepe with brains. Meme and AI unite!",
-          logoURL: "https://memesite.xyz/pepeai.png"
+          logoUrl: "https://memesite.xyz/pepeai.png"
         },
         selectedGoals: {
           lp: true,
@@ -74,6 +75,7 @@ describe("User CRUD Test", () => {
           voteUnit: "1 NFT = 1 vote",
           escrowedFunds: true
         },
+        proposal_id: "lbsfbfbdddsvb",
         proposer_wallet: "wallet-fr-002"
       });
 
