@@ -1,16 +1,22 @@
 "use client";
 import React from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useRouter } from "next/navigation";
 import logoutAction from "@/lib/actions/auth/logoutAction";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const LogoutButton = () => {
+  const router = useRouter();
   const wallet = useWallet();
-  function logout() {
+
+  async function logout() {
     localStorage.removeItem("signed-message");
+    localStorage.removeItem("walletName");
+    await logoutAction();
     wallet.disconnect();
-    logoutAction();
+
+    router.push("/");
   }
   return (
     <Button

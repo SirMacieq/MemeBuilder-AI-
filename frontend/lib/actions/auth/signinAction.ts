@@ -11,6 +11,7 @@ import { encode } from "../../utils/authUtils/jwtUtils";
 import { userSignin } from "@/lib/api/user/user";
 import setTokenCookie from "@/lib/api/setTokenCookie";
 import { revalidatePath } from "next/cache";
+import getCurrentUserData from "../user/getCurrentUserData";
 
 /**
  *
@@ -25,6 +26,7 @@ const signinAction = async (
   signedMessage: string,
   message: string,
 ): Promise<Response> => {
+  let user = null;
   try {
     const cookieStore = await cookies();
     const isDev = process.env.NODE_ENV === "development";
@@ -68,13 +70,16 @@ const signinAction = async (
       httpOnly: true,
       secure: isDev ? undefined : true,
       expires: exp,
-      sameSite: isDev ? undefined : "strict",
+      sameSite: isDev ? "lax" : "strict",
       path: "/",
     });
 
     //
     // finally returning Ok response
     //
+    try {
+      user = await getCurrentUserData();
+    } catch {}
   } catch {
     return {
       type: ErrorType.InternalError,
@@ -82,6 +87,11 @@ const signinAction = async (
     };
   }
   revalidatePath("/");
-  redirect("/profile");
+  if (!user?.nickname) {
+    redirect("/profile");
+  }
+  return {
+    status: ResponseStatus.Ok,
+  };
 };
 export default signinAction;

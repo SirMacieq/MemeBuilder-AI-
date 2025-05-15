@@ -8,18 +8,24 @@ const AppHeader = async () => {
   try {
     user = await getCurrentUserData();
   } catch {}
-  
+
   return (
     <header className="p-4 lg:p-6 bg-[#010613] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
       <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 w-full lg:w-auto">
         <div className="flex justify-between items-center w-full lg:w-auto">
-          <Image src="/images/logo.svg" alt="Logo" width={60} height={60} />
+          <Image
+            src="/images/logo.svg"
+            alt="Logo"
+            width={60}
+            height={60}
+            priority
+          />
           <div className="lg:hidden">
             <AppNav />
           </div>
         </div>
 
-        {(user && user.nickname !== null) && (
+        {user && user.nickname !== null && (
           <div className="relative w-full lg:w-[466px] mb-[10px] md:mb-0">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#BABABA] w-5 h-5" />
             <input

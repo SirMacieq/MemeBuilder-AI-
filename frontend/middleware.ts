@@ -4,42 +4,45 @@ import { NextRequest, NextResponse } from "next/server";
 
 const middleware = async (req: NextRequest) => {
   const path = req.nextUrl.pathname;
-  const isHomePage = path === "/";
 
-  let res = NextResponse.next();
+  const isLoggedBool = await isLogged();
+  let user = null;
+  try {
+    user = await getCurrentUserData();
+  } catch {}
 
-  if (isHomePage) {
-    res.cookies.set("isHomePage", "true");
-  } else {
-    res.cookies.set("isHomePage", "false");
-
-    const isLoggedBool = await isLogged();
-    let user = null;
-    try {
-      user = await getCurrentUserData();
-    } catch {}
-
-    if (!isLoggedBool && path !== "/login") {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    if (isLoggedBool && path === "/login") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    if (path === "/dashboard" && !user?.nickname) {
-      return NextResponse.redirect(new URL("/profile", req.url));
+  //
+  //handle not logges case
+  if (!isLoggedBool && path !== "/login") {
+    const url = new URL("/login", req.url);
+    url.searchParams.set("redirect", path);
+    return NextResponse.redirect(url);
+  }
+  //
+  //handling /login when isLogged
+  if (isLoggedBool && path === "/login") {
+    const redirect = req.nextUrl.searchParams.get("redirect");
+    if (redirect) {
+      return NextResponse.redirect(new URL(redirect, req.url));
+    } else {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
 
-  return res;
-};
+  if (path === "/dashboard" && !user?.nickname) {
+    return NextResponse.redirect(new URL("/profile", req.url));
+  }
 
+  return NextResponse.next();
+};
 export default middleware;
 
+//
+// Execute the middleware for theses routes matcher
+//
 export const config = {
   matcher: [
-    "/",
+    "/login",
     "/profile",
     "/profile/:path*",
     "/dashboard",
