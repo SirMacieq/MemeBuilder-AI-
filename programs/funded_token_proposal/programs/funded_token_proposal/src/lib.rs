@@ -30,9 +30,11 @@ pub const BOOL_SPACE: usize = 4;
 pub const I64_SPACE: usize = 8;
 pub const PUBKEY_COUNT_MAX: usize = 10_000;
 pub const PUBKEY_SPACE: usize = 32;
-pub const STATUS_LENGTH_MAX: usize = 17; // "tokens-distributed"
+pub const STATUS_LENGTH_MAX: usize = 17; // "token-mint-created"
 pub const STRING_SPACE: usize = 4;
 pub const TIMESTAMP_SPACE: usize = I64_SPACE;
+pub const TOKEN_DECIMAL: u8 = 9; // SPL Token default decimals
+pub const TOKEN_METADATA_URI: &str = "https://raw.githubusercontent.com/solana-developers/program-examples/new-examples/tokens/tokens/.assets/spl-token.json";
 pub const TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX: usize = 100;
 pub const TOKEN_PROPOSAL_NAME_LENGTH_MAX: usize = 50;
 pub const TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX: usize = 3;
@@ -46,6 +48,8 @@ pub const VEC_SPACE: usize = 4;
 pub const VOTING_PERIOD_SECONDS: i64 = 5 * 24 * 60 * 60; // 5 days (fixed for MVP)
 
 // Texts
+pub const TEXTS_TOKEN_METADATA_ACCOUNT_CREATE_SUCCESS: &str = "You successfully created Token Metadata Account. Token Metadata Account ID:";
+pub const TEXTS_TOKEN_MINT_CREATE_SUCCESS: &str = "You successfully created Token Mint.";
 pub const TEXTS_TOKEN_PROPOSAL_FACTORY_INITIALIZE_SUCCESS: &str = "You successfully initialized Token Proposal Factory. Token Proposal Factory ID:";
 pub const TEXTS_TOKEN_PROPOSAL_HARD_CAP_REACHED: &str = "The HardCap has been reached! Reached at:";
 pub const TEXTS_TOKEN_PROPOSAL_SOFT_CAP_REACHED: &str = "The SoftCap has been reached! Reached at:";
@@ -135,36 +139,17 @@ pub mod funded_token_proposal {
         // Contributions
         token_proposal.amount_contributed = 0;
         token_proposal.contribution_count = 0;
-        /*
-         * Status:
-         *   - "submitted";
-         *   - "voting-started";
-         *   - "voting-active";
-         *   - "voting-ended";
-         *   - "soft-cap-reached";
-         *   - "hard-cap-reached";
-         *   - "quorum-reached";
-         *   - "passed";
-         *   - "executed";
-         *   - "cancelled";
-         *   - "rejected";
-         *   - "funds-released";
-         *   - "tokens-distributed".
-         */
-        token_proposal.status = String::from("voting-active");
-        // Lifecycle States (Key State/Flags) Timestamps
-        token_proposal.submitted_at = current_timestamp;
+        // Status
+        token_proposal.status = String::from("voting-started");
+        // Lifecycle States (Key States/Flags) Timestamps
         token_proposal.voting_started_at = current_timestamp;
         token_proposal.voting_ended_at = 0;
         token_proposal.soft_cap_reached_at = 0;
         token_proposal.hard_cap_reached_at = 0;
-        token_proposal.quorum_reached_at = 0;
         token_proposal.passed_at = 0;
-        token_proposal.executed_at = 0;
-        token_proposal.cancelled_at = 0;
         token_proposal.rejected_at = 0;
-        token_proposal.funds_released_at = 0;
-        token_proposal.tokens_distributed_at = 0;
+        token_proposal.token_mint_created_at = 0;
+        token_proposal.funds_returned_at = 0;
         // Owner
         token_proposal.owner = *ctx.accounts.signer.key;
         // Timestamps
@@ -212,21 +197,30 @@ pub mod funded_token_proposal {
             CustomError::VotingPeriodAlreadyEnded
         );
 
-        // End Token Proposal's voting period.
+        /*
+         * End Token Proposal's voting period.
+         */
+        // Status
+        token_proposal.status = String::from("voting-ended");
+        // Lifecycle States (Key States/Flags) Timestamps
         token_proposal.voting_ended_at = current_timestamp;
 
         /*
          * Voting Mechanics
          */
-        if token_proposal.amount_contributed >= token_proposal.soft_cap {
+        if token_proposal.soft_cap_reached_at > 0 {
             msg!(
                 "{} {}",
                 TEXTS_TOKEN_PROPOSAL_SOFT_CAP_REACHED, current_timestamp
             );
 
+            token_proposal.status = String::from("passed");
+
             // -> Automatically launch Token.
         } else {
-            // -> Automatically refund Token.
+            token_proposal.status = String::from("rejected");
+
+            // -> Automatically refund Contributions.
         }
 
         Ok(())
@@ -355,7 +349,7 @@ pub mod funded_token_proposal {
                     token_proposal.status = String::from("soft-cap-reached");
                     token_proposal.soft_cap_reached_at = current_timestamp;
 
-                    // voting continue.
+                    // -> Voting continue.
                 }
             }
 
@@ -364,15 +358,27 @@ pub mod funded_token_proposal {
 
     pub fn create_token_mint(
         ctx: Context<CreateTokenMint>,
-        _token_decimals: u8,
-        token_name: String,
-        token_symbol: String,
-        token_uri: String,
     ) -> Result<()> {
-        msg!("Creating metadata account...");
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
+
+        /*
+         * Accounts
+         */
+        let metadata_account = &ctx.accounts.metadata_account;
+        let mint_account = &ctx.accounts.mint_account;
+        let payer = &mut ctx.accounts.payer;
+        let rent = &ctx.accounts.rent;
+        let system_program = &ctx.accounts.system_program;
+        let token_metadata_program = &ctx.accounts.token_metadata_program;
+        let token_program = &ctx.accounts.token_program;
+        let token_proposal = &mut ctx.accounts.token_proposal;
+
         msg!(
-            "Metadata account address: {}",
-            &ctx.accounts.metadata_account.key()
+            "{} {}",
+            TEXTS_TOKEN_METADATA_ACCOUNT_CREATE_SUCCESS,
+            metadata_account.key()
         );
 
         /*
@@ -383,32 +389,40 @@ pub mod funded_token_proposal {
          */
         create_metadata_accounts_v3(
             CpiContext::new(
-                ctx.accounts.token_metadata_program.to_account_info(),
+                token_metadata_program.to_account_info(),
                 CreateMetadataAccountsV3 {
-                    metadata: ctx.accounts.metadata_account.to_account_info(),
-                    mint: ctx.accounts.mint_account.to_account_info(),
-                    mint_authority: ctx.accounts.payer.to_account_info(),
-                    payer: ctx.accounts.payer.to_account_info(),
-                    rent: ctx.accounts.rent.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                    update_authority: ctx.accounts.payer.to_account_info(),
+                    metadata: metadata_account.to_account_info(),
+                    mint: mint_account.to_account_info(),
+                    mint_authority: payer.to_account_info(),
+                    payer: payer.to_account_info(),
+                    rent: rent.to_account_info(),
+                    system_program: system_program.to_account_info(),
+                    update_authority: payer.to_account_info(),
                 },
             ),
             DataV2 {
-                name: token_name, // token_proposal.token.name
-                symbol: token_symbol, // token_proposal.token.symbol
-                uri: token_uri, // token_proposal.token.logo_url
+                name: token_proposal.token.name.clone(),
+                symbol: token_proposal.token.symbol.clone(),
+                uri: TOKEN_METADATA_URI.to_string(),
                 seller_fee_basis_points: 0,
                 creators: None,
                 collection: None,
                 uses: None,
             },
-            false, // Is mutable
-            true, // Update authority is signer
-            None, // Collection details
+            false, // Is mutable?
+            true, // Is update authority the signer?
+            None, // Any collection details?
         )?;
 
-        msg!("Token mint created successfully.");
+        msg!(TEXTS_TOKEN_MINT_CREATE_SUCCESS);
+
+        /*
+         * Token Proposal
+         */
+        // Status
+        token_proposal.status = String::from("token-mint-created");
+        // Lifecycle States (Key States/Flags) Timestamps
+        token_proposal.token_mint_created_at = current_timestamp;
 
         Ok(())
     }
@@ -508,19 +522,15 @@ pub struct CreateTokenProposal<'info> {
             + U32_SPACE // contribution_count (u32)
             // Status
             + (STRING_SPACE * STATUS_LENGTH_MAX) // status (String)
-            // Lifecycle States (Key State/Flags) Timestamps
-            + TIMESTAMP_SPACE // submitted_at (i64 timestamp)
+            // Lifecycle States (Key States/Flags) Timestamps
             + TIMESTAMP_SPACE // voting_started_at (i64 timestamp)
             + TIMESTAMP_SPACE // voting_ended_at (i64 timestamp)
             + TIMESTAMP_SPACE // soft_cap_reached_at (i64 timestamp)
             + TIMESTAMP_SPACE // hard_cap_reached_at: i64
-            + TIMESTAMP_SPACE // quorum_reached_at (i64 timestamp)
             + TIMESTAMP_SPACE // passed_at (i64 timestamp)
-            + TIMESTAMP_SPACE // executed_at (i64 timestamp)
-            + TIMESTAMP_SPACE // cancelled_at (i64 timestamp)
             + TIMESTAMP_SPACE // rejected_at (i64 timestamp)
-            + TIMESTAMP_SPACE // funds_released_at (i64 timestamp)
-            + TIMESTAMP_SPACE // tokens_distributed_at (i64 timestamp)
+            + TIMESTAMP_SPACE // token_mint_created_at (i64 timestamp)
+            + TIMESTAMP_SPACE // funds_returned_at (i64 timestamp)
             // Owner
             + PUBKEY_SPACE // owner (Pubkey)
             // Timestamps
@@ -578,7 +588,6 @@ pub struct ContributeToTokenProposal<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(_token_decimals: u8)]
 pub struct CreateTokenMint<'info> {
     /// CHECK: Validate address by deriving PDA.
     #[account(
@@ -596,7 +605,7 @@ pub struct CreateTokenMint<'info> {
     #[account(
         init,
         payer = payer,
-        mint::decimals = _token_decimals,
+        mint::decimals = TOKEN_DECIMAL,
         mint::authority = payer.key(),
     )]
     pub mint_account: Account<'info, Mint>,
@@ -606,6 +615,8 @@ pub struct CreateTokenMint<'info> {
     pub system_program: Program<'info, System>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Program<'info, Token>,
+    #[account(mut)]
+    pub token_proposal: Account<'info, TokenProposal>,
 }
 
 /************
@@ -668,22 +679,28 @@ pub struct TokenProposal {
     // Contributions
     pub amount_contributed: u64,
     pub contribution_count: u32,
-    // Status
+    /*
+     * Status:
+     *   - "voting-started";
+     *   - "voting-ended";
+     *   - "soft-cap-reached";
+     *   - "hard-cap-reached";
+     *   - "passed";
+     *   - "rejected";
+     *   - "token-mint-created".
+     *   - "funds-returned";
+     */
     #[max_len(STATUS_LENGTH_MAX)]
     pub status: String,
-    // Lifecycle States (Key State/Flags) Timestamps
-    pub submitted_at: i64,
+    // Lifecycle States (Key States/Flags) Timestamps
     pub voting_started_at: i64,
     pub voting_ended_at: i64,
     pub soft_cap_reached_at: i64,
     pub hard_cap_reached_at: i64,
-    pub quorum_reached_at: i64,
     pub passed_at: i64,
-    pub executed_at: i64,
-    pub cancelled_at: i64,
     pub rejected_at: i64,
-    pub funds_released_at: i64,
-    pub tokens_distributed_at: i64,
+    pub token_mint_created_at: i64,
+    pub funds_returned_at: i64,
     // Owner
     pub owner: Pubkey,
     // Timestamps

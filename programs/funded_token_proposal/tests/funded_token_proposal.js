@@ -31,6 +31,9 @@ describe("Funded Token Proposal", () => {
   // User
   const user = Keypair.generate();
 
+  // Generate new keypair to use as address for mint account.
+  const mintKeypair = new Keypair();
+
   let contributionAccountId;
   let contributionBump;
   let tokenProposalAccountId;
@@ -337,14 +340,6 @@ describe("Funded Token Proposal", () => {
       assert.equal(tokenProposalAccount.contributionCount, 0);
     });
 
-    it("should set the Token Proposal's submitted at to the current UNIX timestamp.", async () => {
-      assert.ok(
-        Math.abs(
-          tokenProposalAccount.submittedAt.toNumber() - currentUnixTimestamp
-        ) <= TIMESTAMP_TOLERANCE
-      );
-    });
-
     it("should set the Token Proposal's voting started at to the current UNIX timestamp.", async () => {
       assert.ok(
         Math.abs(
@@ -365,32 +360,20 @@ describe("Funded Token Proposal", () => {
       assert.equal(tokenProposalAccount.hardCapReachedAt.toNumber(), 0);
     });
 
-    it("should set the Token Proposal's quorum reached at to zero.", async () => {
-      assert.equal(tokenProposalAccount.hardCapReachedAt.toNumber(), 0);
-    });
-
     it("should set the Token Proposal's passed at to zero.", async () => {
       assert.equal(tokenProposalAccount.passedAt.toNumber(), 0);
     });
 
-    it("should set the Token Proposal's executed at to zero.", async () => {
-      assert.equal(tokenProposalAccount.executedAt.toNumber(), 0);
-    });
-
-    it("should set the Token Proposal's cancelled at to zero.", async () => {
-      assert.equal(tokenProposalAccount.cancelledAt.toNumber(), 0);
-    });
-
     it("should set the Token Proposal's rejected at to zero.", async () => {
-      assert.equal(tokenProposalAccount.cancelledAt.toNumber(), 0);
+      assert.equal(tokenProposalAccount.rejectedAt.toNumber(), 0);
     });
 
-    it("should set the Token Proposal's funds released at to zero.", async () => {
-      assert.equal(tokenProposalAccount.fundsReleasedAt.toNumber(), 0);
+    it("should set the Token Proposal's token mint created at to zero.", async () => {
+      assert.equal(tokenProposalAccount.tokenMintCreatedAt.toNumber(), 0);
     });
 
-    it("should set the Token Proposal's tokens distributed at to zero.", async () => {
-      assert.equal(tokenProposalAccount.tokensDistributedAt.toNumber(), 0);
+    it("should set the Token Proposal's funds returned at to zero.", async () => {
+      assert.equal(tokenProposalAccount.fundsReturnedAt.toNumber(), 0);
     });
 
     it("should not change the Token Proposal Factory's admin.", async () => {
@@ -538,4 +521,29 @@ describe("Funded Token Proposal", () => {
       );
     });
   });
+
+  /*
+   * Works just on Devnet.
+   */
+  //describe("Create Token Mint:", () => {
+  //  let transactionSignature;
+
+  //  before(async () => {
+  //    transactionSignature = await program.methods.createTokenMint()
+  //      .accounts({
+  //        mintAccount: mintKeypair.publicKey,
+  //        payer: admin.publicKey,
+  //        tokenProposal: tokenProposalAccountId,
+  //      })
+  //      .signers([mintKeypair])
+  //      .rpc();
+
+  //    console.log("Mint Address: ", mintKeypair.publicKey);
+  //    console.log("Transaction Signature: ", transactionSignature);
+  //  });
+
+  //  it("should create a Token Mint", async () => {
+  //    assert.ok(transactionSignature);
+  //  });
+  //});
 });
