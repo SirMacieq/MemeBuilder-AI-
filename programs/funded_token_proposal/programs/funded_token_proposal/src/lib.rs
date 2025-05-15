@@ -1,3 +1,5 @@
+#![allow(clippy::result_large_err)]
+
 /***********
  * Imports *
  ***********/
@@ -12,7 +14,13 @@ use anchor_lang::solana_program::sysvar;
  * As a standardized protocol, it ensures consistent behavior and
  * interoperability for tokens across the Solana ecosystem.
  */
-//use spl_token::instruction as token_instruction;
+use anchor_spl::metadata::{
+    CreateMetadataAccountsV3,
+    Metadata,
+    create_metadata_accounts_v3,
+    mpl_token_metadata::types::DataV2,
+};
+use anchor_spl::token::{Mint, Token};
 
 declare_id!("CtaFEhyUB8FJvcHRfRutN2WGd2bQ9cL3DgXxpkwajfCf");
 
@@ -99,7 +107,7 @@ pub mod funded_token_proposal {
 
     pub fn create_token_proposal(
         ctx: Context<CreateTokenProposal>,
-        token: Token,
+        token: ProposalToken,
         selected_goals: SelectedGoals,
         funding_goals: FundingGoals,
         soft_cap: u64,
@@ -353,6 +361,57 @@ pub mod funded_token_proposal {
 
         Ok(())
     }
+
+    pub fn create_token_mint(
+        ctx: Context<CreateTokenMint>,
+        _token_decimals: u8,
+        token_name: String,
+        token_symbol: String,
+        token_uri: String,
+    ) -> Result<()> {
+        msg!("Creating metadata account...");
+        msg!(
+            "Metadata account address: {}",
+            &ctx.accounts.metadata_account.key()
+        );
+
+        /*
+         * Cross Program Invocation (CPI):
+         *
+         * Invoking the create_metadata_account_v3 instruction on the token
+         * metadata program.
+         */
+        create_metadata_accounts_v3(
+            CpiContext::new(
+                ctx.accounts.token_metadata_program.to_account_info(),
+                CreateMetadataAccountsV3 {
+                    metadata: ctx.accounts.metadata_account.to_account_info(),
+                    mint: ctx.accounts.mint_account.to_account_info(),
+                    mint_authority: ctx.accounts.payer.to_account_info(),
+                    payer: ctx.accounts.payer.to_account_info(),
+                    rent: ctx.accounts.rent.to_account_info(),
+                    system_program: ctx.accounts.system_program.to_account_info(),
+                    update_authority: ctx.accounts.payer.to_account_info(),
+                },
+            ),
+            DataV2 {
+                name: token_name, // token_proposal.token.name
+                symbol: token_symbol, // token_proposal.token.symbol
+                uri: token_uri, // token_proposal.token.logo_url
+                seller_fee_basis_points: 0,
+                creators: None,
+                collection: None,
+                uses: None,
+            },
+            false, // Is mutable
+            true, // Update authority is signer
+            None, // Collection details
+        )?;
+
+        msg!("Token mint created successfully.");
+
+        Ok(())
+    }
 }
 
 /************
@@ -518,6 +577,37 @@ pub struct ContributeToTokenProposal<'info> {
     pub user: Account<'info, User>,
 }
 
+#[derive(Accounts)]
+#[instruction(_token_decimals: u8)]
+pub struct CreateTokenMint<'info> {
+    /// CHECK: Validate address by deriving PDA.
+    #[account(
+        mut,
+        seeds = [
+            b"metadata",
+            token_metadata_program.key().as_ref(),
+            mint_account.key().as_ref(),
+        ],
+        bump,
+        seeds::program = token_metadata_program.key(),
+    )]
+    pub metadata_account: UncheckedAccount<'info>,
+    // Create new mint account.
+    #[account(
+        init,
+        payer = payer,
+        mint::decimals = _token_decimals,
+        mint::authority = payer.key(),
+    )]
+    pub mint_account: Account<'info, Mint>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub rent: Sysvar<'info, Rent>,
+    pub system_program: Program<'info, System>,
+    pub token_metadata_program: Program<'info, Metadata>,
+    pub token_program: Program<'info, Token>,
+}
+
 /************
  * Accounts *
  ************/
@@ -567,7 +657,7 @@ pub struct Contribution {
 #[account]
 #[derive(InitSpace)]
 pub struct TokenProposal {
-    pub token: Token,
+    pub token: ProposalToken,
     pub selected_goals: SelectedGoals,
     pub funding_goals: FundingGoals,
     pub soft_cap: u64,
@@ -609,7 +699,7 @@ pub struct TokenProposal {
 #[derive(Clone)]
 #[derive(InitSpace)]
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct Token {
+pub struct ProposalToken {
     #[max_len(TOKEN_PROPOSAL_NAME_LENGTH_MAX)]
     pub name: String,
     #[max_len(TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX)]
