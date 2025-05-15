@@ -52,7 +52,7 @@ export function crudRouteCreator({
         const addEntity =
           useCases[`add${useCaseName}UseCase`](dependencies).execute;
 
-        const newEntity = { ...req.body, creation_date_time: new Date() };
+        const newEntity = { ...req.body, created_at: new Date() };
 
         const response = await addEntity(newEntity);
         res.json(response);

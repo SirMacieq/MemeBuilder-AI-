@@ -29,6 +29,7 @@ describe("DaoGovernance CRUD Test", () => {
       periodDays: 5,
       voteUnit: "1 NFT or token equivalent = 1 vote"
     },
+    proposal_id: "llsfgblvfdvss",
     proposer_wallet: "wallet-gov-001"
   });
 
@@ -52,6 +53,7 @@ describe("DaoGovernance CRUD Test", () => {
       periodDays: 5,
       voteUnit: "1 NFT or token equivalent = 1 vote"
     },
+    proposal_id: "dvbsdbsfgblvfdvss",
     proposer_wallet: "wallet-gov-002"
   });
 

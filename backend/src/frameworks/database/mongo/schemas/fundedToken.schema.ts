@@ -6,7 +6,7 @@ const fundedTokenSchema = new mongoose.Schema(
       name: { type: String, required: true },
       symbol: { type: String, required: true },
       description: { type: String, required: true },
-      logoURL: { type: String, required: true }
+      logoUrl: { type: String, required: true }
     },
     selectedGoals: {
       lp: { type: Boolean, required: true },
@@ -34,6 +34,7 @@ const fundedTokenSchema = new mongoose.Schema(
       voteUnit: { type: String, required: true },
       escrowedFunds: { type: Boolean, required: true }
     },
+    proposal_id: { type: String, required: true },
     proposer_wallet: { type: String, required: true },
     created_at: { type: Number, required: false }
   },

@@ -6,7 +6,7 @@ const treasuryTokenSchema = new mongoose.Schema(
       name: { type: String, required: true },
       symbol: { type: String, required: true },
       description: { type: String, required: true },
-      logoURL: { type: String, required: true }
+      logoUrl: { type: String, required: true }
     },
     chain: { type: String, required: true },
     fundingGoals: {
@@ -45,6 +45,7 @@ const treasuryTokenSchema = new mongoose.Schema(
       previousSuccess: { type: Boolean, required: true },
       rateLimit: { type: String, required: true }
     },
+    proposal_id: { type: String, required: true },
     proposer_wallet: { type: String, required: true },
     created_at: { type: Number, required: false }
   },

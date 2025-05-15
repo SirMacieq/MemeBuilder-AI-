@@ -148,11 +148,14 @@ Vote now & join the future of $DOGE99! 🐶🚀`;
 
           <h2 className="font-semibold mb-[16px] text-[20px]">
             Raised: {proposal.amountContributed.toNumber() / LAMPORT_PEL_SOL}{" "}
-            SOL / {totalFunds / LAMPORT_PEL_SOL} SOL (
-            {(proposal.amountContributed.toNumber() / totalFunds) * 100}%)
+            SOL / {proposal.hardCap.toNumber() / LAMPORT_PEL_SOL} SOL (
+            {(proposal.amountContributed.toNumber() /
+              proposal.hardCap.toNumber()) *
+              100}
+            %)
           </h2>
           <FractionProgress
-            target={totalFunds}
+            target={proposal.hardCap.toNumber()}
             current={proposal.amountContributed.toNumber()}
             fractions={5}
           />

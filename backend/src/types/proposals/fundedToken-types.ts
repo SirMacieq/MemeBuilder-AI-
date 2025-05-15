@@ -4,7 +4,7 @@ export interface FundedTokenQuery {
       name: string;
       symbol: string;
       description: string;
-      logoURL: string;
+      logoUrl: string;
     };
     selectedGoals: {
       lp: boolean;
@@ -33,6 +33,7 @@ export interface FundedTokenQuery {
       escrowedFunds: boolean;
     };
     created_at?: number;
+    proposal_id: string;
     proposer_wallet: string;
   }
   
@@ -41,7 +42,7 @@ export interface FundedTokenQuery {
       name: string;
       symbol: string;
       description: string;
-      logoURL: string;
+      logoUrl: string;
     };
     selectedGoals: {
       lp: boolean;
@@ -69,6 +70,7 @@ export interface FundedTokenQuery {
       voteUnit: string;
       escrowedFunds: boolean;
     };
+    proposal_id: string;
     proposer_wallet: string;
   }
   

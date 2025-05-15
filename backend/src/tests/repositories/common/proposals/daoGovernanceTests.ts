@@ -32,6 +32,7 @@ export const daoGovernanceRepositoryTests = (repositories: any) => {
       periodDays: 5,
       voteUnit: "1 NFT or token equivalent = 1 vote",
     },
+    proposal_id: "llsfgblss",
     proposer_wallet: "wallet-gov-001",
   });
 
@@ -56,6 +57,7 @@ export const daoGovernanceRepositoryTests = (repositories: any) => {
       periodDays: 5,
       voteUnit: "1 NFT or token equivalent = 1 vote",
     },
+    proposal_id: "llsfgblvfdvss",
     proposer_wallet: "wallet-gov-002",
   });
 

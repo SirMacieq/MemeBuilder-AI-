@@ -5,7 +5,7 @@ export interface TokenDtoQuery {
       name: string;
       symbol: string;
       description: string;
-      logoURL?: string;
+      logoUrl?: string;
       totalSupply: number;
       tokenAddress: string;
       network: "solana" | "sonic";

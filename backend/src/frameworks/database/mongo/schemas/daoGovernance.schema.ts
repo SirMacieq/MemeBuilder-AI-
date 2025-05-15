@@ -21,6 +21,7 @@ const daoGovernanceSchema = new mongoose.Schema(
       periodDays: { type: Number, required: true },
       voteUnit: { type: String, required: true }
     },
+    proposal_id: { type: String, required: true },
     proposer_wallet: { type: String, required: true },
     created_at: { type: Number, required: false }
   },

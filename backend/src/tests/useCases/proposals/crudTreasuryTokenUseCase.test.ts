@@ -10,7 +10,7 @@ describe("TreasuryToken CRUD Test", () => {
       name: "PepeGPT",
       symbol: "PGPT",
       description: "PepeGPT is the meme agent of the chain — built by the people, funded by the DAO.",
-      logoURL: "https://memesite.xyz/pepegpt.png"
+      logoUrl: "https://memesite.xyz/pepegpt.png"
     },
     chain: "Sonic SVM",
     fundingGoals: {
@@ -49,6 +49,7 @@ describe("TreasuryToken CRUD Test", () => {
       previousSuccess: true,
       rateLimit: "1 per 14 days"
     },
+    proposal_id: "cvbfsbbsfbsf",
     proposer_wallet: "wallet-tr-001"
   });
 
@@ -57,7 +58,7 @@ describe("TreasuryToken CRUD Test", () => {
       name: "MemeMaster",
       symbol: "MEMEM",
       description: "MemeMaster is the ultimate memecoin with treasury-backed growth.",
-      logoURL: "https://memesite.xyz/mememaster.png"
+      logoUrl: "https://memesite.xyz/mememaster.png"
     },
     chain: "Ethereum",
     fundingGoals: {
@@ -96,6 +97,7 @@ describe("TreasuryToken CRUD Test", () => {
       previousSuccess: false,
       rateLimit: "1 per 30 days"
     },
+    proposal_id: "cvbfsbbsfbsf",
     proposer_wallet: "wallet-tr-002"
   });
 

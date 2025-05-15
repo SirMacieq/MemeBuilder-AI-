@@ -6,7 +6,7 @@ export type mongoFundedTokenResponse = {
     name: string;
     symbol: string;
     description: string;
-    logoURL: string;
+    logoUrl: string;
   };
   selectedGoals: {
     lp: boolean;
@@ -34,6 +34,7 @@ export type mongoFundedTokenResponse = {
     voteUnit: string;
     escrowedFunds: boolean;
   };
+  proposal_id: string;
   proposer_wallet: string;
   created_at?: number;
   _id: Types.ObjectId;

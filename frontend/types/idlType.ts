@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/meme_builder_ai.json`.
  */
 export type MemeBuilderAi = {
-  address: "BBzF2mZwMXBSDdt2n2VFKANreLob8DufeSFPCAvqHsFr";
+  address: "35dcDMFG3XsntwwLTf7ZhTS3kxDjFDeFguZJzMgUR66q";
   metadata: {
     name: "memeBuilderAi";
     version: "0.1.0";
@@ -118,6 +118,11 @@ export type MemeBuilderAi = {
               },
               {
                 kind: "account";
+                path: "token_proposal_factory.token_proposal_count";
+                account: "tokenProposalFactory";
+              },
+              {
+                kind: "account";
                 path: "signer";
               },
             ];
@@ -155,11 +160,11 @@ export type MemeBuilderAi = {
         },
         {
           name: "softCap";
-          type: "u32";
+          type: "u64";
         },
         {
           name: "hardCap";
-          type: "u32";
+          type: "u64";
         },
         {
           name: "fundingModel";
@@ -264,10 +269,6 @@ export type MemeBuilderAi = {
                   121,
                 ];
               },
-              {
-                kind: "account";
-                path: "signer";
-              },
             ];
           };
         },
@@ -296,33 +297,23 @@ export type MemeBuilderAi = {
   errors: [
     {
       code: 6000;
-      name: "tokenProposalAlreadyCompleted";
-      msg: "The Token Proposal has already been completed.";
+      name: "votingPeriodNotStartedYet";
+      msg: "The voting period on the Token Proposal has not started yet.";
     },
     {
       code: 6001;
-      name: "tokenProposalAlreadyFinalized";
-      msg: "The Token Proposal has already been finalized.";
+      name: "votingPeriodAlreadyEnded";
+      msg: "The voting period on the Token Proposal has already ended.";
     },
     {
       code: 6002;
-      name: "tokenProposalNotFinalized";
-      msg: "The Token Proposal has not been finalized.";
+      name: "votesAlreadyReachedHardCap";
+      msg: "The votes on the Token Proposal have already reached the hard cap.";
     },
     {
       code: 6003;
-      name: "tokenProposalNotReadyToBeFinalized";
-      msg: "The Token Proposal is not ready to be finalized.";
-    },
-    {
-      code: 6004;
       name: "userAlreadyVoted";
       msg: "The User has already voted on the Token Proposal.";
-    },
-    {
-      code: 6005;
-      name: "userNotOwner";
-      msg: "The User is not the Owner of the Token Proposal.";
     },
   ];
   types: [
@@ -354,6 +345,14 @@ export type MemeBuilderAi = {
           {
             name: "userId";
             type: "pubkey";
+          },
+          {
+            name: "createdAt";
+            type: "i64";
+          },
+          {
+            name: "updatedAt";
+            type: "i64";
           },
         ];
       };
@@ -477,11 +476,11 @@ export type MemeBuilderAi = {
           },
           {
             name: "softCap";
-            type: "u32";
+            type: "u64";
           },
           {
             name: "hardCap";
-            type: "u32";
+            type: "u64";
           },
           {
             name: "fundingModel";
@@ -516,24 +515,68 @@ export type MemeBuilderAi = {
             type: "u32";
           },
           {
-            name: "readyToBeFinalized";
-            type: "bool";
+            name: "status";
+            type: "string";
           },
           {
-            name: "finalized";
-            type: "bool";
+            name: "submittedAt";
+            type: "i64";
           },
           {
-            name: "completed";
-            type: "bool";
+            name: "votingStartedAt";
+            type: "i64";
+          },
+          {
+            name: "votingEndedAt";
+            type: "i64";
+          },
+          {
+            name: "softCapReachedAt";
+            type: "i64";
+          },
+          {
+            name: "hardCapReachedAt";
+            type: "i64";
+          },
+          {
+            name: "quorumReachedAt";
+            type: "i64";
+          },
+          {
+            name: "passedAt";
+            type: "i64";
+          },
+          {
+            name: "executedAt";
+            type: "i64";
+          },
+          {
+            name: "cancelledAt";
+            type: "i64";
+          },
+          {
+            name: "rejectedAt";
+            type: "i64";
+          },
+          {
+            name: "fundsReleasedAt";
+            type: "i64";
+          },
+          {
+            name: "tokensDistributedAt";
+            type: "i64";
           },
           {
             name: "owner";
             type: "pubkey";
           },
           {
-            name: "bump";
-            type: "u8";
+            name: "createdAt";
+            type: "i64";
+          },
+          {
+            name: "updatedAt";
+            type: "i64";
           },
         ];
       };
@@ -550,8 +593,20 @@ export type MemeBuilderAi = {
             };
           },
           {
+            name: "tokenProposalCount";
+            type: "u32";
+          },
+          {
             name: "admin";
             type: "pubkey";
+          },
+          {
+            name: "createdAt";
+            type: "i64";
+          },
+          {
+            name: "updatedAt";
+            type: "i64";
           },
         ];
       };
@@ -570,6 +625,20 @@ export type MemeBuilderAi = {
           {
             name: "totalContributions";
             type: "u64";
+          },
+          {
+            name: "votes";
+            type: {
+              vec: "pubkey";
+            };
+          },
+          {
+            name: "createdAt";
+            type: "i64";
+          },
+          {
+            name: "updatedAt";
+            type: "i64";
           },
         ];
       };

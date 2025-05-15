@@ -1,5 +1,5 @@
 {
-  "address": "7iEZx5UGZZfiTEj1vXqLXWsxybw9De7Xh1J7DHrRecin",
+  "address": "35dcDMFG3XsntwwLTf7ZhTS3kxDjFDeFguZJzMgUR66q",
   "metadata": {
     "name": "meme_builder_ai",
     "version": "0.1.0",
@@ -9,16 +9,7 @@
   "instructions": [
     {
       "name": "contribute_to_token_proposal",
-      "discriminator": [
-        141,
-        232,
-        182,
-        155,
-        6,
-        64,
-        109,
-        159
-      ],
+      "discriminator": [141, 232, 182, 155, 6, 64, 109, 159],
       "accounts": [
         {
           "name": "contribution",
@@ -28,18 +19,7 @@
               {
                 "kind": "const",
                 "value": [
-                  99,
-                  111,
-                  110,
-                  116,
-                  114,
-                  105,
-                  98,
-                  117,
-                  116,
-                  105,
-                  111,
-                  110
+                  99, 111, 110, 116, 114, 105, 98, 117, 116, 105, 111, 110
                 ]
               },
               {
@@ -80,16 +60,7 @@
     },
     {
       "name": "create_token_proposal",
-      "discriminator": [
-        184,
-        177,
-        112,
-        165,
-        100,
-        128,
-        143,
-        66
-      ],
+      "discriminator": [184, 177, 112, 165, 100, 128, 143, 66],
       "accounts": [
         {
           "name": "signer",
@@ -108,19 +79,7 @@
               {
                 "kind": "const",
                 "value": [
-                  116,
-                  111,
-                  107,
-                  101,
-                  110,
-                  95,
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
+                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
                   108
                 ]
               },
@@ -172,11 +131,11 @@
         },
         {
           "name": "soft_cap",
-          "type": "u32"
+          "type": "u64"
         },
         {
           "name": "hard_cap",
-          "type": "u32"
+          "type": "u64"
         },
         {
           "name": "funding_model",
@@ -206,16 +165,7 @@
     },
     {
       "name": "create_user",
-      "discriminator": [
-        108,
-        227,
-        130,
-        130,
-        252,
-        109,
-        75,
-        218
-      ],
+      "discriminator": [108, 227, 130, 130, 252, 109, 75, 218],
       "accounts": [
         {
           "name": "signer",
@@ -233,12 +183,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
+                "value": [117, 115, 101, 114]
               },
               {
                 "kind": "account",
@@ -252,16 +197,7 @@
     },
     {
       "name": "initialize_token_proposal_factory",
-      "discriminator": [
-        25,
-        24,
-        25,
-        127,
-        239,
-        178,
-        160,
-        123
-      ],
+      "discriminator": [25, 24, 25, 127, 239, 178, 160, 123],
       "accounts": [
         {
           "name": "signer",
@@ -280,33 +216,9 @@
               {
                 "kind": "const",
                 "value": [
-                  116,
-                  111,
-                  107,
-                  101,
-                  110,
-                  95,
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
-                  108,
-                  95,
-                  102,
-                  97,
-                  99,
-                  116,
-                  111,
-                  114,
-                  121
+                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
+                  108, 95, 102, 97, 99, 116, 111, 114, 121
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "signer"
               }
             ]
           }
@@ -318,87 +230,41 @@
   "accounts": [
     {
       "name": "Contribution",
-      "discriminator": [
-        182,
-        187,
-        14,
-        111,
-        72,
-        167,
-        242,
-        212
-      ]
+      "discriminator": [182, 187, 14, 111, 72, 167, 242, 212]
     },
     {
       "name": "TokenProposal",
-      "discriminator": [
-        192,
-        42,
-        4,
-        79,
-        215,
-        17,
-        144,
-        39
-      ]
+      "discriminator": [192, 42, 4, 79, 215, 17, 144, 39]
     },
     {
       "name": "TokenProposalFactory",
-      "discriminator": [
-        78,
-        247,
-        145,
-        137,
-        65,
-        41,
-        172,
-        119
-      ]
+      "discriminator": [78, 247, 145, 137, 65, 41, 172, 119]
     },
     {
       "name": "User",
-      "discriminator": [
-        159,
-        117,
-        95,
-        227,
-        239,
-        151,
-        58,
-        236
-      ]
+      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "TokenProposalAlreadyCompleted",
-      "msg": "The Token Proposal has already been completed."
+      "name": "VotingPeriodNotStartedYet",
+      "msg": "The voting period on the Token Proposal has not started yet."
     },
     {
       "code": 6001,
-      "name": "TokenProposalAlreadyFinalized",
-      "msg": "The Token Proposal has already been finalized."
+      "name": "VotingPeriodAlreadyEnded",
+      "msg": "The voting period on the Token Proposal has already ended."
     },
     {
       "code": 6002,
-      "name": "TokenProposalNotFinalized",
-      "msg": "The Token Proposal has not been finalized."
+      "name": "VotesAlreadyReachedHardCap",
+      "msg": "The votes on the Token Proposal have already reached the hard cap."
     },
     {
       "code": 6003,
-      "name": "TokenProposalNotReadyToBeFinalized",
-      "msg": "The Token Proposal is not ready to be finalized."
-    },
-    {
-      "code": 6004,
       "name": "UserAlreadyVoted",
       "msg": "The User has already voted on the Token Proposal."
-    },
-    {
-      "code": 6005,
-      "name": "UserNotOwner",
-      "msg": "The User is not the Owner of the Token Proposal."
     }
   ],
   "types": [
@@ -430,6 +296,14 @@
           {
             "name": "user_id",
             "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
           }
         ]
       }
@@ -553,11 +427,11 @@
           },
           {
             "name": "soft_cap",
-            "type": "u32"
+            "type": "u64"
           },
           {
             "name": "hard_cap",
-            "type": "u32"
+            "type": "u64"
           },
           {
             "name": "funding_model",
@@ -592,20 +466,68 @@
             "type": "u32"
           },
           {
-            "name": "ready_to_be_finalized",
-            "type": "bool"
+            "name": "status",
+            "type": "string"
           },
           {
-            "name": "finalized",
-            "type": "bool"
+            "name": "submitted_at",
+            "type": "i64"
           },
           {
-            "name": "completed",
-            "type": "bool"
+            "name": "voting_started_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_ended_at",
+            "type": "i64"
+          },
+          {
+            "name": "soft_cap_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "hard_cap_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "quorum_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "passed_at",
+            "type": "i64"
+          },
+          {
+            "name": "executed_at",
+            "type": "i64"
+          },
+          {
+            "name": "cancelled_at",
+            "type": "i64"
+          },
+          {
+            "name": "rejected_at",
+            "type": "i64"
+          },
+          {
+            "name": "funds_released_at",
+            "type": "i64"
+          },
+          {
+            "name": "tokens_distributed_at",
+            "type": "i64"
           },
           {
             "name": "owner",
             "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
           }
         ]
       }
@@ -628,6 +550,14 @@
           {
             "name": "admin",
             "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
           }
         ]
       }
@@ -646,6 +576,20 @@
           {
             "name": "total_contributions",
             "type": "u64"
+          },
+          {
+            "name": "votes",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
           }
         ]
       }

@@ -19,6 +19,7 @@ export interface DaoGovernanceDtoQuery {
     periodDays: number;
     voteUnit: string;
   };
+  proposal_id: string;
   proposer_wallet: string;
 }
 

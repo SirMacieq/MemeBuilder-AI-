@@ -4,7 +4,7 @@ export interface TreasuryTokenDtoQuery {
     name: string;
     symbol: string;
     description: string;
-    logoURL: string;
+    logoUrl: string;
   };
   chain: string;
   fundingGoals: {
@@ -43,6 +43,7 @@ export interface TreasuryTokenDtoQuery {
     previousSuccess: boolean;
     rateLimit: string;
   };
+  proposal_id: string;
   proposer_wallet: string;
 }
 

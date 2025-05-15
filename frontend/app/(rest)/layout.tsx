@@ -4,6 +4,7 @@ import AppWalletProvider from "@/components/contexts/AppWalletProvider";
 import AppHeader from "@/components/organisms/AppHeader";
 import AppFooter from "@/components/organisms/AppFooter";
 import Hoc from "@/components/Hoc";
+import ReduxStoreProvider from "@/components/contexts/ReduxStoreProvider";
 
 export const metadata: Metadata = {
   title: "Meme Builder(ai)",
@@ -19,10 +20,12 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`antialiased flex flex-col min-h-screen`}>
         <AppWalletProvider>
-          <Hoc />
-          <AppHeader />
-          <main className="grow flex">{children}</main>
-          <AppFooter />
+          <ReduxStoreProvider>
+            <Hoc />
+            <AppHeader />
+            <main className="grow flex">{children}</main>
+            <AppFooter />
+          </ReduxStoreProvider>
         </AppWalletProvider>
       </body>
     </html>

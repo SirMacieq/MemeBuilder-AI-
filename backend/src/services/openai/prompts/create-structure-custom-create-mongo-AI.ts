@@ -29,7 +29,7 @@ INTERFACE MODEL TO FOLLOW:
     "name": "string",
     "symbol": "string",
     "description": "string",
-    "logoURL": ""
+    "logoUrl": ""
   },
   "selectedGoals": {
     "lp": true,

@@ -6,7 +6,7 @@ export type mongoTreasuryTokenResponse = {
     name: string;
     symbol: string;
     description: string;
-    logoURL: string;
+    logoUrl: string;
   };
   chain: string;
   fundingGoals: {
@@ -45,6 +45,7 @@ export type mongoTreasuryTokenResponse = {
     previousSuccess: boolean;
     rateLimit: string;
   };
+  proposal_id: string;
   proposer_wallet: string;
   created_at?: number;
   _id: Types.ObjectId;
