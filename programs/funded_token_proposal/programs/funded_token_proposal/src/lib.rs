@@ -14,7 +14,7 @@ use anchor_lang::solana_program::sysvar;
  */
 //use spl_token::instruction as token_instruction;
 
-declare_id!("7iEZx5UGZZfiTEj1vXqLXWsxybw9De7Xh1J7DHrRecin");
+declare_id!("CtaFEhyUB8FJvcHRfRutN2WGd2bQ9cL3DgXxpkwajfCf");
 
 // Constants
 pub const ANCHOR_DISCRIMINATOR_SPACE: usize = 8;
@@ -47,7 +47,7 @@ pub const TEXTS_USER_CREATE_SUCCESS: &str = "You successfully created User. User
  * Program *
  ***********/
 #[program]
-pub mod meme_builder_ai {
+pub mod funded_token_proposal {
     use super::*;
 
     pub fn initialize_token_proposal_factory(
@@ -173,6 +173,53 @@ pub mod meme_builder_ai {
         token_proposal_factory.token_proposal_count += 1;
         // Timestamps
         token_proposal_factory.updated_at = current_timestamp;
+
+        Ok(())
+    }
+
+    pub fn end_token_proposal_voting_period(
+        ctx: Context<EndTokenProposalVotingPeriod>,
+    ) -> Result<()> {
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
+
+        /*
+         * Token Proposal
+         */
+        let token_proposal = &mut ctx.accounts.token_proposal;
+
+        /*
+         * Guard Checks
+         */
+        //require!(
+        //    current_timestamp >
+        //    token_proposal.voting_started_at,
+        //    CustomError::VotingPeriodNotStartedYet
+        //);
+
+        require!(
+            current_timestamp <
+            (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
+            CustomError::VotingPeriodAlreadyEnded
+        );
+
+        // End Token Proposal's voting period.
+        token_proposal.voting_ended_at = current_timestamp;
+
+        /*
+         * Voting Mechanics
+         */
+        if token_proposal.amount_contributed >= token_proposal.soft_cap {
+            msg!(
+                "{} {}",
+                TEXTS_TOKEN_PROPOSAL_SOFT_CAP_REACHED, current_timestamp
+            );
+
+            // -> Automatically launch Token.
+        } else {
+            // -> Automatically refund Token.
+        }
 
         Ok(())
     }
@@ -320,7 +367,6 @@ pub struct InitializeTokenProposalFactory<'info> {
         init,
         seeds = [
             b"token_proposal_factory".as_ref(),
-            //signer.key().as_ref(),
         ],
         bump,
         payer = signer,
@@ -366,9 +412,7 @@ pub struct CreateTokenProposal<'info> {
         init,
         seeds = [
             b"token_proposal".as_ref(),
-            token_proposal_factory.key().as_ref(),
             token_proposal_factory.token_proposal_count.to_le_bytes().as_ref(),
-            signer.key().as_ref(),
         ],
         bump,
         payer = signer,
@@ -423,6 +467,23 @@ pub struct CreateTokenProposal<'info> {
             // Timestamps
             + TIMESTAMP_SPACE // created_at (i64 timestamp)
             + TIMESTAMP_SPACE // updated_at (i64 timestamp)
+    )]
+    pub token_proposal: Account<'info, TokenProposal>,
+    #[account(mut)]
+    pub token_proposal_factory: Account<'info, TokenProposalFactory>,
+}
+
+#[derive(Accounts)]
+pub struct EndTokenProposalVotingPeriod<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [
+            b"token_proposal".as_ref(),
+            token_proposal_factory.token_proposal_count.to_le_bytes().as_ref(),
+        ],
+        bump,
     )]
     pub token_proposal: Account<'info, TokenProposal>,
     #[account(mut)]
