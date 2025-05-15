@@ -5,12 +5,24 @@ import { type MemeBuilderAi } from "@/types/idlType";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
 import { dummyFundedToken } from "./testing/testingData";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import getSolanaCluster from "../envGetters/getSolanaCluster";
+import type { BN } from "@coral-xyz/anchor";
 
 type FundedTokenCreate = typeof dummyFundedToken;
 
 const { PublicKey, SystemProgram } = anchor.web3;
 
-const LAMPORTS_PER_SOL = 1_000_000;
+const cluster = getSolanaCluster();
+let network: WalletAdapterNetwork;
+switch (cluster) {
+  case "devnet":
+    network = WalletAdapterNetwork.Devnet;
+    break;
+  case "mainnet":
+    network = WalletAdapterNetwork.Mainnet;
+    break;
+}
 
 const connection = new Connection("https://api.devnet.solana.com");
 
@@ -38,14 +50,13 @@ export const getProgram = (wallet: AnchorWallet) => {
 const getProposalFactoryPDA = async (wallet: AnchorWallet) => {
   const program = getProgram(wallet);
 
-  const [tokenProposalFactoryAccountId, tokenProposalFactoryBump] =
-    await PublicKey.findProgramAddress(
-      [
-        anchor.utils.bytes.utf8.encode("token_proposal_factory"),
-        wallet.publicKey.toBytes(),
-      ],
-      program.programId,
-    );
+  const [tokenProposalFactoryAccountId] = await PublicKey.findProgramAddress(
+    [
+      anchor.utils.bytes.utf8.encode("token_proposal_factory"),
+      // wallet.publicKey.toBytes(), //admin
+    ],
+    program.programId,
+  );
   return tokenProposalFactoryAccountId;
 };
 
@@ -65,7 +76,6 @@ const getTokenProposalPDA = async (
   const newCount = parseInt(tokenProposalFactory.tokenProposalCount);
 
   const [tokenProposalAccountId, tokenProposalBump] =
-    // console.log("bn",new BN(0))
     await PublicKey.findProgramAddress(
       [
         anchor.utils.bytes.utf8.encode("token_proposal"),
@@ -83,8 +93,13 @@ const getTokenProposalPDA = async (
  */
 export const initializeTokenFactory = async (wallet: AnchorWallet) => {
   const program = getProgram(wallet);
+  console.debug("programid", program.programId.toBase58());
   const tokenProposalFactoryAccountId = await getProposalFactoryPDA(wallet);
-
+  console.debug("tokenProposalFactoryAccountId", tokenProposalFactoryAccountId);
+  const tkpdata = await program.account.tokenProposalFactory.fetchNullable(
+    tokenProposalFactoryAccountId,
+  );
+  console.debug("tkpdata", tkpdata);
   try {
     const tx = await program.methods
       .initializeTokenProposalFactory()
@@ -93,9 +108,7 @@ export const initializeTokenFactory = async (wallet: AnchorWallet) => {
         systemProgram: SystemProgram.programId,
         tokenProposalFactory: tokenProposalFactoryAccountId,
       })
-      // .signers([wallet])
       .rpc();
-    console.log(tx);
     return tx;
   } catch (e) {
     console.log("init error");
@@ -116,6 +129,7 @@ export const createTokenProposal = async (
     wallet,
     tokenProposalFactoryAccountId,
   );
+  console.debug("tokenProposalAccountId", tokenProposalAccountId.toBase58());
 
   const tx = await program.methods
     .createTokenProposal(
@@ -157,6 +171,7 @@ export const createUser = async (
   wallet: AnchorWallet,
   userAccountId: anchor.web3.PublicKey,
 ) => {
+  console.debug("fn: createUser");
   const program = getProgram(wallet);
 
   const tx = program.methods.createUser().accounts({
@@ -164,13 +179,31 @@ export const createUser = async (
     systemProgram: SystemProgram.programId,
     user: userAccountId,
   });
-  return tx.rpc();
+  const returnTx = await tx.rpc();
+  console.debug("returnTx", returnTx);
+  return returnTx;
+};
+/**
+ * Get One user
+ */
+export const getOneUser = async (
+  wallet: AnchorWallet,
+  userAccountId: string,
+) => {
+  console.debug("fn: getOneUser");
+  const program = getProgram(wallet);
+  const userPdaId = new PublicKey(userAccountId);
+
+  const userData = await program.account.user.fetch(userPdaId);
+  console.debug("userData", userData);
+  return userData;
 };
 
 /**
  * Get all token proposals
  */
 export const getAllTokenProposals = async (wallet: AnchorWallet) => {
+  console.debug("fn: getAllTokenProposals");
   const program = getProgram(wallet);
   const tokenProposalFactoryAccountId = await getProposalFactoryPDA(wallet);
 
@@ -183,6 +216,7 @@ export const getAllTokenProposals = async (wallet: AnchorWallet) => {
   const tokenProposals = (
     await program.account.tokenProposal.fetchMultiple(ids)
   ).map((p, i) => ({ ...p, id: ids[i].toBase58() }));
+  console.debug("tokenProposals", tokenProposals);
   return tokenProposals as OnChainProposalBase[];
 };
 
@@ -194,6 +228,7 @@ export const getOneTokenProposal = async (
   wallet: AnchorWallet,
   proposalIdString: string,
 ) => {
+  console.debug("fn: getOneTokenProposal");
   const proposalId = new anchor.web3.PublicKey(proposalIdString);
   const program = getProgram(wallet);
 
@@ -209,19 +244,24 @@ export const getOneTokenProposal = async (
     } else return acc;
   }, signatures[0].blockTime);
 
-  return {
+  const proposalReturn = {
     ...tokenProposalAccount,
     id: proposalId.toBase58(),
     createdAt: new Date(createdAt * 1000),
   } as OnChainProposal;
+
+  console.debug("proposalReturn", proposalReturn);
+  return proposalReturn;
 };
 /**
  * Gets or create contribution PDA
  */
+// FIX:
 export const getContributionPDA = async (
   wallet: AnchorWallet,
   tokenProposalAccountId: anchor.web3.PublicKey,
 ) => {
+  console.debug("fn: getContributionPDA");
   const program = getProgram(wallet);
 
   const [contributionAccountId] = await PublicKey.findProgramAddress(
@@ -238,6 +278,7 @@ export const getContributionPDA = async (
 /**
  * Contribute to proposal
  */
+// FIX:
 export const contributeToProposal = async (
   wallet: AnchorWallet,
   proposalIdString: string,
@@ -245,6 +286,7 @@ export const contributeToProposal = async (
   contributionAccountId: anchor.web3.PublicKey,
   userAccountId: anchor.web3.PublicKey,
 ) => {
+  console.debug("fn: contributeToProposal");
   const proposalId = new anchor.web3.PublicKey(proposalIdString);
   const program = getProgram(wallet);
 
@@ -260,6 +302,10 @@ export const contributeToProposal = async (
     .rpc();
   return tx;
 };
+
+//
+// TYPES
+//
 export type OnChainProposalBase = {
   token: {
     name: string;
@@ -279,8 +325,8 @@ export type OnChainProposalBase = {
     kol: number;
     ai: number;
   };
-  softCap: number;
-  hardCap: number;
+  softCap: BN;
+  hardCap: BN;
   fundingModel: {
     dynamicUnlock: boolean;
     endsEarlyOnHardCap: boolean;
@@ -295,12 +341,24 @@ export type OnChainProposalBase = {
   };
   amountContributed: anchor.BN;
   contributionCount: number;
-  readyToBeFinalized: boolean;
-  finalized: boolean;
-  completed: boolean;
   owner: anchor.web3.PublicKey;
   /** proposal pubkey in base58 */
   id: string;
+
+  // timestamps
+  cancelledAt: BN;
+  executedAt: BN;
+  fundsReleasedAt: BN;
+  hardCapReachedAt: BN;
+  passedAt: BN;
+  quorumReachedAt: BN;
+  rejectedAt: BN;
+  softCapReachedAt: BN;
+  submittedAt: BN;
+  tokensDistributedAt: BN;
+  updatedAt: BN;
+  votingEndedAt: BN;
+  votingStartedAt: BN;
 };
 export interface OnChainProposal extends OnChainProposalBase {
   createdAt: Date;
