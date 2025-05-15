@@ -2,11 +2,10 @@
 import { Button } from "@/components/ui/button";
 import ProposalTypeBadge from "@/components/atoms/ProposalTypeBadge";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { getAllTokenProposals, OnChainProposalBase } from "@/lib/net-api/chain";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import FractionProgress from "@/components/atoms/FractionProgress";
+import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 
 type RefinedProposal = {
   id: string;
@@ -20,19 +19,9 @@ type RefinedProposal = {
   raisedAmount: number;
 };
 const Proposals = () => {
-  const wallet = useAnchorWallet();
   const [filter, setFilter] = useState("All");
-  const [onChainProposals, setOnChainProposals] = useState<
-    OnChainProposalBase[]
-  >([]);
-
-  useEffect(() => {
-    if (!wallet) return;
-    (async () => {
-      const res = await getAllTokenProposals(wallet);
-      setOnChainProposals(res);
-    })();
-  }, [wallet]);
+  const { proposals: onChainProposals } = useFundedProposals();
+  console.log("onChainProposals", onChainProposals);
 
   const reducedOnChainProposals: typeof workingfakeProposals =
     onChainProposals.map((proposal) => ({
