@@ -133,7 +133,7 @@ export const createTokenProposal = async (
 
   const tx = await program.methods
     .createTokenProposal(
-      { ...data.token, logoUrl: data.token.logoURL },
+      data.token,
       data.selectedGoals,
       data.fundingGoals,
       data.softCap,
@@ -148,7 +148,7 @@ export const createTokenProposal = async (
       tokenProposal: tokenProposalAccountId,
       tokenProposalFactory: tokenProposalFactoryAccountId,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
   return tx;
 };
 
@@ -297,7 +297,7 @@ export const contributeToProposal = async (
       tokenProposal: proposalId,
       user: userAccountId,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
   return tx;
 };
 
