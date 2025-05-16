@@ -446,6 +446,11 @@
     "@solana/wallet-adapter-base" "^0.9.17"
     bs58 "^5.0.0"
 
+"@glennsl/bs-json@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@glennsl/bs-json/-/bs-json-3.0.0.tgz#b4e1cf6612270a8dd7287a8a71ebe17e8f0fb683"
+  integrity sha512-slqtGLd/c3yQK9Qfd1gfMB9JCzNU4wzCpVPfO9pXlG64M+te5r30FK++tb3uQEVlVLYtpgZ4wCHtkI8xoshgxQ==
+
 "@hookform/resolvers@^5.0.1":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-5.0.1.tgz#0a5e90310149e3ac5b017efcb5beb9bdbb711f38"
@@ -4558,6 +4563,11 @@ browserify-sign@^4.2.3:
     readable-stream "^2.3.8"
     safe-buffer "^5.2.1"
 
+bs-fetch@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/bs-fetch/-/bs-fetch-0.3.1.tgz#9c7d074b27e6bb2b9f2ec985964f32bcac49f79e"
+  integrity sha512-MxwnuuXPldXnoCtlpeN5JNbbmb1tVgsqpLfVunvuMLAIQNyP0TqoImHiQRTz38PBSN8/iX+2yVlm+PFJfnHHiA==
+
 bs58@6.0.0, bs58@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/bs58/-/bs58-6.0.0.tgz#a2cda0130558535dd281a2f8697df79caaf425d8"
@@ -7813,7 +7823,7 @@ node-fetch@2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
-node-fetch@^2.7.0:
+node-fetch@^2.3.0, node-fetch@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
@@ -8136,6 +8146,20 @@ picomatch@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.2.tgz#77c742931e8f3b8820946c76cd0c1f13730d1dab"
   integrity sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==
+
+pinata-sdk@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/pinata-sdk/-/pinata-sdk-0.1.7.tgz#26d0b07b622ce0235c48ed31a5c15f1a5bb47d66"
+  integrity sha512-hjNRUp2M0SySwfDx0kLtNKVIDCvmxGpWo1cVipGlEotMjKWsgzbPdFHBDNGly8ZRv0/6puIvGMm5QkQLiIf3bg==
+  dependencies:
+    "@glennsl/bs-json" "^3.0.0"
+    bs-fetch "^0.3.1"
+    node-fetch "^2.3.0"
+
+pinata@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/pinata/-/pinata-2.3.0.tgz#4ca8ebb3d63329c653d750d827ca5b91f06551ea"
+  integrity sha512-WMS5Y5UsocoplZiMdpHP3WQ97BzM3GtM2BKr4kLYJz0ug/5sAZkLxDOoC9SSGpiGjacUwA0BU43nquIJ70YwZw==
 
 pino-abstract-transport@v0.5.0:
   version "0.5.0"

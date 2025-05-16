@@ -7,10 +7,6 @@ import Image from "next/image";
 import FractionProgress from "@/components/atoms/FractionProgress";
 import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 import { useWallet } from "@solana/wallet-adapter-react";
-//@ts-ignore
-import("@jup-ag/terminal/css");
-//@ts-ignore
-import('./Dashboard.css')
 
 const endpoint = "https://api.mainnet-beta.solana.com";
 type RefinedProposal = {
@@ -25,7 +21,8 @@ type RefinedProposal = {
   raisedAmount: number;
 };
 const Proposals = () => {
-  const [filter, setFilter] = useState("All");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [filter, setFilter] = useState<string>("All");
   const { proposals: onChainProposals } = useFundedProposals();
   console.log("onChainProposals", onChainProposals);
   const walletProps = useWallet();
@@ -154,6 +151,8 @@ const Proposals = () => {
               if (typeof window !== "undefined") {
                 import("@jup-ag/terminal").then((mod) => {
                   const init = mod.init;
+                  //@ts-ignore
+                  import("@jup-ag/terminal/css");
                   init({
                     enableWalletPassthrough: true,
                     passthroughWalletContextState: walletProps,
