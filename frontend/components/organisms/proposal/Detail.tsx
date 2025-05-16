@@ -42,9 +42,13 @@ const Detail = ({ id }: { id: string | string[] | undefined }) => {
   useEffect(() => {
     (async () => {
       if (!proposal) return;
-      const res = await fetch(proposal.token.logoUrl);
-      const json = await res.json();
-      setImageUrl(json.image);
+      try {
+        const res = await fetch(proposal.token.logoUrl);
+        const json = await res.json();
+        setImageUrl(json.image);
+      } catch (e) {
+        console.log(e);
+      }
     })();
   }, [proposal, proposal?.token.logoUrl]);
 

@@ -25,9 +25,13 @@ const ProposalCard = ({ proposal }: { proposal: any }) => {
   };
   useEffect(() => {
     (async () => {
-      const res = await fetch(proposal.imgSrc);
-      const json = await res.json();
-      setImageUrl(json.image);
+      try {
+        const res = await fetch(proposal.imgSrc);
+        const json = await res.json();
+        setImageUrl(json.image);
+      } catch (e) {
+        console.log(e);
+      }
     })();
   }, [proposal.imgSrc]);
   return (
