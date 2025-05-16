@@ -1,7 +1,7 @@
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import { Connection } from "@solana/web3.js";
 import idl from "@/idl.json";
-import { type MemeBuilderAi } from "@/types/idlType";
+import { type FundedTokenProposal } from "@/types/idlType";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@coral-xyz/anchor";
 import { dummyFundedToken } from "./testing/testingData";
@@ -41,7 +41,7 @@ const getProvider = (wallet: AnchorWallet) => {
  */
 export const getProgram = (wallet: AnchorWallet) => {
   const provider = getProvider(wallet);
-  return new Program<MemeBuilderAi>(idl, provider);
+  return new Program<FundedTokenProposal>(idl, provider);
 };
 
 /**
@@ -342,16 +342,10 @@ export type OnChainProposalBase = {
   id: string;
 
   // timestamps
-  cancelledAt: BN;
-  executedAt: BN;
-  fundsReleasedAt: BN;
   hardCapReachedAt: BN;
   passedAt: BN;
-  quorumReachedAt: BN;
   rejectedAt: BN;
   softCapReachedAt: BN;
-  submittedAt: BN;
-  tokensDistributedAt: BN;
   updatedAt: BN;
   votingEndedAt: BN;
   votingStartedAt: BN;
