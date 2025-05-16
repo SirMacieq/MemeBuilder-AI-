@@ -36,6 +36,8 @@ describe("Funded Token Proposal", () => {
 
   let contributionAccountId;
   let contributionBump;
+  let initialTokenProposalFactoryTokenProposalCount;
+  let tokenProposalAccount;
   let tokenProposalAccountId;
   let tokenProposalBump;
   let tokenProposalFactoryAccountId;
@@ -91,11 +93,13 @@ describe("Funded Token Proposal", () => {
      *     token_proposal_factory.token_proposal_count.to_le_bytes().as_ref(),
      * ]
      */
+    initialTokenProposalFactoryTokenProposalCount = 0;
     [tokenProposalAccountId, tokenProposalBump] = await PublicKey.findProgramAddress(
       [
         anchor.utils.bytes.utf8.encode('token_proposal'),
         // Initial Token Proposal Factory's Token Proposal count
-        new BN(0).toBuffer('le', 4),
+        new BN(initialTokenProposalFactoryTokenProposalCount)
+          .toBuffer('le', 4),
       ],
       program.programId,
     );
@@ -230,7 +234,6 @@ describe("Funded Token Proposal", () => {
     let selectedGoals;
     let softCap;
     let token;
-    let tokenProposalAccount;
     let voting;
 
     before(async () => {
@@ -255,7 +258,7 @@ describe("Funded Token Proposal", () => {
         ai: 0,
       };
       softCap = new BN(0),
-      hardCap = new BN(0),
+      hardCap = new BN(10 * LAMPORTS_PER_SOL),
       fundingModel = {
         dynamicUnlock: false,
         endsEarlyOnHardCap: false,
@@ -269,17 +272,16 @@ describe("Funded Token Proposal", () => {
         escrowedFund: false
       };
 
-      const tx = await program.methods
-        .createTokenProposal(
-          token,
-          selectedGoals,
-          fundingGoals,
-          softCap,
-          hardCap,
-          fundingModel,
-          airdropModules,
-          voting,
-        )
+      const tx = await program.methods.createTokenProposal(
+        token,
+        selectedGoals,
+        fundingGoals,
+        softCap,
+        hardCap,
+        fundingModel,
+        airdropModules,
+        voting,
+      )
         .accounts({
           signer: admin.publicKey,
           systemProgram: SystemProgram.programId,
@@ -430,8 +432,7 @@ describe("Funded Token Proposal", () => {
 
       amount = new BN(100000000); // 0.1 SOL in lamports
 
-      const tx = await program.methods
-        .contributeToTokenProposal(amount)
+      const tx = await program.methods.contributeToTokenProposal(amount)
         .accounts({
           contribution: contributionAccountId,
           signer: admin.publicKey,
@@ -517,6 +518,33 @@ describe("Funded Token Proposal", () => {
       assert.ok(
         Math.abs(
           userAccount.updatedAt.toNumber() - currentUnixTimestamp
+        ) <= TIMESTAMP_TOLERANCE
+      );
+    });
+  });
+
+  describe("End Token Proposal's Voting Period:", () => {
+    before(async () => {
+      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+
+      const tx = await program.methods.endTokenProposalVotingPeriod(
+        initialTokenProposalFactoryTokenProposalCount
+      )
+        .accounts({
+          signer: admin.publicKey,
+          tokenProposal: tokenProposalAccountId,
+          tokenProposalFactory: tokenProposalFactoryAccountId,
+        })
+        .rpc();
+
+      tokenProposalAccount = await program.account.tokenProposal
+        .fetch(tokenProposalAccountId);
+    });
+
+    it("should set the Token Proposal's voting ended at to the current UNIX timestamp.", async () => {
+      assert.ok(
+        Math.abs(
+          tokenProposalAccount.votingEndedAt.toNumber() - currentUnixTimestamp
         ) <= TIMESTAMP_TOLERANCE
       );
     });

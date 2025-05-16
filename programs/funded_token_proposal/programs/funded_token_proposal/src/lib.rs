@@ -172,6 +172,7 @@ pub mod funded_token_proposal {
 
     pub fn end_token_proposal_voting_period(
         ctx: Context<EndTokenProposalVotingPeriod>,
+        _token_proposal_index: u32,
     ) -> Result<()> {
         // Clock
         let clock = Clock::get()?;
@@ -543,6 +544,7 @@ pub struct CreateTokenProposal<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(_token_proposal_index: u32)]
 pub struct EndTokenProposalVotingPeriod<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -550,7 +552,7 @@ pub struct EndTokenProposalVotingPeriod<'info> {
         mut,
         seeds = [
             b"token_proposal".as_ref(),
-            token_proposal_factory.token_proposal_count.to_le_bytes().as_ref(),
+            _token_proposal_index.to_le_bytes().as_ref(),
         ],
         bump,
     )]
