@@ -4,8 +4,7 @@
  * Imports *
  ***********/
 use anchor_lang::prelude::*;
-//use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::solana_program::sysvar;
+use anchor_lang::system_program::{Transfer, transfer};
 /*
  * The SPL Token Program is part of the Solana Program Library. It's a separate
  * program that is already deployed on-chain and that manages token creation,
@@ -226,11 +225,12 @@ pub mod funded_token_proposal {
 
             token_proposal.status = String::from("passed");
 
-            // TODO -> Automatically launch Token.
+            // -> Launch Token with `create_token_mint` (manually for now).
         } else {
             token_proposal.status = String::from("rejected");
 
-            // TODO -> Automatically refund Contributions.
+            // -> Refund individual Contributions with
+            // `return_funds_from_token_proposal` (manually for now).
         }
 
         Ok(())
@@ -249,6 +249,7 @@ pub mod funded_token_proposal {
          */
         let contribution = &mut ctx.accounts.contribution;
         let signer = &ctx.accounts.signer;
+        let system_program = &ctx.accounts.system_program;
         let token_proposal = &mut ctx.accounts.token_proposal;
         let user = &mut ctx.accounts.user;
 
@@ -272,22 +273,18 @@ pub mod funded_token_proposal {
         );
 
         /*
-         * Transfer
+         * Transfer from the User Account to the Token Proposal Account the
+         * amount of its Contribution.
          */
-        // Create the transfer instruction.
-        let instruction = anchor_lang::solana_program::system_instruction::transfer(
-            &signer.key(),
-            &token_proposal.key(),
-            amount,
+        let cpi_context = CpiContext::new(
+            system_program.to_account_info(),
+            Transfer {
+                from: signer.to_account_info(),
+                to: token_proposal.to_account_info(),
+            },
         );
-        // Invoke the transfer instruction.
-        let _ = anchor_lang::solana_program::program::invoke(
-            &instruction,
-            &[
-                signer.to_account_info(),
-                token_proposal.to_account_info(),
-            ],
-        );
+
+        transfer(cpi_context, amount)?;
 
         /*
          * Contribution
@@ -334,7 +331,7 @@ pub mod funded_token_proposal {
                     // end the vote early.
                     token_proposal.voting_ended_at = current_timestamp;
 
-                    // TODO -> Automatically launch Token.
+                    // -> Launch Token with `create_token_mint` (manually for now).
 
                     // Else if SoftCap has been reached,
                 } else if token_proposal.amount_contributed >= token_proposal.soft_cap {
@@ -346,7 +343,7 @@ pub mod funded_token_proposal {
                     token_proposal.status = String::from("soft-cap-reached");
                     token_proposal.soft_cap_reached_at = current_timestamp;
 
-                    // -> Voting continue ...
+                    // -> Voting period still active. Voting continue ...
                 }
             }
 
@@ -369,7 +366,6 @@ pub mod funded_token_proposal {
         let rent = &ctx.accounts.rent;
         let system_program = &ctx.accounts.system_program;
         let token_metadata_program = &ctx.accounts.token_metadata_program;
-        let token_program = &ctx.accounts.token_program;
         let token_proposal = &mut ctx.accounts.token_proposal;
 
         msg!(
@@ -420,6 +416,65 @@ pub mod funded_token_proposal {
         token_proposal.status = String::from("token-mint-created");
         // Lifecycle States (Key States/Flags) Timestamps
         token_proposal.token_mint_created_at = current_timestamp;
+
+        Ok(())
+    }
+
+    pub fn return_funds_from_token_proposal(
+        ctx: Context<ReturnFundsFromTokenProposal>,
+        amount: u64,
+    ) -> Result<()> {
+        // Clock
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
+
+        /*
+         * Accounts
+         */
+        let contribution = &mut ctx.accounts.contribution;
+        let signer = &ctx.accounts.signer;
+        let system_program = &ctx.accounts.system_program;
+        let token_proposal = &mut ctx.accounts.token_proposal;
+        let user = &mut ctx.accounts.user;
+
+        /*
+         * Guard Checks
+         */
+        // TODO: Uncomment that guard check when ready!
+        //require!(
+        //    current_timestamp >=
+        //    (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
+        //    CustomError::VotingPeriodNotEndedYet
+        //);
+
+        require!(
+            token_proposal.hard_cap_reached_at == 0,
+            CustomError::VotesAlreadyReachedHardCap
+        );
+
+        require!(
+            token_proposal.soft_cap_reached_at == 0,
+            CustomError::VotesAlreadyReachedSoftCap
+        );
+
+        require!(
+            user.votes.contains(&token_proposal.to_account_info().key),
+            CustomError::UserNeverVoted
+        );
+
+        /*
+         * Transfer from the Token Proposal Account back to the User Account the
+         * amount of its Contribution.
+         */
+        let cpi_context = CpiContext::new(
+            system_program.to_account_info(),
+            Transfer {
+                from: token_proposal.to_account_info(),
+                to: user.to_account_info(),
+            },
+        );
+
+        transfer(cpi_context, contribution.amount)?;
 
         Ok(())
     }
@@ -618,6 +673,18 @@ pub struct CreateTokenMint<'info> {
     pub token_proposal: Account<'info, TokenProposal>,
 }
 
+#[derive(Accounts)]
+pub struct ReturnFundsFromTokenProposal<'info> {
+    #[account(mut)]
+    pub contribution: Account<'info, Contribution>,
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    #[account(mut)]
+    pub token_proposal: Account<'info, TokenProposal>,
+    #[account(mut)]
+    pub user: Account<'info, User>,
+}
+
 /************
  * Accounts *
  ************/
@@ -779,12 +846,16 @@ pub struct Voting {
  *********/
 #[error_code]
 enum CustomError {
-    #[msg("The voting period on the Token Proposal has not ended yet.")]
-    VotingPeriodNotEndedYet,
-    #[msg("The voting period on the Token Proposal has already ended.")]
-    VotingPeriodAlreadyEnded,
-    #[msg("The votes on the Token Proposal have already reached the hard cap.")]
-    VotesAlreadyReachedHardCap,
     #[msg("The User has already voted on the Token Proposal.")]
     UserAlreadyVoted,
+    #[msg("The User has never voted on the Token Proposal.")]
+    UserNeverVoted,
+    #[msg("The votes on the Token Proposal have already reached the hard cap.")]
+    VotesAlreadyReachedHardCap,
+    #[msg("The votes on the Token Proposal have already reached the soft cap.")]
+    VotesAlreadyReachedSoftCap,
+    #[msg("The voting period on the Token Proposal has already ended.")]
+    VotingPeriodAlreadyEnded,
+    #[msg("The voting period on the Token Proposal has not ended yet.")]
+    VotingPeriodNotEndedYet,
 }
