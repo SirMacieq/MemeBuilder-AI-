@@ -265,7 +265,7 @@ export const getContributionPDA = async (
     [
       anchor.utils.bytes.utf8.encode("contribution"),
       tokenProposalAccountId.toBytes(),
-      wallet.publicKey.toBytes(), // should be admin
+      wallet.publicKey.toBytes(),
     ],
     program.programId,
   );

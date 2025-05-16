@@ -54,6 +54,7 @@ import {
 import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
 import { BN } from "@coral-xyz/anchor";
 import { fundedTokenCreate } from "@/lib/api/proposals/funded-token";
+import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -101,6 +102,7 @@ const FoundedTokenFormSchema = z.object({
  */
 const FoundedTokenForm = () => {
   const wallet = useAnchorWallet();
+  const { refresh } = useFundedProposals();
   const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
     resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
@@ -224,6 +226,7 @@ const FoundedTokenForm = () => {
       proposal_id: tokenProposalAccountId.toBase58(),
       proposer_wallet: wallet.publicKey.toBase58(),
     });
+    refresh();
     setCreatedProposalHash(tx);
     setDialogMessage("Proposal submitted successfully!");
 
@@ -319,7 +322,9 @@ const FoundedTokenForm = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger />
         <DialogContent>
-          <DialogTitle>We&apos;re cooking it...</DialogTitle>
+          <DialogTitle>
+            {createdProposalHash === "" ? "We&apos;re cooking it..." : "DONE !"}
+          </DialogTitle>
           <DialogDescription className="text-wrap wrap-anywhere">
             You should see your wallet asking you to validate transaction to
             create the proposal
