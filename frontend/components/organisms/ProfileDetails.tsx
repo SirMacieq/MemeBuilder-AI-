@@ -5,18 +5,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import PubKeyDisplay from "../atoms/PubKeyDisplay";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogHeader,
-  DialogFooter,
-  DialogOverlay,
-  DialogContent,
-  DialogClose,
-  DialogTitle,
-  DialogDescription,
-  DialogPortal,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import ContributionDetails from "./ContributionDetails";
 import { type OnChainProposalBase } from "@/lib/net-api/chain";
 
@@ -70,7 +59,7 @@ const ProfileDetails = () => {
               <tr
                 key={proposal.id}
                 onClick={() => setContributionToPopup(proposal)}
-                className="cursor-pointer hover:brightness-110"
+                className="cursor-pointer hover:bg-accent"
               >
                 <td>{proposal.token.symbol}</td>
                 <td className="text-right">{proposal.token.name}</td>

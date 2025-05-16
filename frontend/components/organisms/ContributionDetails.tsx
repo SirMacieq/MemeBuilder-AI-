@@ -35,8 +35,6 @@ const ContributionDetails = ({
     getContribution();
   }, [wallet, proposal, getContribution]);
 
-  console.log("contribution", contribution);
-  console.log("proposal", proposal);
   return (
     <div>
       <h3 className="text-lg font-semibold mb-2">ContributionDetails</h3>
