@@ -1,5 +1,5 @@
 #! /bin/bash
 # solana confi
-anchor build
 anchor keys sync
-anchor deploy
+anchor build
+anchor deploy --provider.cluster devnet

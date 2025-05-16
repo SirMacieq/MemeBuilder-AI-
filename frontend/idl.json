@@ -1,7 +1,7 @@
 {
-  "address": "35dcDMFG3XsntwwLTf7ZhTS3kxDjFDeFguZJzMgUR66q",
+  "address": "Bwfn53i3zdqs8n9KqiZaphPgATv1LPdaNToXujFso9bD",
   "metadata": {
-    "name": "meme_builder_ai",
+    "name": "funded_token_proposal",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "contribute_to_token_proposal",
-      "discriminator": [141, 232, 182, 155, 6, 64, 109, 159],
+      "discriminator": [
+        141,
+        232,
+        182,
+        155,
+        6,
+        64,
+        109,
+        159
+      ],
       "accounts": [
         {
           "name": "contribution",
@@ -19,7 +28,18 @@
               {
                 "kind": "const",
                 "value": [
-                  99, 111, 110, 116, 114, 105, 98, 117, 116, 105, 111, 110
+                  99,
+                  111,
+                  110,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
@@ -59,8 +79,96 @@
       ]
     },
     {
+      "name": "create_token_mint",
+      "discriminator": [
+        35,
+        109,
+        237,
+        196,
+        54,
+        218,
+        33,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "metadata_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint_account"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "mint_account",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_proposal",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "create_token_proposal",
-      "discriminator": [184, 177, 112, 165, 100, 128, 143, 66],
+      "discriminator": [
+        184,
+        177,
+        112,
+        165,
+        100,
+        128,
+        143,
+        66
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -79,22 +187,26 @@
               {
                 "kind": "const",
                 "value": [
-                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
                   108
                 ]
               },
               {
                 "kind": "account",
-                "path": "token_proposal_factory"
-              },
-              {
-                "kind": "account",
                 "path": "token_proposal_factory.token_proposal_count",
                 "account": "TokenProposalFactory"
-              },
-              {
-                "kind": "account",
-                "path": "signer"
               }
             ]
           }
@@ -109,7 +221,7 @@
           "name": "token",
           "type": {
             "defined": {
-              "name": "Token"
+              "name": "ProposalToken"
             }
           }
         },
@@ -165,7 +277,16 @@
     },
     {
       "name": "create_user",
-      "discriminator": [108, 227, 130, 130, 252, 109, 75, 218],
+      "discriminator": [
+        108,
+        227,
+        130,
+        130,
+        252,
+        109,
+        75,
+        218
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -183,7 +304,12 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114]
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
               },
               {
                 "kind": "account",
@@ -196,8 +322,78 @@
       "args": []
     },
     {
+      "name": "end_token_proposal_voting_period",
+      "discriminator": [
+        55,
+        221,
+        22,
+        243,
+        5,
+        20,
+        203,
+        180
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_token_proposal_index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_proposal_factory",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "_token_proposal_index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "initialize_token_proposal_factory",
-      "discriminator": [25, 24, 25, 127, 239, 178, 160, 123],
+      "discriminator": [
+        25,
+        24,
+        25,
+        127,
+        239,
+        178,
+        160,
+        123
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -216,8 +412,28 @@
               {
                 "kind": "const",
                 "value": [
-                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
-                  108, 95, 102, 97, 99, 116, 111, 114, 121
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108,
+                  95,
+                  102,
+                  97,
+                  99,
+                  116,
+                  111,
+                  114,
+                  121
                 ]
               }
             ]
@@ -230,26 +446,62 @@
   "accounts": [
     {
       "name": "Contribution",
-      "discriminator": [182, 187, 14, 111, 72, 167, 242, 212]
+      "discriminator": [
+        182,
+        187,
+        14,
+        111,
+        72,
+        167,
+        242,
+        212
+      ]
     },
     {
       "name": "TokenProposal",
-      "discriminator": [192, 42, 4, 79, 215, 17, 144, 39]
+      "discriminator": [
+        192,
+        42,
+        4,
+        79,
+        215,
+        17,
+        144,
+        39
+      ]
     },
     {
       "name": "TokenProposalFactory",
-      "discriminator": [78, 247, 145, 137, 65, 41, 172, 119]
+      "discriminator": [
+        78,
+        247,
+        145,
+        137,
+        65,
+        41,
+        172,
+        119
+      ]
     },
     {
       "name": "User",
-      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+      "discriminator": [
+        159,
+        117,
+        95,
+        227,
+        239,
+        151,
+        58,
+        236
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "VotingPeriodNotStartedYet",
-      "msg": "The voting period on the Token Proposal has not started yet."
+      "name": "VotingPeriodNotEndedYet",
+      "msg": "The voting period on the Token Proposal has not ended yet."
     },
     {
       "code": 6001,
@@ -349,6 +601,30 @@
       }
     },
     {
+      "name": "ProposalToken",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "logo_url",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "SelectedGoals",
       "type": {
         "kind": "struct",
@@ -373,39 +649,19 @@
       }
     },
     {
-      "name": "Token",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "symbol",
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "name": "logo_url",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
       "name": "TokenProposal",
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "index",
+            "type": "u32"
+          },
+          {
             "name": "token",
             "type": {
               "defined": {
-                "name": "Token"
+                "name": "ProposalToken"
               }
             }
           },
@@ -470,10 +726,6 @@
             "type": "string"
           },
           {
-            "name": "submitted_at",
-            "type": "i64"
-          },
-          {
             "name": "voting_started_at",
             "type": "i64"
           },
@@ -490,19 +742,7 @@
             "type": "i64"
           },
           {
-            "name": "quorum_reached_at",
-            "type": "i64"
-          },
-          {
             "name": "passed_at",
-            "type": "i64"
-          },
-          {
-            "name": "executed_at",
-            "type": "i64"
-          },
-          {
-            "name": "cancelled_at",
             "type": "i64"
           },
           {
@@ -510,11 +750,11 @@
             "type": "i64"
           },
           {
-            "name": "funds_released_at",
+            "name": "token_mint_created_at",
             "type": "i64"
           },
           {
-            "name": "tokens_distributed_at",
+            "name": "funds_returned_at",
             "type": "i64"
           },
           {
