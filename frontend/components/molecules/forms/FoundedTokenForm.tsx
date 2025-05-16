@@ -316,11 +316,7 @@ const FoundedTokenForm = () => {
 
   return (
     <div className="w-full pt-[32px]">
-<<<<<<< Updated upstream
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-=======
-      <Dialog open={form.formState.isSubmitting}>
->>>>>>> Stashed changes
         <DialogTrigger />
         <DialogContent>
           <DialogTitle>We&apos;re cooking it...</DialogTitle>
