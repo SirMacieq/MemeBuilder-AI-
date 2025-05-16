@@ -4,14 +4,13 @@ import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 //@ts-ignore
 import * as anchor from "@coral-xyz/anchor";
 import idl from "./idl.json";
-import fs from "fs";
 const dotenv = require("dotenv");
 dotenv.config();
 
-const PATH_TO_PAYER_KEY = process.env.SOLANA_ADMIN_KEYPAIR;
+const PAYER_KEY = process.env.SOLANA_ADMIN_KEYPAIR;
 
 export const endTokenProposal = async (proposal: any) => {
-  if (!PATH_TO_PAYER_KEY) {
+  if (!PAYER_KEY) {
     return {
       success: false,
       proposalId: proposal.proposal_id,
@@ -20,9 +19,7 @@ export const endTokenProposal = async (proposal: any) => {
   }
 
   try {
-    const secretKey = new Uint8Array(
-      JSON.parse(fs.readFileSync(PATH_TO_PAYER_KEY, "utf-8"))
-    );
+    const secretKey = new Uint8Array(JSON.parse(PAYER_KEY));
     if (!secretKey || secretKey.length === 0) {
       throw new Error("Admin keypair is empty or invalid");
     }
@@ -37,14 +34,18 @@ export const endTokenProposal = async (proposal: any) => {
 
     const [tokenProposalFactoryAccountId] = await PublicKey.findProgramAddress(
       [anchor.utils.bytes.utf8.encode("token_proposal_factory")],
-      program.programId
+      program.programId,
     );
 
     const proposalId = new PublicKey(proposal.proposal_id);
 
+    // get on chain proposal
+    const onChainProposalData =
+      await program.account.tokenProposal.fetch(proposalId);
+
     const response = await program.methods
       .endTokenProposalVotingPeriod(
-        new anchor.BN(0).toArrayLike(Buffer, "le", 4)
+        new anchor.BN(onChainProposalData.index).toArrayLike(Buffer, "le", 4),
       )
       .accounts({
         signer: wallet.publicKey,
@@ -55,7 +56,7 @@ export const endTokenProposal = async (proposal: any) => {
     return {
       success: true,
       proposalId: proposal.proposal_id,
-      tokenId: response
+      tokenId: response,
     };
   } catch (error: any) {
     return {
