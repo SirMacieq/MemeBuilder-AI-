@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-funded_token_proposal = "CtaFEhyUB8FJvcHRfRutN2WGd2bQ9cL3DgXxpkwajfCf"
+funded_token_proposal = "Bwfn53i3zdqs8n9KqiZaphPgATv1LPdaNToXujFso9bD"
 
 [registry]
 url = "https://api.apr.dev"

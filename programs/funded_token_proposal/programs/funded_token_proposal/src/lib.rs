@@ -22,7 +22,7 @@ use anchor_spl::metadata::{
 };
 use anchor_spl::token::{Mint, Token};
 
-declare_id!("CtaFEhyUB8FJvcHRfRutN2WGd2bQ9cL3DgXxpkwajfCf");
+declare_id!("Bwfn53i3zdqs8n9KqiZaphPgATv1LPdaNToXujFso9bD");
 
 // Constants
 pub const ANCHOR_DISCRIMINATOR_SPACE: usize = 8;
