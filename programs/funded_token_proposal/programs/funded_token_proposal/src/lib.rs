@@ -34,7 +34,6 @@ pub const STATUS_LENGTH_MAX: usize = 17; // "token-mint-created"
 pub const STRING_SPACE: usize = 4;
 pub const TIMESTAMP_SPACE: usize = I64_SPACE;
 pub const TOKEN_DECIMAL: u8 = 9; // SPL Token default decimals
-pub const TOKEN_METADATA_URI: &str = "https://raw.githubusercontent.com/solana-developers/program-examples/new-examples/tokens/tokens/.assets/spl-token.json";
 pub const TOKEN_PROPOSAL_FACTORY_TOKEN_PROPOSALS_MAX: usize = 100;
 pub const TOKEN_PROPOSAL_NAME_LENGTH_MAX: usize = 50;
 pub const TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX: usize = 3;
@@ -412,7 +411,7 @@ pub mod funded_token_proposal {
             DataV2 {
                 name: token_proposal.token.name.clone(),
                 symbol: token_proposal.token.symbol.clone(),
-                uri: TOKEN_METADATA_URI.to_string(),
+                uri: token_proposal.token.logo_url.clone(),
                 seller_fee_basis_points: 0,
                 creators: None,
                 collection: None,
