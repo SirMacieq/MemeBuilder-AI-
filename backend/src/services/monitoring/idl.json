@@ -1,0 +1,618 @@
+{
+  "address": "35dcDMFG3XsntwwLTf7ZhTS3kxDjFDeFguZJzMgUR66q",
+  "metadata": {
+    "name": "meme_builder_ai",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "contribute_to_token_proposal",
+      "discriminator": [141, 232, 182, 155, 6, 64, 109, 159],
+      "accounts": [
+        {
+          "name": "contribution",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99, 111, 110, 116, 114, 105, 98, 117, 116, 105, 111, 110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_proposal"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_proposal",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_token_proposal",
+      "discriminator": [184, 177, 112, 165, 100, 128, 143, 66],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_proposal_factory"
+              },
+              {
+                "kind": "account",
+                "path": "token_proposal_factory.token_proposal_count",
+                "account": "TokenProposalFactory"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_proposal_factory",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "token",
+          "type": {
+            "defined": {
+              "name": "Token"
+            }
+          }
+        },
+        {
+          "name": "selected_goals",
+          "type": {
+            "defined": {
+              "name": "SelectedGoals"
+            }
+          }
+        },
+        {
+          "name": "funding_goals",
+          "type": {
+            "defined": {
+              "name": "FundingGoals"
+            }
+          }
+        },
+        {
+          "name": "soft_cap",
+          "type": "u64"
+        },
+        {
+          "name": "hard_cap",
+          "type": "u64"
+        },
+        {
+          "name": "funding_model",
+          "type": {
+            "defined": {
+              "name": "FundingModel"
+            }
+          }
+        },
+        {
+          "name": "airdrop_modules",
+          "type": {
+            "defined": {
+              "name": "AirdropModules"
+            }
+          }
+        },
+        {
+          "name": "voting",
+          "type": {
+            "defined": {
+              "name": "Voting"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_user",
+      "discriminator": [108, 227, 130, 130, 252, 109, 75, 218],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_token_proposal_factory",
+      "discriminator": [25, 24, 25, 127, 239, 178, 160, 123],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_proposal_factory",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116, 111, 107, 101, 110, 95, 112, 114, 111, 112, 111, 115, 97,
+                  108, 95, 102, 97, 99, 116, 111, 114, 121
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Contribution",
+      "discriminator": [182, 187, 14, 111, 72, 167, 242, 212]
+    },
+    {
+      "name": "TokenProposal",
+      "discriminator": [192, 42, 4, 79, 215, 17, 144, 39]
+    },
+    {
+      "name": "TokenProposalFactory",
+      "discriminator": [78, 247, 145, 137, 65, 41, 172, 119]
+    },
+    {
+      "name": "User",
+      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "VotingPeriodNotStartedYet",
+      "msg": "The voting period on the Token Proposal has not started yet."
+    },
+    {
+      "code": 6001,
+      "name": "VotingPeriodAlreadyEnded",
+      "msg": "The voting period on the Token Proposal has already ended."
+    },
+    {
+      "code": 6002,
+      "name": "VotesAlreadyReachedHardCap",
+      "msg": "The votes on the Token Proposal have already reached the hard cap."
+    },
+    {
+      "code": 6003,
+      "name": "UserAlreadyVoted",
+      "msg": "The User has already voted on the Token Proposal."
+    }
+  ],
+  "types": [
+    {
+      "name": "AirdropModules",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "drop_score",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Contribution",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_proposal_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "user_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingGoals",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lp",
+            "type": "u32"
+          },
+          {
+            "name": "treasury",
+            "type": "u32"
+          },
+          {
+            "name": "kol",
+            "type": "u32"
+          },
+          {
+            "name": "ai",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingModel",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dynamic_unlock",
+            "type": "bool"
+          },
+          {
+            "name": "ends_early_on_hard_cap",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SelectedGoals",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lp",
+            "type": "bool"
+          },
+          {
+            "name": "treasury",
+            "type": "bool"
+          },
+          {
+            "name": "kol",
+            "type": "bool"
+          },
+          {
+            "name": "ai",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Token",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "logo_url",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenProposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "defined": {
+                "name": "Token"
+              }
+            }
+          },
+          {
+            "name": "selected_goals",
+            "type": {
+              "defined": {
+                "name": "SelectedGoals"
+              }
+            }
+          },
+          {
+            "name": "funding_goals",
+            "type": {
+              "defined": {
+                "name": "FundingGoals"
+              }
+            }
+          },
+          {
+            "name": "soft_cap",
+            "type": "u64"
+          },
+          {
+            "name": "hard_cap",
+            "type": "u64"
+          },
+          {
+            "name": "funding_model",
+            "type": {
+              "defined": {
+                "name": "FundingModel"
+              }
+            }
+          },
+          {
+            "name": "airdrop_modules",
+            "type": {
+              "defined": {
+                "name": "AirdropModules"
+              }
+            }
+          },
+          {
+            "name": "voting",
+            "type": {
+              "defined": {
+                "name": "Voting"
+              }
+            }
+          },
+          {
+            "name": "amount_contributed",
+            "type": "u64"
+          },
+          {
+            "name": "contribution_count",
+            "type": "u32"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_started_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_ended_at",
+            "type": "i64"
+          },
+          {
+            "name": "soft_cap_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "hard_cap_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "quorum_reached_at",
+            "type": "i64"
+          },
+          {
+            "name": "passed_at",
+            "type": "i64"
+          },
+          {
+            "name": "executed_at",
+            "type": "i64"
+          },
+          {
+            "name": "cancelled_at",
+            "type": "i64"
+          },
+          {
+            "name": "rejected_at",
+            "type": "i64"
+          },
+          {
+            "name": "funds_released_at",
+            "type": "i64"
+          },
+          {
+            "name": "tokens_distributed_at",
+            "type": "i64"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenProposalFactory",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_proposal_ids",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "token_proposal_count",
+            "type": "u32"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "contribution_ids",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "total_contributions",
+            "type": "u64"
+          },
+          {
+            "name": "votes",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Voting",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "period_days",
+            "type": "u32"
+          },
+          {
+            "name": "vote_unit",
+            "type": "string"
+          },
+          {
+            "name": "escrowed_fund",
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ]
+}
