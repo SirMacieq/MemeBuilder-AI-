@@ -43,6 +43,7 @@ export const endTokenProposal = async (proposal: any) => {
     const onChainProposalData =
       await program.account.tokenProposal.fetch(proposalId);
 
+    // end Voting period
     const response = await program.methods
       .endTokenProposalVotingPeriod(
         new anchor.BN(onChainProposalData.index).toArrayLike(Buffer, "le", 4),
@@ -53,10 +54,23 @@ export const endTokenProposal = async (proposal: any) => {
         tokenProposalFactory: tokenProposalFactoryAccountId,
       })
       .rpc();
+
+    // Create mint anchor
+    const mintKeypair = Keypair.generate();
+
+    await program.methods
+      .createTokenMint()
+      .accounts({
+        mintAccount: mintKeypair.publicKey,
+        payer: wallet.publicKey,
+        tokenProposal: proposalId,
+      })
+      .signers([mintKeypair])
+      .rpc();
     return {
       success: true,
       proposalId: proposal.proposal_id,
-      tokenId: response,
+      tokenId: mintKeypair.publicKey.toBase58(),
     };
   } catch (error: any) {
     return {
