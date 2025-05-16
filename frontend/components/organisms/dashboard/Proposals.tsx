@@ -1,10 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import ProposalTypeBadge from "@/components/atoms/ProposalTypeBadge";
 import Link from "next/link";
 import { useState } from "react";
-import Image from "next/image";
-import FractionProgress from "@/components/atoms/FractionProgress";
 import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 import { useWallet } from "@solana/wallet-adapter-react";
 import ProposalCard from "@/components/molecules/proposals/ProposalCard";
@@ -22,7 +19,6 @@ type RefinedProposal = {
   raisedAmount: number;
 };
 const Proposals = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>("All");
   const { proposals: onChainProposals } = useFundedProposals();
   console.log("onChainProposals", onChainProposals);

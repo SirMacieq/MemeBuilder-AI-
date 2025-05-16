@@ -386,6 +386,7 @@ const FoundedTokenForm = () => {
           <DialogDescription className="text-wrap wrap-anywhere">
             You should see your wallet asking you to validate transaction to
             create the proposal
+            <br />
             <span>Status: {dialogMessage}</span>
             <br />
             {createdProposalHash && (
