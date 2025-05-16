@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
 import { BN } from "@coral-xyz/anchor";
+import { fundedTokenCreate } from "@/lib/api/proposals/funded-token";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -177,7 +178,7 @@ const FoundedTokenForm = () => {
     }
     setIsDialogOpen(true);
     setDialogMessage("Connecting to the blockchain...");
-    const tx = await createTokenProposal(wallet, {
+    const { tx, tokenProposalAccountId } = await createTokenProposal(wallet, {
       token: {
         name: values.token.name,
         symbol: values.token.symbol,
@@ -198,6 +199,30 @@ const FoundedTokenForm = () => {
         voteUnit: values.voting.voteUnit,
         escrowedFund: values.voting.escrowedFunds,
       },
+    });
+    await fundedTokenCreate({
+      token: {
+        name: values.token.name,
+        symbol: values.token.symbol,
+        description: values.token.description,
+        //@ts-expect-error error expected due to mismatching typo between chain and backend
+        logoUrl: values.token.logoURL, //
+      },
+      selectedGoals: values.selectedGoals,
+      fundingGoals: values.fundingGoals,
+      softCap: values.softCap,
+      hardCap: values.hardCap,
+      fundingModel: values.fundingModel,
+      airdropModules: {
+        dropScore: values.airdropModules?.dropScore ?? false,
+      },
+      voting: {
+        periodDays: values.voting.periodDays,
+        voteUnit: values.voting.voteUnit,
+        escrowedFunds: values.voting.escrowedFunds,
+      },
+      proposal_id: tokenProposalAccountId.toBase58(),
+      proposer_wallet: wallet.publicKey.toBase58(),
     });
     setCreatedProposalHash(tx);
     setDialogMessage("Proposal submitted successfully!");
