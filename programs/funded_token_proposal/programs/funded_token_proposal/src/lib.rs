@@ -70,9 +70,13 @@ pub mod funded_token_proposal {
         let current_timestamp = clock.unix_timestamp;
 
         /*
-         * Token Proposal Factory
+         * Accounts
          */
         let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
+
+        /*
+         * Token Proposal Factory
+         */
         token_proposal_factory.token_proposal_ids = Vec::new();
         token_proposal_factory.token_proposal_count = 0;
         // Admin
@@ -94,9 +98,13 @@ pub mod funded_token_proposal {
         let current_timestamp = clock.unix_timestamp;
 
         /*
-         * User
+         * Accounts
          */
         let user = &mut ctx.accounts.user;
+
+        /*
+         * User
+         */
         user.contribution_ids = Vec::new();
         user.total_contributions = 0;
         user.votes = Vec::new();
@@ -125,9 +133,15 @@ pub mod funded_token_proposal {
         let current_timestamp = clock.unix_timestamp;
 
         /*
+         * Accounts
+         */
+        let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
+        let token_proposal = &mut ctx.accounts.token_proposal;
+
+        /*
          * Token Proposal
          */
-        let token_proposal = &mut ctx.accounts.token_proposal;
+        token_proposal.index = token_proposal_factory.token_proposal_count;
         token_proposal.token = token;
         token_proposal.selected_goals = selected_goals;
         token_proposal.funding_goals = funding_goals;
@@ -157,10 +171,10 @@ pub mod funded_token_proposal {
         token_proposal.updated_at = current_timestamp;
 
         /*
-         * Store Token Proposal's Program Derived Addresses (PDA) in Token
-         * Proposal Factory.
+         * Token Proposal Factory
          */
-        let token_proposal_factory = &mut ctx.accounts.token_proposal_factory;
+        // Store Token Proposal's Program Derived Addresses (PDA) in Token
+        // Proposal Factory.
         token_proposal_factory.token_proposal_ids
             .push(*token_proposal.to_account_info().key);
         token_proposal_factory.token_proposal_count += 1;
@@ -179,7 +193,7 @@ pub mod funded_token_proposal {
         let current_timestamp = clock.unix_timestamp;
 
         /*
-         * Token Proposal
+         * Accounts
          */
         let token_proposal = &mut ctx.accounts.token_proposal;
 
@@ -199,8 +213,9 @@ pub mod funded_token_proposal {
         );
 
         /*
-         * End Token Proposal's voting period.
+         * Token Proposal
          */
+        // End Token Proposal's voting period.
         // Status
         token_proposal.status = String::from("voting-ended");
         // Lifecycle States (Key States/Flags) Timestamps
@@ -217,11 +232,11 @@ pub mod funded_token_proposal {
 
             token_proposal.status = String::from("passed");
 
-            // -> Automatically launch Token.
+            // TODO -> Automatically launch Token.
         } else {
             token_proposal.status = String::from("rejected");
 
-            // -> Automatically refund Contributions.
+            // TODO -> Automatically refund Contributions.
         }
 
         Ok(())
@@ -236,9 +251,12 @@ pub mod funded_token_proposal {
         let current_timestamp = clock.unix_timestamp;
 
         /*
-         * Token Proposal
+         * Accounts
          */
+        let contribution = &mut ctx.accounts.contribution;
+        let signer = &ctx.accounts.signer;
         let token_proposal = &mut ctx.accounts.token_proposal;
+        let user = &mut ctx.accounts.user;
 
         /*
          * Guard Checks
@@ -260,19 +278,10 @@ pub mod funded_token_proposal {
             CustomError::VotesAlreadyReachedHardCap
         );
 
-        /*
-         * User
-         */
-        let user = &mut ctx.accounts.user;
         require!(
             !user.votes.contains(&token_proposal.to_account_info().key),
             CustomError::UserAlreadyVoted
         );
-
-        /*
-         * Signer
-         */
-        let signer = &ctx.accounts.signer;
 
         /*
          * Transfer
@@ -295,7 +304,6 @@ pub mod funded_token_proposal {
         /*
          * Contribution
          */
-        let contribution = &mut ctx.accounts.contribution;
         contribution.amount = amount;
         contribution.token_proposal_id = *token_proposal.to_account_info().key;
         contribution.user_id = *user.to_account_info().key;
@@ -338,7 +346,7 @@ pub mod funded_token_proposal {
                     // end the vote early.
                     token_proposal.voting_ended_at = current_timestamp;
 
-                    // -> Automatically launch Token.
+                    // TODO -> Automatically launch Token.
 
                     // Else if SoftCap has been reached,
                 } else if token_proposal.amount_contributed >= token_proposal.soft_cap {
@@ -350,7 +358,7 @@ pub mod funded_token_proposal {
                     token_proposal.status = String::from("soft-cap-reached");
                     token_proposal.soft_cap_reached_at = current_timestamp;
 
-                    // -> Voting continue.
+                    // -> Voting continue ...
                 }
             }
 
@@ -491,6 +499,7 @@ pub struct CreateTokenProposal<'info> {
         bump,
         payer = signer,
         space = ANCHOR_DISCRIMINATOR_SPACE // discriminator
+            + U32_SPACE // index (u32)
             // Token struct
             + (STRING_SPACE * TOKEN_PROPOSAL_NAME_LENGTH_MAX)
             + (STRING_SPACE * TOKEN_PROPOSAL_SYMBOL_LENGTH_MAX)
@@ -670,6 +679,9 @@ pub struct Contribution {
 #[account]
 #[derive(InitSpace)]
 pub struct TokenProposal {
+    // Index
+    pub index: u32,
+    // Proposal
     pub token: ProposalToken,
     pub selected_goals: SelectedGoals,
     pub funding_goals: FundingGoals,

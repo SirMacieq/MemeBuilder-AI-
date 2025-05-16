@@ -298,6 +298,10 @@ describe("Funded Token Proposal", () => {
       assert.ok(tokenProposalAccount);
     });
 
+    it("should set the Token Proposal's index to zero.", async () => {
+      assert.equal(tokenProposalAccount.index, 0);
+    });
+
     it("should set the Token Proposal's owner to the user.", async () => {
       assert.deepEqual(tokenProposalAccount.owner, admin.publicKey);
     });
