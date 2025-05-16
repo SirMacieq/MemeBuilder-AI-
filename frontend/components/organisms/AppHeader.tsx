@@ -10,7 +10,7 @@ const AppHeader = async () => {
   } catch {}
 
   return (
-    <header className="p-4 lg:p-6 bg-[#010613] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+    <header className="p-4 lg:p-6 bg-[#010613] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 z-50">
       <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 w-full lg:w-auto">
         <div className="flex justify-between items-center w-full lg:w-auto">
           <Image

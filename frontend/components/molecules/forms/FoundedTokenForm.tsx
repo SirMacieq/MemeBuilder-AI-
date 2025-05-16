@@ -54,6 +54,8 @@ import {
 import getSolanaCluster from "@/lib/envGetters/getSolanaCluster";
 import { BN } from "@coral-xyz/anchor";
 import { fundedTokenCreate } from "@/lib/api/proposals/funded-token";
+import { pinata } from "@/lib/utils/pinata-storage"
+export const dynamic = "force-dynamic";
 
 const ProposalFormContext = createContext<{
   carouselApi: CarouselApi;
@@ -101,6 +103,50 @@ const FoundedTokenFormSchema = z.object({
  */
 const FoundedTokenForm = () => {
   const wallet = useAnchorWallet();
+  const [file, setFile] = useState<any>(null);
+  const [ipfsHash, setIpfsHash] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
+
+  const uploadFile = async (img: any) => {
+    try {
+      if (!img) {
+        alert("No file selected");
+        return;
+      }
+
+      setUploading(true);
+      console.log(img)
+      console.log(pinata)
+      const nameWithoutExtension = img.name.replace(/\.[^/.]+$/, "");
+      const upload = await pinata.upload.public.file(img)
+      
+      console.log(upload)
+      const uploadJson = await pinata.upload.public.json({
+        name: "PUTE",
+        symbol: "PUTE",
+        description: "Une pute pas cher",
+        image: `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${upload.cid}`
+    }).name(`${nameWithoutExtension}-metadata.json`)
+
+    console.log("JSON", uploadJson)
+      setIpfsHash(img);
+      const finalUrl = `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${uploadJson.cid}`
+      setUploading(false);
+      form.setValue("token.logoURL",finalUrl,{
+        shouldDirty: true,
+        shouldTouch: true,
+      })
+    } catch (e) {
+      console.log(e);
+      setUploading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target?.files?.[0]);
+    uploadFile(e.target?.files?.[0])
+  };
+
   const form = useForm<z.infer<typeof FoundedTokenFormSchema>>({
     resolver: zodResolver(FoundedTokenFormSchema),
     defaultValues: {
@@ -142,7 +188,7 @@ const FoundedTokenForm = () => {
     {
       key: "token-identity",
       name: "Token Identity",
-      element: <TokenIdentity />,
+      element: <TokenIdentity handleChange={handleChange} file ipfsHash={ipfsHash} uploading/>,
     },
     {
       key: "campaign-budget-goals",
@@ -178,54 +224,58 @@ const FoundedTokenForm = () => {
     }
     setIsDialogOpen(true);
     setDialogMessage("Connecting to the blockchain...");
-    const { tx, tokenProposalAccountId } = await createTokenProposal(wallet, {
-      token: {
-        name: values.token.name,
-        symbol: values.token.symbol,
-        description: values.token.description,
-        //@ts-expect-error error expected due to mismatching typo between chain and backend
-        logoUrl: values.token.logoURL, //
-      },
-      selectedGoals: values.selectedGoals,
-      fundingGoals: values.fundingGoals,
-      softCap: new BN(values.softCap),
-      hardCap: new BN(values.hardCap === "dynamic" ? 0 : values.hardCap),
-      fundingModel: values.fundingModel,
-      airdropModules: {
-        dropScore: values.airdropModules?.dropScore ?? false,
-      },
-      voting: {
-        periodDays: values.voting.periodDays,
-        voteUnit: values.voting.voteUnit,
-        escrowedFund: values.voting.escrowedFunds,
-      },
-    });
-    await fundedTokenCreate({
-      token: {
-        name: values.token.name,
-        symbol: values.token.symbol,
-        description: values.token.description,
-        //@ts-expect-error error expected due to mismatching typo between chain and backend
-        logoUrl: values.token.logoURL, //
-      },
-      selectedGoals: values.selectedGoals,
-      fundingGoals: values.fundingGoals,
-      softCap: values.softCap,
-      hardCap: values.hardCap,
-      fundingModel: values.fundingModel,
-      airdropModules: {
-        dropScore: values.airdropModules?.dropScore ?? false,
-      },
-      voting: {
-        periodDays: values.voting.periodDays,
-        voteUnit: values.voting.voteUnit,
-        escrowedFunds: values.voting.escrowedFunds,
-      },
-      proposal_id: tokenProposalAccountId.toBase58(),
-      proposer_wallet: wallet.publicKey.toBase58(),
-    });
-    setCreatedProposalHash(tx);
-    setDialogMessage("Proposal submitted successfully!");
+    try {
+      const { tx, tokenProposalAccountId } = await createTokenProposal(wallet, {
+        token: {
+          name: values.token.name,
+          symbol: values.token.symbol,
+          description: values.token.description,
+          //@ts-expect-error error expected due to mismatching typo between chain and backend
+          logoUrl: values.token.logoURL, //
+        },
+        selectedGoals: values.selectedGoals,
+        fundingGoals: values.fundingGoals,
+        softCap: new BN(values.softCap),
+        hardCap: new BN(values.hardCap === "dynamic" ? 0 : values.hardCap),
+        fundingModel: values.fundingModel,
+        airdropModules: {
+          dropScore: values.airdropModules?.dropScore ?? false,
+        },
+        voting: {
+          periodDays: values.voting.periodDays,
+          voteUnit: values.voting.voteUnit,
+          escrowedFund: values.voting.escrowedFunds,
+        },
+      });
+      await fundedTokenCreate({
+        token: {
+          name: values.token.name,
+          symbol: values.token.symbol,
+          description: values.token.description,
+          //@ts-expect-error error expected due to mismatching typo between chain and backend
+          logoUrl: values.token.logoURL, //
+        },
+        selectedGoals: values.selectedGoals,
+        fundingGoals: values.fundingGoals,
+        softCap: values.softCap,
+        hardCap: values.hardCap,
+        fundingModel: values.fundingModel,
+        airdropModules: {
+          dropScore: values.airdropModules?.dropScore ?? false,
+        },
+        voting: {
+          periodDays: values.voting.periodDays,
+          voteUnit: values.voting.voteUnit,
+          escrowedFunds: values.voting.escrowedFunds,
+        },
+        proposal_id: tokenProposalAccountId.toBase58(),
+        proposer_wallet: wallet.publicKey.toBase58(),
+      });
+      setCreatedProposalHash(tx);
+      setDialogMessage("Proposal submitted successfully!");
+    } catch (err) {
+      
+    }
 
     // await createAction(values);
   };
@@ -331,7 +381,9 @@ const FoundedTokenForm = () => {
                 Proposal hash: {createdProposalHash}
                 <br />
                 <Link
-                  href={`https://explorer.solana.com/tx/${createdProposalHash}${solanaCluster === "devnet" ? "?cluster=devnet" : ""}`}
+                  href={`https://explorer.solana.com/tx/${createdProposalHash}${
+                    solanaCluster === "devnet" ? "?cluster=devnet" : ""
+                  }`}
                   target="_blank"
                   className="text-[#f5a856]"
                 >
@@ -386,9 +438,9 @@ const FoundedTokenForm = () => {
                                 ? [...errorSections, formState.key]
                                 : [
                                     ...errorSections.filter(
-                                      (e) => e !== formState.key,
+                                      (e) => e !== formState.key
                                     ),
-                                  ],
+                                  ]
                             )
                           }
                           error={errorSections.includes(formState.key)}
@@ -467,8 +519,15 @@ const FoundedTokenForm = () => {
 };
 export default FoundedTokenForm;
 
-const TokenIdentity = () => {
+const TokenIdentity = ({
+  handleChange,
+  file,
+  ipfsHash,
+  uploading
+} : {handleChange: (e: any) => void; file: any; ipfsHash: any; uploading: boolean;}
+) => {
   const form = useFormContext<z.infer<typeof FoundedTokenFormSchema>>();
+
   // DONE token name,symbol
   // blockchain
   // DONE logo upload + desc
@@ -506,12 +565,14 @@ const TokenIdentity = () => {
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <Input placeholder="logoURL" {...field} />
+              <Input className="pb-10 pt-3" placeholder="logoURL" type="file" onChange={handleChange}/>
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {uploading && <p>Uploading in progess...</p>}
+      {ipfsHash && <img src={ipfsHash} alt="Image from Pinata" />}
       <FormField
         control={form.control}
         name="token.description"
@@ -741,7 +802,7 @@ const CampaignBudgetGoals = () => {
                 // min="0"
                 onChange={(e) =>
                   field.onChange(
-                    e.target.value === "0" ? "dynamic" : Number(e.target.value),
+                    e.target.value === "0" ? "dynamic" : Number(e.target.value)
                   )
                 }
               />

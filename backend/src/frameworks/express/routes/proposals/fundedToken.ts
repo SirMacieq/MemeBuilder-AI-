@@ -35,7 +35,9 @@ cron.schedule("*/15 * * * * *", async () => {
   isRunning = true;
 
   try {
-    await botFundedToken(dependencies);
+    const urlSmartContract = await botFundedToken(dependencies);
+
+
   } catch (error) {
     console.error("Erreur botFundedToken:", error)
   } finally {
