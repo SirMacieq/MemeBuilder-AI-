@@ -149,7 +149,7 @@ export const createTokenProposal = async (
       tokenProposalFactory: tokenProposalFactoryAccountId,
     })
     .rpc({ commitment: "confirmed" });
-  return tx;
+  return { tx, tokenProposalAccountId };
 };
 
 /**
