@@ -14,6 +14,8 @@ import { BN } from "@coral-xyz/anchor";
 const LAMPORT_PEL_SOL = 1_000_000_000;
 
 const Detail = ({ id }: { id: string | string[] | undefined }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const defaultProposal = {
     percentage: 60,
     status: "Voting",
@@ -37,6 +39,18 @@ const Detail = ({ id }: { id: string | string[] | undefined }) => {
   //   proposal.amountContributed.toNumber() / LAMPORT_PEL_SOL,
   // );
   // console.log("not divided", proposal.amountContributed.toString());
+  useEffect(() => {
+    (async () => {
+      if (!proposal) return;
+      try {
+        const res = await fetch(proposal.token.logoUrl);
+        const json = await res.json();
+        setImageUrl(json.image);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, [proposal, proposal?.token.logoUrl]);
 
   useEffect(() => {
     if (!id || !wallet) return;
@@ -105,7 +119,7 @@ Vote now & join the future of $DOGE99! 🐶🚀`;
     <div className="flex flex-col md:flex-row justify-between items-start grow bg-[#010613] px-[5%] gap-6">
       <div className="w-full md:w-[49%] relative rounded-[12px] overflow-hidden bg-[#0e131f]">
         <Image
-          src={proposal.token.logoUrl}
+          src={imageUrl}
           alt="Meme"
           width={800}
           height={0}

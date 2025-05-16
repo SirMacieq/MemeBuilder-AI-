@@ -1,12 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import ProposalTypeBadge from "@/components/atoms/ProposalTypeBadge";
 import Link from "next/link";
 import { useState } from "react";
-import Image from "next/image";
-import FractionProgress from "@/components/atoms/FractionProgress";
 import useFundedProposals from "@/store/sliceHooks/useFundedProposals";
 import { useWallet } from "@solana/wallet-adapter-react";
+import ProposalCard from "@/components/molecules/proposals/ProposalCard";
 
 const endpoint = "https://api.mainnet-beta.solana.com";
 type RefinedProposal = {
@@ -21,7 +19,6 @@ type RefinedProposal = {
   raisedAmount: number;
 };
 const Proposals = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>("All");
   const { proposals: onChainProposals } = useFundedProposals();
   console.log("onChainProposals", onChainProposals);
@@ -50,22 +47,6 @@ const Proposals = () => {
             proposal.status === filter,
         );
 
-  const generateRandomGradient = () => {
-    const colors = [
-      "rgba(255, 0, 0, 0.8)", // Red
-      "rgba(0, 255, 0, 0.8)", // Green
-      "rgba(0, 0, 255, 0.8)", // Blue
-      "rgba(255, 255, 0, 0.8)", // Yellow
-      "rgba(0, 255, 255, 0.8)", // Cyan
-      "rgba(255, 165, 0, 0.8)", // Orange
-      "rgba(128, 0, 128, 0.8)", // Purple
-    ];
-
-    const randomColor1 = colors[Math.floor(Math.random() * colors.length)];
-    const randomColor2 = colors[Math.floor(Math.random() * colors.length)];
-
-    return `linear-gradient(to right, ${randomColor1}, ${randomColor2})`;
-  };
   return (
     <section className="w-full pt-[32px]">
       <div className="md:hidden mb-[24px] bg-[#151925] p-[24px] rounded-[12px]">
@@ -160,11 +141,16 @@ const Proposals = () => {
                     formProps: {
                       fixedOutputMint: true,
                       initialAmount: "0",
-                      initialInputMint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-                      initialOutputMint: "So11111111111111111111111111111111111111112",
+                      initialInputMint:
+                        "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+                      initialOutputMint:
+                        "So11111111111111111111111111111111111111112",
                     },
-                    containerStyles: { maxHeight: '390px', padding: 16, boxShadow: "0 0 30px 10px #7912FF"}
-                    
+                    containerStyles: {
+                      maxHeight: "390px",
+                      padding: 16,
+                      boxShadow: "0 0 30px 10px #7912FF",
+                    },
                   });
                 });
               }
@@ -178,83 +164,23 @@ const Proposals = () => {
           >
             Swap token
           </Button>
-        <Button
-          asChild
-          type="submit"
-          className="w-[417px] text-white font-semibold p-[24px] rounded-[12px] hidden md:flex"
-          style={{
-            background:
-              "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
-          }}
-        >
-          <Link href="proposals/">Submit your memecoin</Link>
-        </Button>
+          <Button
+            asChild
+            type="submit"
+            className="w-[417px] text-white font-semibold p-[24px] rounded-[12px] hidden md:flex"
+            style={{
+              background:
+                "radial-gradient(circle at center, #7912FF 0%, #6E00FD 100%)",
+            }}
+          >
+            <Link href="proposals/">Submit your memecoin</Link>
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[24px]">
         {filteredProposals.toReversed().map((proposal) => (
-          <div
-            key={proposal.id}
-            className="bg-[#151925] rounded-[12px] shadow-lg flex flex-col items-start"
-          >
-            <div
-              className="h-[200px] w-full rounded-tl-[12px] rounded-tr-[12px] rounded-bl-none rounded-br-none overflow-clip flex flex-col justify-center"
-              style={{
-                background: generateRandomGradient(),
-              }}
-              suppressHydrationWarning
-            >
-              <Image
-                src={
-                  proposal.imgSrc === "" || !proposal.imgSrc
-                    ? "/images/memes/meme-1.svg"
-                    : proposal.imgSrc
-                }
-                alt="Avatar voters"
-                width={300}
-                height={200}
-                className="h-full w-full object-center object-cover"
-                priority={true}
-              />
-            </div>
-            <div className="w-full p-[24px]">
-              <h3 className="flex flex-row justify-between items-center">
-                <Link
-                  href={`proposal/${proposal.id}`}
-                  className="text-[20px] uppercase font-semibold text-white mb-[8px]"
-                >
-                  {proposal.title}
-                </Link>
-                <ProposalTypeBadge type="funded" variant="small" />
-              </h3>
-              <p className="text-sm text-[#BABABA] mb-[16px]">
-                {proposal.description}
-              </p>
-
-              <div className="flex w-full mb-[16px]">
-                <FractionProgress
-                  current={proposal.raisedAmount}
-                  target={proposal.totalGoal}
-                  fractions={5}
-                />
-              </div>
-
-              <div className="flex items-center">
-                <Image
-                  src="/images/voters.png"
-                  alt="Avatar voters"
-                  width={54}
-                  height={33}
-                  className="h-auto w-auto mr-2"
-                />
-                <div>
-                  <p className="text-white">{proposal.voters}</p>
-                  <p className="text-sm text-[#BABABA]">participants</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProposalCard proposal={proposal} key={proposal.id} />
         ))}
       </div>
     </section>
