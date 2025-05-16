@@ -3,7 +3,10 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import * as api from "../chain";
 import * as datas from "./testingData";
+import * as admin from "../admin";
+
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 
 const ChainTesting = () => {
   const wallet = useAnchorWallet();
@@ -58,7 +61,7 @@ const ChainTesting = () => {
         onClick={() =>
           api.getOneTokenProposal(
             wallet,
-            "EKaoYPXmMXkFqGGpw1KwiX2GbKoeBeCdBbESESR6GEyk",
+            "C5GPcWzcQkBeE49qK8exvE6Cr3JYshJzeDioe91WU2kn",
           )
         }
       >
@@ -66,6 +69,28 @@ const ChainTesting = () => {
       </Button>
       <Button type="button" onClick={() => onClick()}>
         custom
+      </Button>
+      <Button
+        type="button"
+        onClick={() =>
+          admin.endTokenProposalVotingPeriod(
+            wallet,
+            new PublicKey("C5GPcWzcQkBeE49qK8exvE6Cr3JYshJzeDioe91WU2kn"),
+          )
+        }
+      >
+        end token proposal
+      </Button>
+      <Button
+        type="button"
+        onClick={() =>
+          admin.createMintToken(
+            wallet,
+            new PublicKey("C5GPcWzcQkBeE49qK8exvE6Cr3JYshJzeDioe91WU2kn"),
+          )
+        }
+      >
+        createMintToken
       </Button>
     </div>
   );

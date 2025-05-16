@@ -47,7 +47,7 @@ export const getProgram = (wallet: AnchorWallet) => {
 /**
  * Create or gets proposal factory PDA
  */
-const getProposalFactoryPDA = async (wallet: AnchorWallet) => {
+export const getProposalFactoryPDA = async (wallet: AnchorWallet) => {
   const program = getProgram(wallet);
 
   const [tokenProposalFactoryAccountId] = await PublicKey.findProgramAddress(
