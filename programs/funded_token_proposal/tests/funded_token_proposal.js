@@ -17,6 +17,12 @@ const TOKEN_PROPOSAL_DESCRIPTION_LENGTH_MAX = 255;
 const TOKEN_PROPOSAL_LOGO_URL_LENGTH_MAX = 127;
 const TOKEN_PROPOSAL_VOTING_VOTE_UNIT_LENGTH_MAX = 10;
 const USER_TOKEN_PROPOSAL_CONTRIBUTIONS_MAX = 100;
+const VOTING_PERIOD_SECONDS = 5 * 24 * 60 * 60; // 5 days (fixed for MVP)
+
+// Helpers
+function getCurrentUnixTimestamp() {
+  return Math.floor(Date.now() / 1000);
+}
 
 describe("Funded Token Proposal", () => {
   // Configure the client to use the local cluster.
@@ -128,7 +134,7 @@ describe("Funded Token Proposal", () => {
 
   describe("Initialize Token Proposal Factory:", () => {
     before(async () => {
-      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+      currentUnixTimestamp = getCurrentUnixTimestamp();
 
       const tx = await program.methods.initializeTokenProposalFactory()
         .accounts({
@@ -182,7 +188,7 @@ describe("Funded Token Proposal", () => {
     let userAccount;
 
     before(async () => {
-      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+      currentUnixTimestamp = getCurrentUnixTimestamp();
 
       const tx = await program.methods.createUser()
         .accounts({
@@ -237,7 +243,7 @@ describe("Funded Token Proposal", () => {
     let voting;
 
     before(async () => {
-      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+      currentUnixTimestamp = getCurrentUnixTimestamp();
 
       token = {
         name: "Test Token",
@@ -432,7 +438,7 @@ describe("Funded Token Proposal", () => {
     let userAccount;
 
     before(async () => {
-      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+      currentUnixTimestamp = getCurrentUnixTimestamp();
 
       amount = new BN(100000000); // 0.1 SOL in lamports
 
@@ -529,7 +535,10 @@ describe("Funded Token Proposal", () => {
 
   describe("End Token Proposal's Voting Period:", () => {
     before(async () => {
-      currentUnixTimestamp = Math.floor(Date.now() / 1000);
+      currentUnixTimestamp = getCurrentUnixTimestamp();
+      let tokenProposalAccountVotingEndedAt = currentUnixTimestamp
+        + VOTING_PERIOD_SECONDS
+        + TIMESTAMP_TOLERANCE;
 
       const tx = await program.methods.endTokenProposalVotingPeriod(
         initialTokenProposalFactoryTokenProposalCount

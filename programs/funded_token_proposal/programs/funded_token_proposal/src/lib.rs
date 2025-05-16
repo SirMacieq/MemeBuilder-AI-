@@ -199,17 +199,12 @@ pub mod funded_token_proposal {
         /*
          * Guard Checks
          */
+        // TODO: Uncomment that guard check when ready!
         //require!(
-        //    current_timestamp >
-        //    token_proposal.voting_started_at,
-        //    CustomError::VotingPeriodNotStartedYet
+        //    current_timestamp >=
+        //    (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
+        //    CustomError::VotingPeriodNotEndedYet
         //);
-
-        require!(
-            current_timestamp <
-            (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
-            CustomError::VotingPeriodAlreadyEnded
-        );
 
         /*
          * Token Proposal
@@ -260,12 +255,6 @@ pub mod funded_token_proposal {
         /*
          * Guard Checks
          */
-        //require!(
-        //    current_timestamp >
-        //    token_proposal.voting_started_at,
-        //    CustomError::VotingPeriodNotStartedYet
-        //);
-
         require!(
             current_timestamp <
             (token_proposal.voting_started_at + VOTING_PERIOD_SECONDS),
@@ -790,8 +779,8 @@ pub struct Voting {
  *********/
 #[error_code]
 enum CustomError {
-    #[msg("The voting period on the Token Proposal has not started yet.")]
-    VotingPeriodNotStartedYet,
+    #[msg("The voting period on the Token Proposal has not ended yet.")]
+    VotingPeriodNotEndedYet,
     #[msg("The voting period on the Token Proposal has already ended.")]
     VotingPeriodAlreadyEnded,
     #[msg("The votes on the Token Proposal have already reached the hard cap.")]
