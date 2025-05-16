@@ -10,7 +10,7 @@ const AppNav = async () => {
   try {
     user = await getCurrentUserData();
   } catch {}
-
+  console.log(user)
   return (
     <nav className="p-2 flex flex-row gap-2 items-center">
       {user && (

@@ -45,9 +45,7 @@ export const endTokenProposal = async (proposal: any) => {
 
     // end Voting period
     const response = await program.methods
-      .endTokenProposalVotingPeriod(
-        new anchor.BN(onChainProposalData.index).toArrayLike(Buffer, "le", 4),
-      )
+      .endTokenProposalVotingPeriod(onChainProposalData.index)
       .accounts({
         signer: wallet.publicKey,
         tokenProposal: proposalId,
