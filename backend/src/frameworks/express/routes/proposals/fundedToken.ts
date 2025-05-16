@@ -29,8 +29,8 @@ crudRouteCreator({
 });
 
 let isRunning = false;
-//"*/10 * * * * *"
-cron.schedule("*/15 * * * *", async () => {
+//"*/10 * * * * *" "*/15 * * * *"
+cron.schedule("*/15 * * * * *", async () => {
   if (isRunning) return console.log("⏳ botFundedToken déjà en cours");
   isRunning = true;
 
