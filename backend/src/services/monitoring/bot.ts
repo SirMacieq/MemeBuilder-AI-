@@ -1,3 +1,5 @@
+import { endTokenProposal } from "./endTokenProposal";
+
 export const botFundedToken = async (dependencies: any) => {
   const fundedTokenRepository = dependencies.repositories["fundedTokenRepository"];
   const tokenRepository = dependencies.repositories["tokenRepository"];
@@ -26,6 +28,22 @@ export const botFundedToken = async (dependencies: any) => {
   const filteredProposals = proposalsAt5Days.filter((proposal: any) => {
     return !usedProposalIds.has(proposal.id);
   });
-
   console.log("Proposals expirant aujourd'hui (5 jours) et sans token associé :", filteredProposals);
+  for (const proposal of filteredProposals) {
+    try {
+      const result = await endTokenProposal(proposal);
+      if (result.success) {
+        console.log(`Success: ${result.proposalId}, token: ${result.tokenId}`);
+        //ajout du token dans le backend (avec toutes les infos nécéssaires) await tokenRepository.add({infos du token});
+        
+      } else {
+        console.error(`Error: ${result.proposalId}: ${result.error}`);
+      }
+    } catch (error) {
+      console.error(`Error calling endTokenProposal for proposal ID ${proposal.id}:`, error);
+    }
+  }
+  
+
+  
 };
