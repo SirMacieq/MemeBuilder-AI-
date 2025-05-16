@@ -79,9 +79,7 @@ const getTokenProposalPDA = async (
     await PublicKey.findProgramAddress(
       [
         anchor.utils.bytes.utf8.encode("token_proposal"),
-        tokenProposalFactoryAccountId.toBytes(),
         new anchor.BN(newCount).toArrayLike(Buffer, "le", 4),
-        wallet.publicKey.toBytes(),
       ],
       program.programId,
     );
