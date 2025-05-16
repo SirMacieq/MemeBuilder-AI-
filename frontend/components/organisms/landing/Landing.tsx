@@ -217,31 +217,23 @@ const Landing = () => {
           </motion.div>
         </div>
         <article className="description md:h-[947px] flex flex-col justify-center items-center px-4">
-          <div className="w-[95%] md:w-full max-w-[700px] p-[32px] md:p-[75px] text-[16px]/[2] backdrop-blur-md bg-black/50 rounded-[30px] md:rounded-[50px] text-center dm-mono-light" id="story">
+          <div className="w-[95%] md:w-full max-w-[700px] p-[32px] md:p-[75px] text-[15px]/[2] backdrop-blur-md bg-black/50 rounded-[30px] md:rounded-[50px] text-center dm-mono-light" id="story">
             <p className="mb-[24px]">
               The{" "}
               <span className="font-bold">United Society of Memes (USM)</span>{" "}
-              is here to make{" "}
+              will make {" "}
               <span className="font-bold">Solana NFTs great again</span> by
               uniting meme culture, cutting-edge technology, and a vision for
               community empowerment.
-              <br />
-              The whole collection fits within the MEME-NFT narrative, combining{" "}
-              <span className="font-bold">Classic Memes</span>, PolitiFi, and{" "}
-              <span className="font-bold">Celebrity Meta</span> with
-              meticulously designed traits for each character.
             </p>
             <p className="mb-[24px]">
-              At USM, we’re creating more than just art; we’re building a
-              DAO-driven <span className="font-bold">Memebuilder (AI)</span>{" "}
-              with tools that empower NFT holders to create their own Memecoins
-              with tailored AI Agents on X and share token allocations
-              exclusively within the DAO.
+              We’re building <span className="font-bold">Memebuilder(AI) - a modular platform for launching utility-driven memecoins - AI automated, on-chain, powered by DAO.</span>
             </p>
             <p className="mb-[24px]">
-              Together, we aim to build a community where equality,
-              sustainability, and transparency are at the core of every
-              decision.
+            The entry keys will be the <span className="font-bold">$POTUS - AI Agent with token</span> and the <span className="font-bold">$USM NFT collection</span> based on the MPL-404 standard with hundreds of meme traits
+            </p>
+            <p className="mb-[24px]">
+            We aim to build a community where equality, sustainability, and transparency are at the core of every decision.
             </p>
             <p className="dm-mono-regular font-bold">IN $USM WE TRUST!</p>
           </div>
@@ -280,12 +272,12 @@ const Landing = () => {
             ].map((text, index) => (
               <li
                 key={index}
-                className="border-b border-[#010613] py-4 flex items-center gap-4"
+                className="border-b border-[#010613] py-6 flex text-[15px] items-center gap-4"
               >
                 <img
                   src="/images/sparkle.svg"
                   alt="icon"
-                  className="w-5 h-5 mt-1"
+                  className="w-6 h-6 mt-1"
                 />
                 <span>{text}</span>
               </li>
