@@ -109,43 +109,6 @@ const FoundedTokenForm = () => {
   const [ipfsHash, setIpfsHash] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
 
-  const uploadFile = async (img: any) => {
-    try {
-      if (!img) {
-        alert("No file selected");
-        return;
-      }
-
-      setUploading(true);
-      console.log(img);
-      console.log(pinata);
-      const nameWithoutExtension = img.name.replace(/\.[^/.]+$/, "");
-      const upload = await pinata.upload.public.file(img);
-
-      console.log(upload);
-      const uploadJson = await pinata.upload.public
-        .json({
-          name: "PUTE",
-          symbol: "PUTE",
-          description: "Une pute pas cher",
-          image: `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${upload.cid}`,
-        })
-        .name(`${nameWithoutExtension}-metadata.json`);
-
-      console.log("JSON", uploadJson);
-      setIpfsHash(img);
-      const finalUrl = `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${uploadJson.cid}`;
-      setUploading(false);
-      form.setValue("token.logoURL", finalUrl, {
-        shouldDirty: true,
-        shouldTouch: true,
-      });
-    } catch (e) {
-      console.log(e);
-      setUploading(false);
-    }
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target?.files?.[0]);
     uploadFile(e.target?.files?.[0]);
@@ -188,6 +151,45 @@ const FoundedTokenForm = () => {
       },
     },
   });
+
+  const uploadFile = async (img: any) => {
+    try {
+      if (!img) {
+        alert("No file selected");
+        return;
+      }
+
+      setUploading(true);
+      console.log("img", img);
+      console.log("pinata", pinata);
+      const nameWithoutExtension = img.name.replace(/\.[^/.]+$/, "");
+      const upload = await pinata.upload.public.file(img);
+
+      console.log("upload", upload);
+      const uploadJson = await pinata.upload.public
+        .json({
+          name: form.getValues("token.name"),
+          symbol: form.getValues("token.symbol"),
+          description: form.getValues("token.description"),
+          image: `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${upload.cid}`,
+        })
+        .name(`${nameWithoutExtension}-metadata.json`);
+
+      console.log("JSON", uploadJson);
+      const finalUrl = `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${uploadJson.cid}`;
+      const res = await fetch(finalUrl);
+      const json = await res.json();
+      setIpfsHash(json.image);
+      setUploading(false);
+      form.setValue("token.logoURL", finalUrl, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    } catch (e) {
+      console.log(e);
+      setUploading(false);
+    }
+  };
   const formStates = [
     {
       key: "token-identity",
@@ -197,7 +199,7 @@ const FoundedTokenForm = () => {
           handleChange={handleChange}
           file
           ipfsHash={ipfsHash}
-          uploading
+          uploading={uploading}
         />
       ),
     },
@@ -582,17 +584,32 @@ const TokenIdentity = ({
             <FormControl>
               <Input
                 className="pb-10 pt-3"
-                placeholder="logoURL"
-                type="file"
-                onChange={handleChange}
+                placeholder="Url Pinata"
+                {...field}
+                disabled
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      <Input
+        className="pb-10 pt-3"
+        placeholder="logoURL"
+        type="file"
+        onChange={handleChange}
+      />
+
       {uploading && <p>Uploading in progess...</p>}
-      {ipfsHash && <img src={ipfsHash} alt="Image from Pinata" />}
+      {ipfsHash && (
+        <img
+          className="mx-auto"
+          src={ipfsHash}
+          width={100}
+          height={100}
+          alt="Image from Pinata"
+        />
+      )}
       <FormField
         control={form.control}
         name="token.description"
