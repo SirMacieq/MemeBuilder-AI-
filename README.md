@@ -3,13 +3,13 @@
 ## 🧠 Overview
 
 **MemeBuilder(ai)** is a modular, no-code token launch framework for DAOs on **Solana**.  
-It empowers communities to **propose, vote on, fund, and launch memecoins** in a fully automated, trustless, and decentralized manner – directly on-chain.
+It empowers DAO members to **propose, vote on, fund, and launch memecoins** in a fully automated, trustless, and decentralized manner – directly on-chain.
 
 The platform integrates optional third-party modules including:
 - Personalized **AI agents**
 - **KOL** (Key Opinion Leader) campaign orchestration
 - **InfoFi** analytics for smart launch strategies
-- **UGC** to reward top community members on Socials as part of the User Generated Content campaigns
+- **UGC** to reward top community members on Socials
 
 The platform also provides the tools necessary to build and fund dedicated SubDAOs for each token launched - necessary to maintain long-term growth.
 
