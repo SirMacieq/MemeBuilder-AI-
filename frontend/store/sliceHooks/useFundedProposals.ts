@@ -20,6 +20,7 @@ const useFundedProposals = () => {
       setLoading(false);
     } catch (e) {
       setLoading(false);
+      //@ts-ignore
       setError(e.toString());
       throw e;
     }

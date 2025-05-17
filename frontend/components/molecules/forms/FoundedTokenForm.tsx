@@ -160,12 +160,12 @@ const FoundedTokenForm = () => {
       }
 
       setUploading(true);
-      console.log("img", img);
-      console.log("pinata", pinata);
+      // console.log("img", img);
+      // console.log("pinata", pinata);
       const nameWithoutExtension = img.name.replace(/\.[^/.]+$/, "");
       const upload = await pinata.upload.public.file(img);
 
-      console.log("upload", upload);
+      // console.log("upload", upload);
       const uploadJson = await pinata.upload.public
         .json({
           name: form.getValues("token.name"),
@@ -175,7 +175,7 @@ const FoundedTokenForm = () => {
         })
         .name(`${nameWithoutExtension}-metadata.json`);
 
-      console.log("JSON", uploadJson);
+      // console.log("JSON", uploadJson);
       const finalUrl = `https://scarlet-obliged-rodent-22.mypinata.cloud/ipfs/${uploadJson.cid}`;
       const res = await fetch(finalUrl);
       const json = await res.json();
@@ -237,56 +237,56 @@ const FoundedTokenForm = () => {
     }
     setIsDialogOpen(true);
     setDialogMessage("Connecting to the blockchain...");
-    try {
-      const { tx, tokenProposalAccountId } = await createTokenProposal(wallet, {
-        token: {
-          name: values.token.name,
-          symbol: values.token.symbol,
-          description: values.token.description,
-          //@ts-expect-error error expected due to mismatching typo between chain and backend
-          logoUrl: values.token.logoURL, //
-        },
-        selectedGoals: values.selectedGoals,
-        fundingGoals: values.fundingGoals,
-        softCap: new BN(values.softCap),
-        hardCap: new BN(values.hardCap === "dynamic" ? 0 : values.hardCap),
-        fundingModel: values.fundingModel,
-        airdropModules: {
-          dropScore: values.airdropModules?.dropScore ?? false,
-        },
-        voting: {
-          periodDays: values.voting.periodDays,
-          voteUnit: values.voting.voteUnit,
-          escrowedFund: values.voting.escrowedFunds,
-        },
-      });
-      await fundedTokenCreate({
-        token: {
-          name: values.token.name,
-          symbol: values.token.symbol,
-          description: values.token.description,
-          //@ts-expect-error error expected due to mismatching typo between chain and backend
-          logoUrl: values.token.logoURL, //
-        },
-        selectedGoals: values.selectedGoals,
-        fundingGoals: values.fundingGoals,
-        softCap: values.softCap,
-        hardCap: values.hardCap,
-        fundingModel: values.fundingModel,
-        airdropModules: {
-          dropScore: values.airdropModules?.dropScore ?? false,
-        },
-        voting: {
-          periodDays: values.voting.periodDays,
-          voteUnit: values.voting.voteUnit,
-          escrowedFunds: values.voting.escrowedFunds,
-        },
-        proposal_id: tokenProposalAccountId.toBase58(),
-        proposer_wallet: wallet.publicKey.toBase58(),
-      });
-      setCreatedProposalHash(tx);
-      setDialogMessage("Proposal submitted successfully!");
-    } catch (err) {}
+    const { tx, tokenProposalAccountId } = await createTokenProposal(wallet, {
+      token: {
+        name: values.token.name,
+        symbol: values.token.symbol,
+        description: values.token.description,
+        //@ts-expect-error error expected due to mismatching typo between chain and backend
+        logoUrl: values.token.logoURL, //
+      },
+      selectedGoals: values.selectedGoals,
+      fundingGoals: values.fundingGoals,
+      softCap: new BN(values.softCap),
+      hardCap: new BN(values.hardCap === "dynamic" ? 0 : values.hardCap),
+      fundingModel: values.fundingModel,
+      airdropModules: {
+        dropScore: values.airdropModules?.dropScore ?? false,
+      },
+      voting: {
+        periodDays: values.voting.periodDays,
+        voteUnit: values.voting.voteUnit,
+        escrowedFund: values.voting.escrowedFunds,
+      },
+    });
+
+    setDialogMessage("Submitted to blockchain, Recording to our server...");
+    await fundedTokenCreate({
+      token: {
+        name: values.token.name,
+        symbol: values.token.symbol,
+        description: values.token.description,
+        //@ts-expect-error error expected due to mismatching typo between chain and backend
+        logoUrl: values.token.logoURL, //
+      },
+      selectedGoals: values.selectedGoals,
+      fundingGoals: values.fundingGoals,
+      softCap: values.softCap,
+      hardCap: values.hardCap,
+      fundingModel: values.fundingModel,
+      airdropModules: {
+        dropScore: values.airdropModules?.dropScore ?? false,
+      },
+      voting: {
+        periodDays: values.voting.periodDays,
+        voteUnit: values.voting.voteUnit,
+        escrowedFunds: values.voting.escrowedFunds,
+      },
+      proposal_id: tokenProposalAccountId.toBase58(),
+      proposer_wallet: wallet.publicKey.toBase58(),
+    });
+    setCreatedProposalHash(tx);
+    setDialogMessage("Proposal submitted successfully!");
 
     // await createAction(values);
   };
@@ -381,7 +381,7 @@ const FoundedTokenForm = () => {
         <DialogTrigger />
         <DialogContent>
           <DialogTitle>
-            {createdProposalHash === "" ? "We&apos;re cooking it..." : "DONE !"}
+            {createdProposalHash === "" ? "We're cooking it..." : "DONE !"}
           </DialogTitle>
           <DialogDescription className="text-wrap wrap-anywhere">
             You should see your wallet asking you to validate transaction to

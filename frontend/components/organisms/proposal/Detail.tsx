@@ -59,7 +59,6 @@ const Detail = ({ id }: { id: string | string[] | undefined }) => {
       console.log("res", res);
       setProposal({
         percentage: 20,
-        status: "Voting",
         tokenomics: {
           Team: 15,
           Community: 50,
@@ -119,7 +118,7 @@ Vote now & join the future of $DOGE99! 🐶🚀`;
     <div className="flex flex-col md:flex-row justify-between items-start grow bg-[#010613] px-[5%] gap-6">
       <div className="w-full md:w-[49%] relative rounded-[12px] overflow-hidden bg-[#0e131f]">
         <Image
-          src={imageUrl}
+          src={imageUrl as string}
           alt="Meme"
           width={800}
           height={0}

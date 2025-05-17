@@ -73,8 +73,10 @@ const getTokenProposalPDA = async (
     tokenProposalFactoryAccountId,
   );
 
+  //@ts-ignore
   const newCount = parseInt(tokenProposalFactory.tokenProposalCount);
 
+  //@ts-ignore
   const [tokenProposalAccountId, tokenProposalBump] =
     await PublicKey.findProgramAddress(
       [
@@ -103,6 +105,7 @@ export const initializeTokenFactory = async (wallet: AnchorWallet) => {
       .initializeTokenProposalFactory()
       .accounts({
         signer: wallet.publicKey,
+        //@ts-ignore
         systemProgram: SystemProgram.programId,
         tokenProposalFactory: tokenProposalFactoryAccountId,
       })
@@ -142,6 +145,7 @@ export const createTokenProposal = async (
     )
     .accounts({
       signer: wallet.publicKey,
+      //@ts-ignore
       systemProgram: SystemProgram.programId,
       tokenProposal: tokenProposalAccountId,
       tokenProposalFactory: tokenProposalFactoryAccountId,
@@ -174,6 +178,7 @@ export const createUser = async (
 
   const tx = program.methods.createUser().accounts({
     signer: wallet.publicKey,
+    //@ts-ignore
     systemProgram: SystemProgram.programId,
     user: userAccountId,
   });
@@ -289,6 +294,7 @@ export const contributeToProposal = async (
   const tx = await program.methods
     .contributeToTokenProposal(amount)
     .accounts({
+      //@ts-ignore
       contribution: contributionAccountId,
       signer: wallet.publicKey, // should be admin
       systemProgram: SystemProgram.programId,
@@ -340,6 +346,8 @@ export type OnChainProposalBase = {
   owner: anchor.web3.PublicKey;
   /** proposal pubkey in base58 */
   id: string;
+
+  status: string;
 
   // timestamps
   hardCapReachedAt: BN;

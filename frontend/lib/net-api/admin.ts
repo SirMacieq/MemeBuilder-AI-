@@ -1,4 +1,3 @@
-import { BN } from "@coral-xyz/anchor";
 import { type AnchorWallet } from "@solana/wallet-adapter-react";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as chain from "./chain";
@@ -17,6 +16,7 @@ export const endTokenProposalVotingPeriod = async (
     .endTokenProposalVotingPeriod(proposalPdaData.index)
     .accounts({
       signer: wallet.publicKey,
+      //@ts-ignore
       tokenProposal: tokenProposalAccountId,
       tokenProposalFactory: tokenProposalFactoryAccountId,
     })
