@@ -101,3 +101,116 @@ Our mission: **replace fragmented token launch processes** with a scalable syste
 │    (On-chain Data)  │  │  (Off-chain Data)   │
 └─────────────────────┘  └─────────────────────┘
 ```
+
+## Setup Instructions
+
+### Back-end
+
+Welcome!
+
+#### Before You Start
+
+  - Only necessary if you want to run your own Solana program.
+  - Ensure you have built and deployed your smart contract.
+  - Run the `syncIdl.sh` script located at the project root.
+
+#### Getting Started
+
+  1. Install dependencies:
+
+```
+npm install
+```
+
+  2. Set up environment variables:
+
+Create a `.env` file in the `/backend` directory and Aadd the following variables:
+
+```
+PORT=3012
+SECRET_TOKEN=your_secret_token
+ENV_REPOSITORIES=mongo
+URI_MONGO=your_mongo_uri
+URI_MONGOLOCAL=your_local_mongo_uri
+URI_BACK=http://localhost:3012/
+OPENAI_API_KEY=your_openai_api_key
+SOLANA_ADMIN_KEYPAIR=your_admin_secret_key_as_json_array
+```
+
+  3. Run the development server:
+
+If using local MongoDB:
+
+```
+docker compose up
+```
+
+In another terminal window, start the backend:
+
+```
+npm run dev
+```
+
+### Front-end
+
+#### Before You Start
+
+  - Only necessary if you want to run your own Solana program.
+  - Ensure you have built and deployed your smart contract.
+  - Run the `syncIdl.sh` script located at the project root.
+
+#### Getting Started
+
+  1. Install dependencies:
+
+Use your preferred package manager. For example:
+
+```
+npm install
+```
+
+  2. Set up environment variables:
+
+Create a `.env file` in the `/frontend` directory and add the following variables:
+
+```
+JWT_SECRET=your_secret
+NEXT_PUBLIC_API_URL=http://localhost:3000  # or your backend URL
+NEXT_PUBLIC_SOLANA_CLUSTER=devnet  # or 'mainnet'
+NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_token
+NEXT_PUBLIC_GATEWAY_URL=your_pinata_gateway_url
+```
+
+  3. Run the development server:
+
+```
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open http://localhost:3000 in your browser to see the app.
+
+### Smart Contract (Solana Program)
+
+The Solana Program is written in Rust with Anchor, and the associated Tests
+ Suite is written in JS with Mocha.
+
+To build the Solana Program run:
+
+```
+anchor build
+```
+
+To run the Tests Suite run:
+
+```
+anchor test
+```
+
+Please be mindful of the cluster of concern: `localnet`, `devnet` or `mainnet`.
+
