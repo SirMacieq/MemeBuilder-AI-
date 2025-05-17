@@ -40,6 +40,6 @@ export const createMintToken = async (
     .signers([mintKeypair])
     .rpc();
 
-  console.log("Mint Address: ", mintKeypair.publicKey);
+  console.log("Mint Address: ", mintKeypair.publicKey.toBase58());
   console.log("Transaction Signature: ", transactionSignature);
 };

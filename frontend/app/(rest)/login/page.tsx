@@ -11,7 +11,7 @@ const Login = () => {
   return (
     <div className="grow flex flex-col items-center justify-center bg-[#010613]">
       <div
-        className="flex flex-col items-center justify-center gap-4 bg-neutral-300 bg-[#0e131f] p-4"
+        className="flex flex-col items-center justify-center gap-4 bg-[#0e131f] p-4"
         suppressHydrationWarning
       >
         <h2 className="text-3xl">Login</h2>
